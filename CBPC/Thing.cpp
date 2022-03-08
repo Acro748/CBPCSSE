@@ -357,16 +357,16 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	breastHeavyArmoredAmplitude_100 = centry["breastHeavyArmoredAmplitude"];
 
 	collisionFriction_100 = 1.0f - centry["collisionFriction"];
-	if (collisionFriction_100 >= 1)
-		collisionFriction_100 = 1.0f;
-	else if (collisionFriction_100 <= 0)
+	if (collisionFriction_100 < 0.0f)
 		collisionFriction_100 = 0.0f;
+	else if (collisionFriction_100 > 1.0f)
+		collisionFriction_100 = 1.0f;
 
 	collisionPenetration_100 = 1.0f - centry["collisionPenetration"];
-	if (collisionPenetration_100 >= 1)
-		collisionPenetration_100 = 1.0f;
-	else if (collisionPenetration_100 <= 0)
+	if (collisionPenetration_100 < 0.0f)
 		collisionPenetration_100 = 0.0f;
+	else if (collisionPenetration_100 > 1.0f)
+		collisionPenetration_100 = 1.0f;
 
 	collisionXmaxOffset_100 = centry["collisionXmaxoffset"];
 	collisionXminOffset_100 = centry["collisionXminoffset"];
@@ -411,15 +411,15 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	rotationalYnew_0 = centry0weight["rotationalY"];
 	rotationalZnew_0 = centry0weight["rotationalZ"];
 
-	linearXrotationX_0 = centry["linearXrotationX"];
-	linearXrotationY_0 = centry["linearXrotationY"];
-	linearXrotationZ_0 = centry["linearXrotationZ"];
-	linearYrotationX_0 = centry["linearYrotationX"];
-	linearYrotationY_0 = centry["linearYrotationY"];
-	linearYrotationZ_0 = centry["linearYrotationZ"];
-	linearZrotationX_0 = centry["linearZrotationX"];
-	linearZrotationY_0 = centry["linearZrotationY"];
-	linearZrotationZ_0 = centry["linearZrotationZ"];
+	linearXrotationX_0 = centry0weight["linearXrotationX"];
+	linearXrotationY_0 = centry0weight["linearXrotationY"];
+	linearXrotationZ_0 = centry0weight["linearXrotationZ"];
+	linearYrotationX_0 = centry0weight["linearYrotationX"];
+	linearYrotationY_0 = centry0weight["linearYrotationY"];
+	linearYrotationZ_0 = centry0weight["linearYrotationZ"];
+	linearZrotationX_0 = centry0weight["linearZrotationX"];
+	linearZrotationY_0 = centry0weight["linearZrotationY"];
+	linearZrotationZ_0 = centry0weight["linearZrotationZ"];
 
 	if (centry0weight.find("timeStep") != centry0weight.end())
 		timeStep_0 = centry0weight["timeStep"];
@@ -443,16 +443,16 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	breastHeavyArmoredAmplitude_0 = centry0weight["breastHeavyArmoredAmplitude"];
 
 	collisionFriction_0 = 1.0f - centry0weight["collisionFriction"];
-	if (collisionFriction_0 >= 1)
-		collisionFriction_0 = 1.0f;
-	else if (collisionFriction_0 <= 0)
+	if (collisionFriction_0 < 0.0f)
 		collisionFriction_0 = 0.0f;
+	else if (collisionFriction_0 > 1.0f)
+		collisionFriction_0 = 1.0f;
 
 	collisionPenetration_0 = 1.0f - centry0weight["collisionPenetration"];
-	if (collisionPenetration_0 >= 1)
-		collisionPenetration_0 = 1.0f;
-	else if (collisionPenetration_0 <= 0)
+	if (collisionPenetration_0 < 0.0f)
 		collisionPenetration_0 = 0.0f;
+	else if (collisionPenetration_0 > 1.0f)
+		collisionPenetration_0 = 1.0f;
 
 	collisionXmaxOffset_0 = centry0weight["collisionXmaxoffset"];
 	collisionXminOffset_0 = centry0weight["collisionXminoffset"];
@@ -1187,7 +1187,7 @@ void Thing::update(Actor* actor) {
 					collisionDiff = partitions[id].partitionCollisions[i].CheckCollision(colliding, thingCollisionSpheres, thingCollisionCapsules, timeTick, originalDeltaT, false, groundPos);
 					if (colliding)
 					{
-						velocity *= collisionPenetration;
+						velocity *= collisionFriction;
 						maybeNot = true;
 						collisionVector = collisionVector + collisionDiff;
 					}
@@ -1204,7 +1204,7 @@ void Thing::update(Actor* actor) {
 			collisionVector.x = clamp(collisionVector.x, collisionXminOffset, collisionXmaxOffset);
 			collisionVector.y = clamp(collisionVector.y, collisionYminOffset, collisionYmaxOffset);
 			collisionVector.z = clamp(collisionVector.z, collisionZminOffset, collisionZmaxOffset);
-			collisionVector = collisionVector * collisionFriction;
+			collisionVector = collisionVector * collisionPenetration;
 			IsThereCollision = true;
 		}
 
@@ -1275,7 +1275,6 @@ void Thing::update(Actor* actor) {
 	newRot.SetEulerAngles(rdiffYnew.x + rdiffYnew.y + rdiffYnew.z, rdiffZnew.x + rdiffZnew.y + rdiffZnew.z, rdiffXnew.x + rdiffXnew.y + rdiffXnew.z);
 		
 	obj->m_localTransform.rot = thingDefaultRot * newRot;
-	
 
 	RefreshNode(obj);
 

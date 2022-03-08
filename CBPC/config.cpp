@@ -455,13 +455,13 @@ void loadConfig() {
 			config[it.second]["stiffness"] = 0.5f;
 			config[it.second]["stiffness2"] = 0.0f;
 			config[it.second]["damping"] = 0.2f;
-			config[it.second]["maxOffset"] = 0.0f;
-			config[it.second]["XmaxOffset"] = 5.0f;
-			config[it.second]["XminOffset"] = -5.0f;
-			config[it.second]["YmaxOffset"] = 5.0f;
-			config[it.second]["YminOffset"] = -5.0f;
-			config[it.second]["ZmaxOffset"] = 5.0f;
-			config[it.second]["ZminOffset"] = -5.0f;
+			config[it.second]["maxoffset"] = 0.0f;
+			config[it.second]["Xmaxoffset"] = 5.0f;
+			config[it.second]["Xminoffset"] = -5.0f;
+			config[it.second]["Ymaxoffset"] = 5.0f;
+			config[it.second]["Yminoffset"] = -5.0f;
+			config[it.second]["Zmaxoffset"] = 5.0f;
+			config[it.second]["Zminoffset"] = -5.0f;
 			config[it.second]["cogOffset"] = 0.0f;
 			config[it.second]["gravityBias"] = 0.0f;
 			config[it.second]["gravityCorrection"] = 0.0f;
@@ -493,24 +493,24 @@ void loadConfig() {
 			config[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
 			config[it.second]["collisionFriction"] = 0.2f;
 			config[it.second]["collisionPenetration"] = 0.0f;
-			config[it.second]["collisionXmaxOffset"] = 100.0f;
-			config[it.second]["collisionXminOffset"] = -100.0f;
-			config[it.second]["collisionYmaxOffset"] = 100.0f;
-			config[it.second]["collisionYminOffset"] = -100.0f;
-			config[it.second]["collisionZmaxOffset"] = 100.0f;
-			config[it.second]["collisionZminOffset"] = -100.0f;
+			config[it.second]["collisionXmaxoffset"] = 100.0f;
+			config[it.second]["collisionXminoffset"] = -100.0f;
+			config[it.second]["collisionYmaxoffset"] = 100.0f;
+			config[it.second]["collisionYminoffset"] = -100.0f;
+			config[it.second]["collisionZmaxoffset"] = 100.0f;
+			config[it.second]["collisionZminoffset"] = -100.0f;
 
 			//0 weight
 			config0weight[it.second]["stiffness"] = 0.5f;
 			config0weight[it.second]["stiffness2"] = 0.0f;
 			config0weight[it.second]["damping"] = 0.2f;
-			config0weight[it.second]["maxOffset"] = 0.0f;
-			config0weight[it.second]["XmaxOffset"] = 5.0f;
-			config0weight[it.second]["XminOffset"] = -5.0f;
-			config0weight[it.second]["YmaxOffset"] = 5.0f;
-			config0weight[it.second]["YminOffset"] = -5.0f;
-			config0weight[it.second]["ZmaxOffset"] = 5.0f;
-			config0weight[it.second]["ZminOffset"] = -5.0f;
+			config0weight[it.second]["maxoffset"] = 0.0f;
+			config0weight[it.second]["Xmaxoffset"] = 5.0f;
+			config0weight[it.second]["Xminoffset"] = -5.0f;
+			config0weight[it.second]["Ymaxoffset"] = 5.0f;
+			config0weight[it.second]["Yminoffset"] = -5.0f;
+			config0weight[it.second]["Zmaxoffset"] = 5.0f;
+			config0weight[it.second]["Zminoffset"] = -5.0f;
 			config0weight[it.second]["cogOffset"] = 0.0f;
 			config0weight[it.second]["gravityBias"] = 0.0f; 
 			config0weight[it.second]["gravityCorrection"] = 0.0f;
@@ -542,12 +542,12 @@ void loadConfig() {
 			config0weight[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
 			config0weight[it.second]["collisionFriction"] = 0.2f;
 			config0weight[it.second]["collisionPenetration"] = 0.0f;
-			config0weight[it.second]["collisionXmaxOffset"] = 100.0f;
-			config0weight[it.second]["collisionXminOffset"] = -100.0f;
-			config0weight[it.second]["collisionYmaxOffset"] = 100.0f;
-			config0weight[it.second]["collisionYminOffset"] = -100.0f;
-			config0weight[it.second]["collisionZmaxOffset"] = 100.0f;
-			config0weight[it.second]["collisionZminOffset"] = -100.0f;
+			config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
+			config0weight[it.second]["collisionXminoffset"] = -100.0f;
+			config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
+			config0weight[it.second]["collisionYminoffset"] = -100.0f;
+			config0weight[it.second]["collisionZmaxoffset"] = 100.0f;
+			config0weight[it.second]["collisionZminoffset"] = -100.0f;
 		}
 
 		auto configList = get_all_files_names_within_folder(configPath.c_str());
@@ -611,13 +611,13 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["stiffness"] = 0.5f;
 											newNPCBounceConfig.config[it.second]["stiffness2"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["damping"] = 0.2f;
-											newNPCBounceConfig.config[it.second]["maxOffset"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["XmaxOffset"] = 5.0f;
-											newNPCBounceConfig.config[it.second]["XminOffset"] = -5.0f;
-											newNPCBounceConfig.config[it.second]["YmaxOffset"] = 5.0f;
-											newNPCBounceConfig.config[it.second]["YminOffset"] = -5.0f;
-											newNPCBounceConfig.config[it.second]["ZmaxOffset"] = 5.0f;
-											newNPCBounceConfig.config[it.second]["ZminOffset"] = -5.0f;
+											newNPCBounceConfig.config[it.second]["maxoffset"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["Xmaxoffset"] = 5.0f;
+											newNPCBounceConfig.config[it.second]["Xminoffset"] = -5.0f;
+											newNPCBounceConfig.config[it.second]["Ymaxoffset"] = 5.0f;
+											newNPCBounceConfig.config[it.second]["Yminoffset"] = -5.0f;
+											newNPCBounceConfig.config[it.second]["Zmaxoffset"] = 5.0f;
+											newNPCBounceConfig.config[it.second]["Zminoffset"] = -5.0f;
 											newNPCBounceConfig.config[it.second]["cogOffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityBias"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityCorrection"] = 0.0f;
@@ -649,24 +649,24 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["collisionFriction"] = 0.2f;
 											newNPCBounceConfig.config[it.second]["collisionPenetration"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["collisionXmaxOffset"] = 100.0f;
-											newNPCBounceConfig.config[it.second]["collisionXminOffset"] = -100.0f;
-											newNPCBounceConfig.config[it.second]["collisionYmaxOffset"] = 100.0f;
-											newNPCBounceConfig.config[it.second]["collisionYminOffset"] = -100.0f;
-											newNPCBounceConfig.config[it.second]["collisionZmaxOffset"] = 100.0f;
-											newNPCBounceConfig.config[it.second]["collisionZminOffset"] = -100.0f;
+											newNPCBounceConfig.config[it.second]["collisionXmaxoffset"] = 100.0f;
+											newNPCBounceConfig.config[it.second]["collisionXminoffset"] = -100.0f;
+											newNPCBounceConfig.config[it.second]["collisionYmaxoffset"] = 100.0f;
+											newNPCBounceConfig.config[it.second]["collisionYminoffset"] = -100.0f;
+											newNPCBounceConfig.config[it.second]["collisionZmaxoffset"] = 100.0f;
+											newNPCBounceConfig.config[it.second]["collisionZminoffset"] = -100.0f;
 
 											//0 weight
 											newNPCBounceConfig.config0weight[it.second]["stiffness"] = 0.5f;
 											newNPCBounceConfig.config0weight[it.second]["stiffness2"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["damping"] = 0.2f;
-											newNPCBounceConfig.config0weight[it.second]["maxOffset"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["XmaxOffset"] = 5.0f;
-											newNPCBounceConfig.config0weight[it.second]["XminOffset"] = -5.0f;
-											newNPCBounceConfig.config0weight[it.second]["YmaxOffset"] = 5.0f;
-											newNPCBounceConfig.config0weight[it.second]["YminOffset"] = -5.0f;
-											newNPCBounceConfig.config0weight[it.second]["ZmaxOffset"] = 5.0f;
-											newNPCBounceConfig.config0weight[it.second]["ZminOffset"] = -5.0f;
+											newNPCBounceConfig.config0weight[it.second]["maxoffset"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["Xmaxoffset"] = 5.0f;
+											newNPCBounceConfig.config0weight[it.second]["Xminoffset"] = -5.0f;
+											newNPCBounceConfig.config0weight[it.second]["Ymaxoffset"] = 5.0f;
+											newNPCBounceConfig.config0weight[it.second]["Yminoffset"] = -5.0f;
+											newNPCBounceConfig.config0weight[it.second]["Zmaxoffset"] = 5.0f;
+											newNPCBounceConfig.config0weight[it.second]["Zminoffset"] = -5.0f;
 											newNPCBounceConfig.config0weight[it.second]["cogOffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityBias"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityCorrection"] = 0.0f;
@@ -698,12 +698,12 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionFriction"] = 0.2f;
 											newNPCBounceConfig.config0weight[it.second]["collisionPenetration"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionXmaxOffset"] = 100.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionXminOffset"] = -100.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionYmaxOffset"] = 100.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionYminOffset"] = -100.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionZmaxOffset"] = 100.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionZminOffset"] = -100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionXminoffset"] = -100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionYminoffset"] = -100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionZmaxoffset"] = 100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionZminoffset"] = -100.0f;
 										}
 									}
 								}

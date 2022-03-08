@@ -64,7 +64,6 @@ bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thing
 	QueryPerformanceCounter(&startingTime);
 	LOG("Collision.IsItColliding() Start");*/
 	bool isItColliding = false;
-	NiPoint3 collisiondiffVector = emptyPoint;
 
 	for(int j = 0; j < thingCollisionSpheres.size(); j++) //sphere X sphere
 	{
@@ -81,8 +80,6 @@ bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thing
 			if (currentDistancePwr2 < limitDistance*limitDistance)
 			{
 				isItColliding = true;
-				if (maybe)
-					return true;
 
 				float currentDistance = std::sqrt(currentDistancePwr2);
 				double Scalar = limitDistance - currentDistance; //Get vector scalar
@@ -105,7 +102,7 @@ bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thing
 				#endif
 			}			
 		}
-
+		/*
 		for (int k = 0; k < collisionCapsules.size(); k++) //sphere X capsule
 		{
 			NiPoint3 bestPoint = ClosestPointOnLineSegment(collisionCapsules[k].End1_worldPos, collisionCapsules[k].End2_worldPos, thingCollisionSpheres[j].worldPos);
@@ -126,7 +123,7 @@ bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thing
 				collisiondif = collisiondif + GetVectorFromCollision(bestPoint, thingCollisionSpheres[j].worldPos, Scalar, currentDistance); //Get collision vector
 			}
 		}
-
+		*/
 		//ground collision
 		float limitDistanceGround = thingCollisionSpheres[j].radius100;
 		float currentDistanceGround = thingSpherePosition.z - groundPos;
@@ -134,15 +131,13 @@ bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thing
 		if (currentDistanceGround < limitDistanceGround && currentDistanceGround > -limitDistanceGround * 2)
 		{
 			isItColliding = true;
-			if (maybe)
-				return true;
 
 			NiPoint3 groundCollisionVector = emptyPoint;
 			groundCollisionVector.z = limitDistanceGround - currentDistanceGround;
 			collisiondif = collisiondif + groundCollisionVector;
 		}
 	}
-	
+	/*
 	for (int n = 0; n < thingCollisionCapsules.size(); n++)
 	{
 		for (int l = 0; l < collisionSpheres.size(); l++) //capsule X sphere
@@ -229,7 +224,7 @@ bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thing
 			collisiondif = collisiondif + groundCollisionVector;
 		}
 	}
-	
+	*/
 	/*QueryPerformanceCounter(&endingTime);
 	elapsedMicroseconds.QuadPart = endingTime.QuadPart - startingTime.QuadPart;
 	elapsedMicroseconds.QuadPart *= 1000000000LL;
