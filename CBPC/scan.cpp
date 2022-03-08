@@ -729,36 +729,7 @@ EventResult TESEquipEventHandler::ReceiveEvent(TESEquipEvent* evn, EventDispatch
 				t.second.skipArmorCheck = 0;
 			}
 		}
-	}
-	else if (isWantSlot(armor, 0x00000080)) // feet
-	{
-		Actor* actor = DYNAMIC_CAST(evn->actor, TESObjectREFR, Actor);
-
-		if (actor == nullptr && actor->loadedState == nullptr)
-			return EventResult::kEvent_Continue;
-
-		auto objIt = actors.find(actor->formID);
-
-		if (objIt == actors.end())
-			return EventResult::kEvent_Continue;
-
-		SimObj& obj = objIt->second;
-
-		if (!obj.isBound())
-			return EventResult::kEvent_Continue;
-
-		for (auto& t : obj.things)
-		{
-			if (t.second.ActorCollisionsEnabled)
-			{
-				t.second.skipHighheelCheck = 1;
-			}
-		}
-	}
-							
-						
-					
-				
+	}		
 
 	return EventResult::kEvent_Continue;
 }

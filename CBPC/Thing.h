@@ -262,9 +262,6 @@ public:
 	NiPoint3 thingDefaultPos;
 	NiMatrix33 thingDefaultRot;
 
-	float groundPos = -10000.0f;
-	float highheelOffset = 0.0f;
-
 	//Extra variables
 	float lastMaxOffsetY = 0.0f;
 	float lastMaxOffsetZ = 0.0f;
@@ -278,7 +275,6 @@ public:
 	bool isHeavyArmor = false;
 	bool isNoPushUp = false;
 	int skipArmorCheck = 0;
-	int skipHighheelCheck = 1;
 	float forceAmplitude = 1.0f;
 
 	float varGravityCorrection = -1 * gravityCorrection;

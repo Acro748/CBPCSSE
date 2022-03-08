@@ -1098,31 +1098,25 @@ void Thing::update(Actor* actor) {
 
 	if (collisionsOn && ActorCollisionsEnabled)
 	{
+		float groundPos = -10000.0f;
 		if (GroundCollisionEnabled)
 		{
-			if (skipHighheelCheck > 0)
-			{
-				if (skipHighheelCheck <= 0)
-				{
-					NiAVObject* highheelobj;
-					highheelobj = loadedState->node->GetObjectByName(&highheel.data);
-
-					if (highheelobj)
-					{
-						highheelOffset = highheelobj->m_localTransform.pos.z; //Get ground by NPC Root node
-					}
-				}
-				skipHighheelCheck--; //When the equipment is switched, the high heel offset is not applied immediately, so wait some frames
-			}
-
 			NiAVObject* groundobj;
 			groundobj = loadedState->node->GetObjectByName(&GroundReferenceBone.data);
 			if (groundobj)
 			{
 				auto groundWPos = groundobj->m_worldTransform.pos;
-				groundPos = groundWPos.z - highheelOffset; //Get ground by NPC Root node
+				groundPos = groundWPos.z; //Get ground by NPC Root [Root] node
+			}
+
+			NiAVObject* highheelobj;
+			highheelobj = loadedState->node->GetObjectByName(&highheel.data);
+			if (highheelobj)
+			{
+				groundPos = groundPos - highheelobj->m_localTransform.pos.z; //Get highheel offset by NPC node
 			}
 		}
+
 		//LOG("Before Maybe Collision Stuff Start");
 		NiPoint3 maybePos = newPos + posDelta + (objRotation * (thingDefaultPos * nodeScale)); //add missing local pos
 
