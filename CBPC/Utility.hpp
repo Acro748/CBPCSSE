@@ -462,3 +462,9 @@ template <typename I> static inline std::string num2hex(I w, size_t hex_len = si
 		rc[i] = digits[(w >> j) & 0x0f];
 	return rc;
 }
+
+static inline bool isWantSlot(TESObjectARMO* thisArmor, UInt32 wantSlot)
+{
+	UInt32 slot = (thisArmor) ? thisArmor->bipedObject.GetSlotMask() : 0;
+	return (slot == wantSlot);
+}

@@ -9,9 +9,9 @@ Collision::Collision(NiAVObject* node, std::vector<Sphere>& spheres, std::vector
 	collisionSpheres = spheres;
 	for (int j = 0; j < collisionSpheres.size(); j++)
 	{
-		collisionSpheres[j].offset100 = GetPointFromPercentage(spheres[j].offset0, spheres[j].offset100, ColliderWeight);
+		collisionSpheres[j].offset100 = GetPointFromPercentage(spheres[j].offset0, spheres[j].offset100, ColliderWeight) * node->m_worldTransform.scale;
 
-		collisionSpheres[j].radius100 = GetPercentageValue(spheres[j].radius0, spheres[j].radius100, ColliderWeight)*node->m_worldTransform.scale;
+		collisionSpheres[j].radius100 = GetPercentageValue(spheres[j].radius0, spheres[j].radius100, ColliderWeight) * node->m_worldTransform.scale;
 
 		collisionSpheres[j].radius100pwr2 = spheres[j].radius100*spheres[j].radius100;
 
@@ -21,18 +21,13 @@ Collision::Collision(NiAVObject* node, std::vector<Sphere>& spheres, std::vector
 	collisionCapsules = capsules;
 	for (int j = 0; j < collisionCapsules.size(); j++)
 	{
-		collisionCapsules[j].End1_offset100 = GetPointFromPercentage(collisionCapsules[j].End1_offset0, collisionCapsules[j].End1_offset100, ColliderWeight);
+		collisionCapsules[j].End1_offset100 = GetPointFromPercentage(collisionCapsules[j].End1_offset0, collisionCapsules[j].End1_offset100, ColliderWeight) * node->m_worldTransform.scale;
 
-		collisionCapsules[j].End1_radius100 = GetPercentageValue(collisionCapsules[j].End1_radius0, collisionCapsules[j].End1_radius100, ColliderWeight) * node->m_worldTransform.scale;
+		collisionCapsules[j].End2_offset100 = GetPointFromPercentage(collisionCapsules[j].End2_offset0, collisionCapsules[j].End2_offset100, ColliderWeight) * node->m_worldTransform.scale;
 
-		collisionCapsules[j].End1_radius100pwr2 = collisionCapsules[j].End1_radius100 * collisionCapsules[j].End1_radius100;
+		collisionCapsules[j].radius100 = GetPercentageValue(collisionCapsules[j].radius0, collisionCapsules[j].radius100, ColliderWeight) * node->m_worldTransform.scale;
 
-		collisionCapsules[j].End2_offset100 = GetPointFromPercentage(collisionCapsules[j].End2_offset0, collisionCapsules[j].End2_offset100, ColliderWeight);
-
-		collisionCapsules[j].End2_radius100 = GetPercentageValue(collisionCapsules[j].End2_radius0, collisionCapsules[j].End2_radius100, ColliderWeight) * node->m_worldTransform.scale;
-
-		collisionCapsules[j].End2_radius100pwr2 = collisionCapsules[j].End2_radius100 * collisionCapsules[j].End2_radius100;
-
+		collisionCapsules[j].radius100pwr2 = collisionCapsules[j].radius100 * collisionCapsules[j].radius100;
 
 		collisionCapsules[j].NodeName = spheres[j].NodeName;
 	}
@@ -60,7 +55,7 @@ void HandHapticFeedbackEffect(bool left)
 	}
 }
 #endif
-bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Capsule>& collisionCapsules, float maxOffset, bool maybe)
+bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Capsule>& collisionCapsules, bool maybe, float groundPos)
 {	
 	/*LARGE_INTEGER startingTime, endingTime, elapsedMicroseconds;
 	LARGE_INTEGER frequency;
@@ -69,14 +64,16 @@ bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thing
 	QueryPerformanceCounter(&startingTime);
 	LOG("Collision.IsItColliding() Start");*/
 	bool isItColliding = false;
+	NiPoint3 collisiondiffVector = emptyPoint;
 
-	for (int j = 0; j < thingCollisionSpheres.size(); j++)
+	for(int j = 0; j < thingCollisionSpheres.size(); j++) //sphere X sphere
 	{
+		NiPoint3 thingSpherePosition = thingCollisionSpheres[j].worldPos;
+
 		for (int i = 0; i < collisionSpheres.size(); i++)
 		{			
 			float limitDistance = thingCollisionSpheres[j].radius100 + collisionSpheres[i].radius100;
 
-			NiPoint3 thingSpherePosition = thingCollisionSpheres[j].worldPos;
 			NiPoint3 colSpherePosition = collisionSpheres[i].worldPos;
 			
 			float currentDistancePwr2 = distanceNoSqrt(thingSpherePosition, colSpherePosition);
@@ -88,24 +85,148 @@ bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thing
 					return true;
 
 				float currentDistance = std::sqrt(currentDistancePwr2);
-				double difPercentage = ((limitDistance - currentDistance) / currentDistance) * 100;
+				double Scalar = limitDistance - currentDistance; //Get vector scalar
 
-				collisiondif = collisiondif + GetPointFromPercentage(colSpherePosition, thingSpherePosition, (difPercentage/*0.9*/) + 100) - thingSpherePosition;
+				collisiondif = collisiondif + GetVectorFromCollision(colSpherePosition, thingSpherePosition, Scalar , currentDistance); //Get collision vector
+
 
 				#ifdef RUNTIME_VR_VERSION_1_4_15
 				if (isItColliding)
 				{
-					if (collisionSpheres[j].NodeName == "LeftWandNode")
+					if (collisionSpheres[k].NodeName == "LeftWandNode")
 					{
 						HandHapticFeedbackEffect(true);
 					}
-					else if (collisionSpheres[j].NodeName == "RightWandNode")
+					else if (collisionSpheres[k].NodeName == "RightWandNode")
 					{
 						HandHapticFeedbackEffect(false);
 					}
 				}
 				#endif
 			}			
+		}
+
+		for (int k = 0; k < collisionCapsules.size(); k++) //sphere X capsule
+		{
+			NiPoint3 bestPoint = ClosestPointOnLineSegment(collisionCapsules[k].End1_worldPos, collisionCapsules[k].End2_worldPos, thingCollisionSpheres[j].worldPos);
+
+			float limitDistance = thingCollisionSpheres[j].radius100 + collisionCapsules[k].radius100;
+
+			float currentDistancePwr2 = distanceNoSqrt(thingCollisionSpheres[j].worldPos, bestPoint);
+
+			if (currentDistancePwr2 < limitDistance * limitDistance)
+			{
+				isItColliding = true;
+				if (maybe)
+					return true;
+
+				float currentDistance = std::sqrt(currentDistancePwr2);
+				double Scalar = limitDistance - currentDistance; //Get vector scalar
+
+				collisiondif = collisiondif + GetVectorFromCollision(bestPoint, thingCollisionSpheres[j].worldPos, Scalar, currentDistance); //Get collision vector
+			}
+		}
+
+		//ground collision
+		float limitDistanceGround = thingCollisionSpheres[j].radius100;
+		float currentDistanceGround = thingSpherePosition.z - groundPos;
+		
+		if (currentDistanceGround < limitDistanceGround && currentDistanceGround > -limitDistanceGround * 2)
+		{
+			isItColliding = true;
+			if (maybe)
+				return true;
+
+			NiPoint3 groundCollisionVector = emptyPoint;
+			groundCollisionVector.z = limitDistanceGround - currentDistanceGround;
+			collisiondif = collisiondif + groundCollisionVector;
+		}
+	}
+	
+	for (int n = 0; n < thingCollisionCapsules.size(); n++)
+	{
+		for (int l = 0; l < collisionSpheres.size(); l++) //capsule X sphere
+		{
+			NiPoint3 bestPoint = ClosestPointOnLineSegment(thingCollisionCapsules[n].End1_worldPos, thingCollisionCapsules[n].End2_worldPos, collisionSpheres[l].worldPos);
+
+			float limitDistance = thingCollisionCapsules[n].radius100 + thingCollisionCapsules[n].radius100;
+
+			float currentDistancePwr2 = distanceNoSqrt(bestPoint, collisionSpheres[l].worldPos);
+
+			if (currentDistancePwr2 < limitDistance * limitDistance)
+			{
+				isItColliding = true;
+				if (maybe)
+					return true;
+
+				float currentDistance = std::sqrt(currentDistancePwr2);
+				double Scalar = limitDistance - currentDistance; //Get vector scalar
+
+				collisiondif = collisiondif + GetVectorFromCollision(collisionSpheres[l].worldPos, bestPoint, Scalar, currentDistance); //Get collision vector
+			}
+		}
+
+		for (int m = 0; m < collisionCapsules.size(); m++) //capsule X capsule
+		{
+			NiPoint3 v0 = collisionCapsules[m].End1_worldPos - thingCollisionCapsules[n].End1_worldPos;
+			NiPoint3 v1 = collisionCapsules[m].End2_worldPos - thingCollisionCapsules[n].End1_worldPos;
+			NiPoint3 v2 = collisionCapsules[m].End1_worldPos - thingCollisionCapsules[n].End2_worldPos;
+			NiPoint3 v3 = collisionCapsules[m].End2_worldPos - thingCollisionCapsules[n].End2_worldPos;
+
+			float d0 = Dot(v0, v0);
+			float d1 = Dot(v1, v1);
+			float d2 = Dot(v2, v2);
+			float d3 = Dot(v3, v3);
+			
+			NiPoint3 bestPointA;
+			if (d2 < d0 || d2 < d1 || d3 < d0 || d3 < d1)
+			{
+				bestPointA = thingCollisionCapsules[n].End2_worldPos;
+			}
+			else
+			{
+				bestPointA = thingCollisionCapsules[n].End1_worldPos;
+			}
+
+			NiPoint3 bestPointB = ClosestPointOnLineSegment(collisionCapsules[m].End1_worldPos, collisionCapsules[m].End2_worldPos, bestPointA);
+			bestPointA = ClosestPointOnLineSegment(thingCollisionCapsules[n].End1_worldPos, thingCollisionCapsules[n].End2_worldPos, bestPointB);
+
+			
+			float limitDistance = thingCollisionCapsules[n].radius100 + collisionCapsules[m].radius100;
+
+			float currentDistancePwr2 = distanceNoSqrt(bestPointA, bestPointB);
+
+			if (currentDistancePwr2 < limitDistance * limitDistance)
+			{
+				isItColliding = true;
+				if (maybe)
+					return true;
+
+				float currentDistance = std::sqrt(currentDistancePwr2);
+				double Scalar = limitDistance - currentDistance; //Get vector scalar
+
+				collisiondif = collisiondif + GetVectorFromCollision(bestPointB, bestPointA, Scalar, currentDistance); //Get collision vector
+			}
+		}
+		
+		//ground collision
+		float limitDistanceGround = thingCollisionCapsules[n].radius100;
+		float bestPoint = 0.0f;
+		if (thingCollisionCapsules[n].End1_worldPos.z < thingCollisionCapsules[n].End2_worldPos.z)
+			bestPoint = thingCollisionCapsules[n].End1_worldPos.z;
+		else
+			bestPoint = thingCollisionCapsules[n].End2_worldPos.z;
+		float currentDistanceGround = bestPoint - groundPos;
+
+		if (currentDistanceGround < limitDistanceGround && currentDistanceGround > -limitDistanceGround * 2)
+		{
+			isItColliding = true;
+			if (maybe)
+				return true;
+
+			NiPoint3 groundCollisionVector = emptyPoint;
+			groundCollisionVector.z = limitDistanceGround - currentDistanceGround;
+			collisiondif = collisiondif + groundCollisionVector;
 		}
 	}
 	
@@ -128,14 +249,14 @@ bool Collision::IsItCollidingTriangleToSphere(NiPoint3 &collisiondif, std::vecto
 	LOG("Collision.IsItCollidingTriangleToSphere() Start");*/
 	bool isItColliding = false;
 
-	for (int j = 0; j < thingCollisionSpheres.size(); j++)
+	for (int k = 0; k < thingCollisionSpheres.size(); k++)
 	{
 		for (int i = 0; i < collisionTriangles.size(); i++)
 		{
 			//Phase One
 			//Check lines to center of sphere distance
 
-			NiPoint3 thingSpherePosition = thingCollisionSpheres[j].worldPos;
+			NiPoint3 thingSpherePosition = thingCollisionSpheres[k].worldPos;
 			Triangle t = collisionTriangles[i];
 			/*t.a = colliderObjectTransform.pos + colliderObjectTransform.rot*t.a;
 			t.b = colliderObjectTransform.pos + colliderObjectTransform.rot*t.b;
@@ -144,7 +265,7 @@ bool Collision::IsItCollidingTriangleToSphere(NiPoint3 &collisiondif, std::vecto
 			NiPoint3 closestPoint = FindClosestPointOnTriangletoPoint(t, thingSpherePosition);
 
 			float distToCenterPwr2 = distanceNoSqrt(closestPoint, thingSpherePosition);
-			if (distToCenterPwr2 <= thingCollisionSpheres[j].radius100pwr2)
+			if (distToCenterPwr2 <= thingCollisionSpheres[k].radius100pwr2)
 			{
 				// we have a collision
 				isItColliding = true;
@@ -152,7 +273,7 @@ bool Collision::IsItCollidingTriangleToSphere(NiPoint3 &collisiondif, std::vecto
 					return true;
 
 				float distToCenter = sqrt(distToCenterPwr2);
-				double difPercentage = ((thingCollisionSpheres[j].radius100 - distToCenter) / distToCenter) * 100;
+				double difPercentage = ((thingCollisionSpheres[k].radius100 - distToCenter) / distToCenter) * 100;
 
 				collisiondif = collisiondif + GetPointFromPercentage(closestPoint, thingSpherePosition, difPercentage+100) - thingSpherePosition;
 			}
@@ -179,7 +300,7 @@ NiPoint3 Collision::CheckPelvisCollision(std::vector<Sphere> &thingCollisionSphe
 
 	if (CollisionObject != nullptr)
 	{
-		IsItColliding(collisionDiff, thingCollisionSpheres, collisionSpheres, thingCollisionCapsules, collisionCapsules, 99, false);
+		IsItColliding(collisionDiff, thingCollisionSpheres, collisionSpheres, thingCollisionCapsules, collisionCapsules, false, -10000);
 
 		#ifdef RUNTIME_VR_VERSION_1_4_15
 		if (collisionTriangles.size() > 0)
@@ -197,7 +318,7 @@ NiPoint3 Collision::CheckPelvisCollision(std::vector<Sphere> &thingCollisionSphe
 	return collisionDiff;
 }
 
-NiPoint3 Collision::CheckCollision(bool &isItColliding, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, float timeTick, long deltaT, float maxOffset, bool maybe)
+NiPoint3 Collision::CheckCollision(bool &isItColliding, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, float timeTick, long deltaT, bool maybe, float groundPos)
 {
 	/*LARGE_INTEGER startingTime, endingTime, elapsedMicroseconds;
 	LARGE_INTEGER frequency;
@@ -209,7 +330,7 @@ NiPoint3 Collision::CheckCollision(bool &isItColliding, std::vector<Sphere> &thi
 	bool isColliding = false;
 	if (CollisionObject != nullptr)
 	{
-		isColliding = IsItColliding(collisionDiff, thingCollisionSpheres, collisionSpheres, thingCollisionCapsules, collisionCapsules, maxOffset, maybe);
+		isColliding = IsItColliding(collisionDiff, thingCollisionSpheres, collisionSpheres, thingCollisionCapsules, collisionCapsules, maybe, groundPos);
 		if (isColliding)
 		{
 			isItColliding = true;
@@ -230,7 +351,7 @@ NiPoint3 Collision::CheckCollision(bool &isItColliding, std::vector<Sphere> &thi
 			}
 		}
 		#endif
-		
+		/*
 		if (isItColliding)
 		{
 			//float timeMultiplier = timeTick / (float)deltaT;
@@ -244,10 +365,10 @@ NiPoint3 Collision::CheckCollision(bool &isItColliding, std::vector<Sphere> &thi
 			//		collisionDiff *= distanceInOneCall;
 			//}
 
-			collisionDiff.x = clamp(collisionDiff.x, -maxOffset, maxOffset);
-			collisionDiff.y = clamp(collisionDiff.y, -maxOffset, maxOffset);
-			collisionDiff.z = clamp(collisionDiff.z, -maxOffset, maxOffset);
-		}
+//			collisionDiff.x = clamp(collisionDiff.x, -maxOffset * testColOffsetMult, maxOffset * testColOffsetMult);
+//			collisionDiff.y = clamp(collisionDiff.y, -maxOffset * testColOffsetMult, maxOffset * testColOffsetMult);
+//			collisionDiff.z = clamp(collisionDiff.z, -maxOffset * testColOffsetMult, maxOffset * testColOffsetMult);
+		}*/
 		//lastColliderPosition = CollisionObject->m_worldTransform.pos;
 	}
 
@@ -257,6 +378,25 @@ NiPoint3 Collision::CheckCollision(bool &isItColliding, std::vector<Sphere> &thi
 	elapsedMicroseconds.QuadPart /= frequency.QuadPart;
 	LOG("Collision.CheckCollision() Update Time = %lld ns\n", elapsedMicroseconds.QuadPart);*/
 	return collisionDiff;
+}
+
+// Dot product of 2 vectors 
+float Collision::Dot(NiPoint3 A, NiPoint3 B)
+{
+	float x1, y1, z1;
+	x1 = A.x * B.x;
+	y1 = A.y * B.y;
+	z1 = A.z * B.z;
+	return (x1 + y1 + z1);
+}
+
+NiPoint3 Collision::ClosestPointOnLineSegment(NiPoint3 lineStart, NiPoint3 lineEnd, NiPoint3 point)
+{
+	auto v = lineEnd - lineStart;
+	auto t = Dot(point - lineStart, v) / Dot(v, v);
+	t = max(t, 0.0f);
+	t = min(t, 1.0f);
+	return lineStart + v * t;
 }
 
 #ifdef RUNTIME_VR_VERSION_1_4_15
@@ -277,16 +417,6 @@ NiPoint3 Collision::DotProduct(NiPoint3 A, NiPoint3 B)
 	result.y = A.y * B.y;
 	result.z = A.z * B.z;
 	return result;
-}
-
-// Dot product of 2 vectors 
-float Collision::Dot(NiPoint3 A, NiPoint3 B)
-{
-	float x1, y1, z1;
-	x1 = A.x * B.x;
-	y1 = A.y * B.y;
-	z1 = A.z * B.z;
-	return (x1 + y1 + z1);
 }
 
 NiPoint3 Collision::FindClosestPointOnTriangletoPoint(Triangle T, NiPoint3 P)

@@ -98,14 +98,40 @@ extern std::vector<std::string> noJitterFixNodesList;
 extern std::atomic<bool> dialogueMenuOpen;
 extern std::atomic<bool> raceSexMenuClosed;
 extern std::atomic<bool> raceSexMenuOpen;
+extern std::atomic<bool> MainMenuOpen;
 
 extern std::string breastGravityReferenceBoneName;
 extern BSFixedString breastGravityReferenceBoneString;
+
+extern std::string GroundReferenceBoneName;
+extern BSFixedString GroundReferenceBone;
 
 extern BGSKeyword* KeywordArmorClothing;
 extern BGSKeyword* KeywordArmorLight;
 extern BGSKeyword* KeywordArmorHeavy;
 extern BGSKeyword* KeywordActorTypeNPC;
+
+extern BSFixedString KeywordNameAsNakadL;
+extern BSFixedString KeywordNameAsNakadR;
+extern BSFixedString KeywordNameAsClothingL;
+extern BSFixedString KeywordNameAsClothingR;
+extern BSFixedString KeywordNameAsLightL;
+extern BSFixedString KeywordNameAsLightR;
+extern BSFixedString KeywordNameAsHeavyL;
+extern BSFixedString KeywordNameAsHeavyR;
+extern BSFixedString KeywordNameNoPushUpL;
+extern BSFixedString KeywordNameNoPushUpR;
+
+extern BGSKeyword* KeywordAsNakadL;
+extern BGSKeyword* KeywordAsNakadR;
+extern BGSKeyword* KeywordAsClothingL;
+extern BGSKeyword* KeywordAsClothingR;
+extern BGSKeyword* KeywordAsLightL;
+extern BGSKeyword* KeywordAsLightR;
+extern BGSKeyword* KeywordAsHeavyL;
+extern BGSKeyword* KeywordAsHeavyR;
+extern BGSKeyword* KeywordNoPushUpL;
+extern BGSKeyword* KeywordNoPushUpR;
 
 extern UInt32 VampireLordBeastRaceFormId;
 
@@ -148,17 +174,13 @@ struct Capsule
 {
 	NiPoint3 End1_offset0 = NiPoint3(0, 0, 0);
 	NiPoint3 End1_offset100 = NiPoint3(0, 0, 0);
-	double End1_radius0 = 4.0;
-	double End1_radius100 = 4.0;
-	double End1_radius100pwr2 = 16.0;
 	NiPoint3 End1_worldPos = NiPoint3(0, 0, 0);
-
 	NiPoint3 End2_offset0 = NiPoint3(0, 0, 0);
 	NiPoint3 End2_offset100 = NiPoint3(0, 0, 0);
-	double End2_radius0 = 4.0;
-	double End2_radius100 = 4.0;
-	double End2_radius100pwr2 = 16.0;
 	NiPoint3 End2_worldPos = NiPoint3(0, 0, 0);
+	double radius0 = 4.0;
+	double radius100 = 4.0;
+	double radius100pwr2 = 16.0;
 
 	std::string NodeName;
 };

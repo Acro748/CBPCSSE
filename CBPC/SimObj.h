@@ -58,6 +58,7 @@ public:
 	bool updateConfig(Actor* actor);
 	bool isBound() const { return bound; }
 
+	bool GroundCollisionEnabled = false;
 };
 
 bool IsActorValid(Actor *actor);

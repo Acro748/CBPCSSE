@@ -12,7 +12,7 @@ void UpdatePlayerColliders(std::unordered_map<std::string, Collision> &actorColl
 
 extern long callCount;
 
-void CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collision> &actorCollidersList);
+void CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collision> &actorCollidersList, bool &GroundCollisionEnabled);
 
 void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList);
 

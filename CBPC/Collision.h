@@ -2,7 +2,7 @@
 #include <string>
 #include <time.h>
 #include <vector>
-
+#include <ppl.h>
 
 
 #include "config.h"
@@ -29,9 +29,9 @@ public:
 
 	NiPoint3 lastColliderPosition = emptyPoint;
 		
-	bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Capsule>& collisionCapsules, float maxOffset, bool maybe);
+	bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Capsule>& collisionCapsules, bool maybe, float ground);
 	
-	NiPoint3 CheckCollision(bool &isItColliding, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, float timeTick, long deltaT, float maxOffset, bool maybe);
+	NiPoint3 CheckCollision(bool &isItColliding, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, float timeTick, long deltaT, bool maybe, float ground);
 
 	NiPoint3 CheckPelvisCollision(std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules);
 	std::vector<Sphere> collisionSpheres;
@@ -40,6 +40,9 @@ public:
 	NiAVObject* CollisionObject;
 	std::string colliderNodeName;
 
+	float Dot(NiPoint3 A, NiPoint3 B);
+	NiPoint3 ClosestPointOnLineSegment(NiPoint3 lineStart, NiPoint3 lineEnd, NiPoint3 point);
+
 	#ifdef RUNTIME_VR_VERSION_1_4_15
 	bool Collision::IsItCollidingTriangleToSphere(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Triangle> &collisionTriangles, float maxOffset, bool maybe);
 
@@ -47,14 +50,18 @@ public:
 	
 	NiPoint3 MultiplyVector(NiPoint3 A, NiPoint3 B);
 	NiPoint3 DotProduct(NiPoint3 A, NiPoint3 B);
-	float Dot(NiPoint3 A, NiPoint3 B);
 	NiPoint3 FindClosestPointOnTriangletoPoint(Triangle T, NiPoint3 P);
 	#endif
 };
 
 static inline NiPoint3 GetPointFromPercentage(NiPoint3 lowWeight, NiPoint3 highWeight, float weight)
 {
-	return ((highWeight - lowWeight)*(weight / 100)) + lowWeight;
+	return ((highWeight - lowWeight) * (weight / 100)) + lowWeight;
+}
+
+static inline NiPoint3 GetVectorFromCollision(NiPoint3 col, NiPoint3 thing, float Scalar, float currentDistance)
+{
+	return (thing - col) / currentDistance * Scalar; // normalized vector * scalar
 }
 
 static inline float distance(NiPoint3 po1, NiPoint3 po2)

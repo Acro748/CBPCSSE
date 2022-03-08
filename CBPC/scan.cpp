@@ -293,10 +293,10 @@ void updateActors()
 		}
 	}
 
-	if (cellChanged || raceSexMenuClosed.load() || creatureFormChange)
+	if (cellChanged || raceSexMenuClosed.load() || creatureFormChange || MainMenuOpen.load())
 	{
 		raceSexMenuClosed.store(false);
-		
+		MainMenuOpen.store(false);
 		actors.clear();
 	}
 	else
@@ -685,48 +685,81 @@ TESEquipEventHandler g_TESEquipEventHandler;
 
 EventResult TESEquipEventHandler::ReceiveEvent(TESEquipEvent* evn, EventDispatcher<TESEquipEvent>* dispatcher)
 {
-	if (evn)
+	if (!evn)
+		return EventResult::kEvent_Continue;
+		
+	if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState)
+		return EventResult::kEvent_Continue;
+
+	if (evn->actor == nullptr)
+		return EventResult::kEvent_Continue;
+		
+	if (!(evn->baseObject > 0))
+		return EventResult::kEvent_Continue;
+				
+	TESForm* form = LookupFormByID(evn->baseObject);
+	if (form == nullptr)
+		return EventResult::kEvent_Continue;
+
+	TESObjectARMO* armor = DYNAMIC_CAST(form, TESForm, TESObjectARMO);		
+	if (armor == nullptr)
+		return EventResult::kEvent_Continue;
+						
+	if (isWantSlot(armor, 0x00000004)) // body
 	{
-		if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState)
-		{
+		Actor* actor = DYNAMIC_CAST(evn->actor, TESObjectREFR, Actor);
+
+		if (actor == nullptr && actor->loadedState == nullptr)
 			return EventResult::kEvent_Continue;
-		}
 
-		if (evn->actor != nullptr)
+		auto objIt = actors.find(actor->formID);
+
+		if (objIt == actors.end())
+			return EventResult::kEvent_Continue;
+
+		SimObj& obj = objIt->second;
+
+		if (!obj.isBound())
+			return EventResult::kEvent_Continue;
+
+		for (auto& t : obj.things)
 		{
-			if (evn->baseObject > 0)
+			if (t.second.IsBreastBone)
 			{
-				TESForm* form = LookupFormByID(evn->baseObject);
-
-				if (form != nullptr)
-				{
-					TESObjectARMO* armor = DYNAMIC_CAST(form, TESForm, TESObjectARMO);
-					if (armor != nullptr)
-					{
-						Actor* actor = DYNAMIC_CAST(evn->actor, TESObjectREFR, Actor);
-						if (actor != nullptr && actor->loadedState != nullptr)
-						{
-							auto objIt = actors.find(actor->formID);
-							if (objIt != actors.end())
-							{
-								SimObj& obj = objIt->second;
-								if (obj.isBound())
-								{
-									for (auto& t : obj.things)
-									{
-										if (t.second.IsBreastBone)
-										{
-											t.second.skipArmorCheck = 0;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+				t.second.skipArmorCheck = 0;
 			}
 		}
 	}
+	else if (isWantSlot(armor, 0x00000080)) // feet
+	{
+		Actor* actor = DYNAMIC_CAST(evn->actor, TESObjectREFR, Actor);
+
+		if (actor == nullptr && actor->loadedState == nullptr)
+			return EventResult::kEvent_Continue;
+
+		auto objIt = actors.find(actor->formID);
+
+		if (objIt == actors.end())
+			return EventResult::kEvent_Continue;
+
+		SimObj& obj = objIt->second;
+
+		if (!obj.isBound())
+			return EventResult::kEvent_Continue;
+
+		for (auto& t : obj.things)
+		{
+			if (t.second.ActorCollisionsEnabled)
+			{
+				t.second.skipHighheelCheck = 1;
+			}
+		}
+	}
+							
+						
+					
+				
+
 	return EventResult::kEvent_Continue;
 }
 

@@ -22,6 +22,7 @@ class Thing {
 
 public:
 	bool ActorCollisionsEnabled = true;
+	bool GroundCollisionEnabled = true;
 	bool IsBreastBone = false;
 	bool IsLeftBreastBone = false;
 	bool IsRightBreastBone = false;
@@ -30,7 +31,13 @@ public:
 	float stiffness = 0.5f;
 	float stiffness2 = 0.0f;
 	float damping = 0.2f;
-	float maxOffset = 5.0f;
+	float maxOffset = 0.0f;
+	float XmaxOffset = 5.0f;
+	float XminOffset = -5.0f;
+	float YmaxOffset = 5.0f;
+	float YminOffset = -5.0f;
+	float ZmaxOffset = 5.0f;
+	float ZminOffset = -5.0f;
 	float cogOffset = 0.0f; //no
 	float gravityBias = 0.0f; //no
 	float gravityCorrection = 0.0f; //no
@@ -42,6 +49,15 @@ public:
 	float rotationalXnew = 0.1f; //was originally rotational
 	float rotationalYnew = 0.1f;
 	float rotationalZnew = 0.1f;
+	float linearXrotationX = 0.0f;
+	float linearXrotationY = 1.0f;
+	float linearXrotationZ = 0.0f;
+	float linearYrotationX = 0.0f;
+	float linearYrotationY = 0.0f;
+	float linearYrotationZ = 1.0f;
+	float linearZrotationX = 1.0f;
+	float linearZrotationY = 0.0f;
+	float linearZrotationZ = 0.0f;
 	float timeStep = 1.0f;
 
 	float gravityInvertedCorrection = 0.0f;
@@ -56,11 +72,27 @@ public:
 	float breastLightArmoredAmplitude = 1.0;
 	float breastHeavyArmoredAmplitude = 1.0;
 
+	float collisionFriction = 0.8f;
+	float collisionPenetration = 1.0f;
+
+	float collisionXmaxOffset = 100.0f;
+	float collisionXminOffset = -100.0f;
+	float collisionYmaxOffset = 100.0f;
+	float collisionYminOffset = -100.0f;
+	float collisionZmaxOffset = 100.0f;
+	float collisionZminOffset = -100.0f;
+
 	//100 weight
 	float stiffness_100 = 0.5f;
 	float stiffness2_100 = 0.0f;
 	float damping_100 = 0.2f;
-	float maxOffset_100 = 5.0f;
+	float maxOffset_100 = 0.0f;
+	float XmaxOffset_100 = 5.0f;
+	float XminOffset_100 = -5.0f;
+	float YmaxOffset_100 = 5.0f;
+	float YminOffset_100 = -5.0f;
+	float ZmaxOffset_100 = 5.0f;
+	float ZminOffset_100 = -5.0f;
 	float cogOffset_100 = 0.0f; //no
 	float gravityBias_100 = 0.0f; //no
 	float gravityCorrection_100 = 0.0f; //no
@@ -72,6 +104,15 @@ public:
 	float rotationalXnew_100 = 0.1f; //was originally rotational
 	float rotationalYnew_100 = 0.1f;
 	float rotationalZnew_100 = 0.1f;
+	float linearXrotationX_100 = 0.0f;
+	float linearXrotationY_100 = 1.0f;
+	float linearXrotationZ_100 = 0.0f;
+	float linearYrotationX_100 = 0.0f;
+	float linearYrotationY_100 = 0.0f;
+	float linearYrotationZ_100 = 1.0f;
+	float linearZrotationX_100 = 1.0f;
+	float linearZrotationY_100 = 0.0f;
+	float linearZrotationZ_100 = 0.0f;
 	float timeStep_100 = 1.0f;
 
 	float gravityInvertedCorrection_100 = 0.0f;
@@ -86,11 +127,27 @@ public:
 	float breastLightArmoredAmplitude_100 = 1.0f;
 	float breastHeavyArmoredAmplitude_100 = 1.0f;
 
+	float collisionFriction_100 = 0.8f;
+	float collisionPenetration_100 = 1.0f;
+
+	float collisionXmaxOffset_100 = 100.0f;
+	float collisionXminOffset_100 = -100.0f;
+	float collisionYmaxOffset_100 = 100.0f;
+	float collisionYminOffset_100 = -100.0f;
+	float collisionZmaxOffset_100 = 100.0f;
+	float collisionZminOffset_100 = -100.0f;
+
 	//0 weight
 	float stiffness_0 = 0.5f;
 	float stiffness2_0 = 0.0f;
 	float damping_0 = 0.2f;
-	float maxOffset_0 = 5.0f;
+	float maxOffset_0 = 0.0f; 
+	float XmaxOffset_0 = 5.0f;
+	float XminOffset_0 = -5.0f;
+	float YmaxOffset_0 = 5.0f;
+	float YminOffset_0 = -5.0f;
+	float ZmaxOffset_0 = 5.0f;
+	float ZminOffset_0 = -5.0f;
 	float cogOffset_0 = 0.0f; //no
 	float gravityBias_0 = 0.0f; //no
 	float gravityCorrection_0 = 0.0f; //no
@@ -102,6 +159,15 @@ public:
 	float rotationalXnew_0 = 0.1f; //was originally rotational
 	float rotationalYnew_0 = 0.1f;
 	float rotationalZnew_0 = 0.1f;
+	float linearXrotationX_0 = 0.0f;
+	float linearXrotationY_0 = 1.0f;
+	float linearXrotationZ_0 = 0.0f;
+	float linearYrotationX_0 = 0.0f;
+	float linearYrotationY_0 = 0.0f;
+	float linearYrotationZ_0 = 1.0f;
+	float linearZrotationX_0 = 1.0f;
+	float linearZrotationY_0 = 0.0f;
+	float linearZrotationZ_0 = 0.0f;
 	float timeStep_0 = 1.0f;
 
 	float gravityInvertedCorrection_0 = 0.0f;
@@ -115,6 +181,16 @@ public:
 	float breastClothedAmplitude_0 = 1.0f;
 	float breastLightArmoredAmplitude_0 = 1.0f;
 	float breastHeavyArmoredAmplitude_0 = 1.0f;
+
+	float collisionFriction_0 = 0.8f;
+	float collisionPenetration_0 = 1.0f;
+
+	float collisionXmaxOffset_0 = 100.0f;
+	float collisionXminOffset_0 = -100.0f;
+	float collisionYmaxOffset_0 = 100.0f;
+	float collisionYminOffset_0 = -100.0f;
+	float collisionZmaxOffset_0 = 100.0f;
+	float collisionZminOffset_0 = -100.0f;
 
 	Thing(Actor *actor, NiAVObject *obj, BSFixedString &name);
 	~Thing();
@@ -186,6 +262,8 @@ public:
 	NiPoint3 thingDefaultPos;
 	NiMatrix33 thingDefaultRot;
 
+	float groundPos = -10000.0f;
+	float highheelOffset = 0.0f;
 
 	//Extra variables
 	float lastMaxOffsetY = 0.0f;
@@ -198,12 +276,14 @@ public:
 	bool isClothed = false;
 	bool isLightArmor = false;
 	bool isHeavyArmor = false;
+	bool isNoPushUp = false;
 	int skipArmorCheck = 0;
+	int skipHighheelCheck = 1;
 	float forceAmplitude = 1.0f;
 
 	float varGravityCorrection = -1 * gravityCorrection;
 
 	//FPS corrction
-	float fps60Tick = 1.0f / 60.0f * 1000.0f;
+	const float fps60Tick = 1.0f / 60.0f * (float)CLOCKS_PER_SEC;
 	float fpsCorrection = 1.0f;
 };

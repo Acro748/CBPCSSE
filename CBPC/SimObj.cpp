@@ -75,8 +75,8 @@ bool SimObj::bind(Actor *actor, bool isMale)
 			}
 		}
 		updateConfig(actor);
-				
-		CreateActorColliders(actor, actorColliders);
+			
+		CreateActorColliders(actor, actorColliders, GroundCollisionEnabled);
 
 		#ifdef RUNTIME_VR_VERSION_1_4_15
 		if (actor->formID == 0x14)
@@ -110,6 +110,7 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 			if (ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)] == false)
 			{
 				t.second.ActorCollisionsEnabled = CollisionsEnabled;
+				t.second.GroundCollisionEnabled = GroundCollisionEnabled;
 				if (strcmp(t.first, pelvis) == 0)
 				{
 					t.second.updatePelvis(actor);
@@ -128,6 +129,7 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 			if (ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)] == false)
 			{
 				t.second.ActorCollisionsEnabled = CollisionsEnabled;
+				t.second.GroundCollisionEnabled = GroundCollisionEnabled;
 				if (strcmp(t.first, pelvis) == 0)
 				{
 					t.second.updatePelvis(actor);

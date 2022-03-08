@@ -102,6 +102,7 @@ std::vector<std::string> noJitterFixNodesList = {
 std::atomic<bool> dialogueMenuOpen = false;
 std::atomic<bool> raceSexMenuClosed = false;
 std::atomic<bool> raceSexMenuOpen = false;
+std::atomic<bool> MainMenuOpen = false;
 
 std::unordered_map<std::string, std::string> configMap;
 std::unordered_map<std::string, Conditions> nodeConditionsMap;
@@ -115,6 +116,9 @@ int collisionSkipFramesPelvis = 5; //5
 std::string breastGravityReferenceBoneName = "NPC Spine2 [Spn2]";
 BSFixedString breastGravityReferenceBoneString;
 
+std::string GroundReferenceBoneName = "NPC Root [Root]";
+BSFixedString GroundReferenceBone;
+
 UInt32 KeywordArmorLightFormId = 0x06BBD3;
 BGSKeyword* KeywordArmorLight;
 
@@ -126,6 +130,36 @@ BGSKeyword* KeywordArmorClothing;
 
 UInt32 KeywordActorTypeNPCFormId = 0x0013794;
 BGSKeyword* KeywordActorTypeNPC;
+
+BSFixedString KeywordNameAsNakadL = "CBPCAsNakadL";
+BGSKeyword* KeywordAsNakadL;
+
+BSFixedString KeywordNameAsNakadR = "CBPCAsNakadR";
+BGSKeyword* KeywordAsNakadR;
+
+BSFixedString KeywordNameAsClothingL = "CBPCAsClothingL";
+BGSKeyword* KeywordAsClothingL;
+
+BSFixedString KeywordNameAsClothingR = "CBPCAsClothingR";
+BGSKeyword* KeywordAsClothingR;
+
+BSFixedString KeywordNameAsLightL = "CBPCAsLightL";
+BGSKeyword* KeywordAsLightL;
+
+BSFixedString KeywordNameAsLightR = "CBPCAsLightR";
+BGSKeyword* KeywordAsLightR;
+
+BSFixedString KeywordNameAsHeavyL = "CBPCAsHeavyL";
+BGSKeyword* KeywordAsHeavyL;
+
+BSFixedString KeywordNameAsHeavyR = "CBPCAsHeavyR";
+BGSKeyword* KeywordAsHeavyR;
+
+BSFixedString KeywordNameNoPushUpL = "CBPCNoPushUpL";
+BGSKeyword* KeywordNoPushUpL;
+
+BSFixedString KeywordNameNoPushUpR = "CBPCNoPushUpR";
+BGSKeyword* KeywordNoPushUpR;
 
 UInt32 VampireLordBeastRaceFormId = 0x0200283A;
 
@@ -421,7 +455,13 @@ void loadConfig() {
 			config[it.second]["stiffness"] = 0.5f;
 			config[it.second]["stiffness2"] = 0.0f;
 			config[it.second]["damping"] = 0.2f;
-			config[it.second]["maxOffset"] = 5.0f;
+			config[it.second]["maxOffset"] = 0.0f;
+			config[it.second]["XmaxOffset"] = 5.0f;
+			config[it.second]["XminOffset"] = -5.0f;
+			config[it.second]["YmaxOffset"] = 5.0f;
+			config[it.second]["YminOffset"] = -5.0f;
+			config[it.second]["ZmaxOffset"] = 5.0f;
+			config[it.second]["ZminOffset"] = -5.0f;
 			config[it.second]["cogOffset"] = 0.0f;
 			config[it.second]["gravityBias"] = 0.0f;
 			config[it.second]["gravityCorrection"] = 0.0f;
@@ -432,6 +472,15 @@ void loadConfig() {
 			config[it.second]["rotationalXnew"] = 0.1f;
 			config[it.second]["rotationalYnew"] = 0.1f;
 			config[it.second]["rotationalZnew"] = 0.1f;
+			config[it.second]["linearXrotationX"] = 0.0f;
+			config[it.second]["linearXrotationY"] = 1.0f;
+			config[it.second]["linearXrotationZ"] = 0.0f;
+			config[it.second]["linearYrotationX"] = 0.0f;
+			config[it.second]["linearYrotationY"] = 0.0f;
+			config[it.second]["linearYrotationZ"] = 1.0f;
+			config[it.second]["linearZrotationX"] = 1.0f;
+			config[it.second]["linearZrotationY"] = 0.0f;
+			config[it.second]["linearZrotationZ"] = 0.0f;
 			config[it.second]["timeStep"] = 1.0f;
 			config[it.second]["gravityInvertedCorrection"] = 0.0f;
 			config[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -442,12 +491,26 @@ void loadConfig() {
 			config[it.second]["breastClothedAmplitude"] = 1.0f;
 			config[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 			config[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
+			config[it.second]["collisionFriction"] = 0.2f;
+			config[it.second]["collisionPenetration"] = 0.0f;
+			config[it.second]["collisionXmaxOffset"] = 100.0f;
+			config[it.second]["collisionXminOffset"] = -100.0f;
+			config[it.second]["collisionYmaxOffset"] = 100.0f;
+			config[it.second]["collisionYminOffset"] = -100.0f;
+			config[it.second]["collisionZmaxOffset"] = 100.0f;
+			config[it.second]["collisionZminOffset"] = -100.0f;
 
 			//0 weight
 			config0weight[it.second]["stiffness"] = 0.5f;
 			config0weight[it.second]["stiffness2"] = 0.0f;
 			config0weight[it.second]["damping"] = 0.2f;
-			config0weight[it.second]["maxOffset"] = 5.0f;
+			config0weight[it.second]["maxOffset"] = 0.0f;
+			config0weight[it.second]["XmaxOffset"] = 5.0f;
+			config0weight[it.second]["XminOffset"] = -5.0f;
+			config0weight[it.second]["YmaxOffset"] = 5.0f;
+			config0weight[it.second]["YminOffset"] = -5.0f;
+			config0weight[it.second]["ZmaxOffset"] = 5.0f;
+			config0weight[it.second]["ZminOffset"] = -5.0f;
 			config0weight[it.second]["cogOffset"] = 0.0f;
 			config0weight[it.second]["gravityBias"] = 0.0f; 
 			config0weight[it.second]["gravityCorrection"] = 0.0f;
@@ -458,6 +521,15 @@ void loadConfig() {
 			config0weight[it.second]["rotationalXnew"] = 0.1f;
 			config0weight[it.second]["rotationalYnew"] = 0.1f;
 			config0weight[it.second]["rotationalZnew"] = 0.1f;
+			config0weight[it.second]["linearXrotationX"] = 0.0f;
+			config0weight[it.second]["linearXrotationY"] = 1.0f;
+			config0weight[it.second]["linearXrotationZ"] = 0.0f;
+			config0weight[it.second]["linearYrotationX"] = 0.0f;
+			config0weight[it.second]["linearYrotationY"] = 0.0f;
+			config0weight[it.second]["linearYrotationZ"] = 1.0f;
+			config0weight[it.second]["linearZrotationX"] = 1.0f;
+			config0weight[it.second]["linearZrotationY"] = 0.0f;
+			config0weight[it.second]["linearZrotationZ"] = 0.0f;
 			config0weight[it.second]["timeStep"] = 1.0f;
 			config0weight[it.second]["gravityInvertedCorrection"] = 0.0f;
 			config0weight[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -468,6 +540,14 @@ void loadConfig() {
 			config0weight[it.second]["breastClothedAmplitude"] = 1.0f;
 			config0weight[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 			config0weight[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
+			config0weight[it.second]["collisionFriction"] = 0.2f;
+			config0weight[it.second]["collisionPenetration"] = 0.0f;
+			config0weight[it.second]["collisionXmaxOffset"] = 100.0f;
+			config0weight[it.second]["collisionXminOffset"] = -100.0f;
+			config0weight[it.second]["collisionYmaxOffset"] = 100.0f;
+			config0weight[it.second]["collisionYminOffset"] = -100.0f;
+			config0weight[it.second]["collisionZmaxOffset"] = 100.0f;
+			config0weight[it.second]["collisionZminOffset"] = -100.0f;
 		}
 
 		auto configList = get_all_files_names_within_folder(configPath.c_str());
@@ -531,7 +611,13 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["stiffness"] = 0.5f;
 											newNPCBounceConfig.config[it.second]["stiffness2"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["damping"] = 0.2f;
-											newNPCBounceConfig.config[it.second]["maxOffset"] = 5.0f;
+											newNPCBounceConfig.config[it.second]["maxOffset"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["XmaxOffset"] = 5.0f;
+											newNPCBounceConfig.config[it.second]["XminOffset"] = -5.0f;
+											newNPCBounceConfig.config[it.second]["YmaxOffset"] = 5.0f;
+											newNPCBounceConfig.config[it.second]["YminOffset"] = -5.0f;
+											newNPCBounceConfig.config[it.second]["ZmaxOffset"] = 5.0f;
+											newNPCBounceConfig.config[it.second]["ZminOffset"] = -5.0f;
 											newNPCBounceConfig.config[it.second]["cogOffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityBias"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityCorrection"] = 0.0f;
@@ -542,6 +628,15 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["rotationalXnew"] = 0.1f;
 											newNPCBounceConfig.config[it.second]["rotationalYnew"] = 0.1f;
 											newNPCBounceConfig.config[it.second]["rotationalZnew"] = 0.1f;
+											newNPCBounceConfig.config[it.second]["linearXrotationX"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["linearXrotationY"] = 1.0f;
+											newNPCBounceConfig.config[it.second]["linearXrotationZ"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["linearYrotationX"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["linearYrotationY"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["linearYrotationZ"] = 1.0f;
+											newNPCBounceConfig.config[it.second]["linearZrotationX"] = 1.0f;
+											newNPCBounceConfig.config[it.second]["linearZrotationY"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["linearZrotationZ"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["timeStep"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["gravityInvertedCorrection"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -552,12 +647,26 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["breastClothedAmplitude"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
+											newNPCBounceConfig.config[it.second]["collisionFriction"] = 0.2f;
+											newNPCBounceConfig.config[it.second]["collisionPenetration"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["collisionXmaxOffset"] = 100.0f;
+											newNPCBounceConfig.config[it.second]["collisionXminOffset"] = -100.0f;
+											newNPCBounceConfig.config[it.second]["collisionYmaxOffset"] = 100.0f;
+											newNPCBounceConfig.config[it.second]["collisionYminOffset"] = -100.0f;
+											newNPCBounceConfig.config[it.second]["collisionZmaxOffset"] = 100.0f;
+											newNPCBounceConfig.config[it.second]["collisionZminOffset"] = -100.0f;
 
 											//0 weight
 											newNPCBounceConfig.config0weight[it.second]["stiffness"] = 0.5f;
 											newNPCBounceConfig.config0weight[it.second]["stiffness2"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["damping"] = 0.2f;
-											newNPCBounceConfig.config0weight[it.second]["maxOffset"] = 5.0f;
+											newNPCBounceConfig.config0weight[it.second]["maxOffset"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["XmaxOffset"] = 5.0f;
+											newNPCBounceConfig.config0weight[it.second]["XminOffset"] = -5.0f;
+											newNPCBounceConfig.config0weight[it.second]["YmaxOffset"] = 5.0f;
+											newNPCBounceConfig.config0weight[it.second]["YminOffset"] = -5.0f;
+											newNPCBounceConfig.config0weight[it.second]["ZmaxOffset"] = 5.0f;
+											newNPCBounceConfig.config0weight[it.second]["ZminOffset"] = -5.0f;
 											newNPCBounceConfig.config0weight[it.second]["cogOffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityBias"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityCorrection"] = 0.0f;
@@ -568,6 +677,15 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["rotationalXnew"] = 0.1f;
 											newNPCBounceConfig.config0weight[it.second]["rotationalYnew"] = 0.1f;
 											newNPCBounceConfig.config0weight[it.second]["rotationalZnew"] = 0.1f;
+											newNPCBounceConfig.config0weight[it.second]["linearXrotationX"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearXrotationY"] = 1.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearXrotationZ"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearYrotationX"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearYrotationY"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearYrotationZ"] = 1.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearZrotationX"] = 1.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearZrotationY"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearZrotationZ"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["timeStep"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityInvertedCorrection"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -578,6 +696,14 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["breastClothedAmplitude"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionFriction"] = 0.2f;
+											newNPCBounceConfig.config0weight[it.second]["collisionPenetration"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionXmaxOffset"] = 100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionXminOffset"] = -100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionYmaxOffset"] = 100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionYminOffset"] = -100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionZmaxOffset"] = 100.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionZminOffset"] = -100.0f;
 										}
 									}
 								}
@@ -801,6 +927,47 @@ void GameLoad()
 	if (keywordForm)
 		KeywordActorTypeNPC = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
 
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsNakadL);
+	if (keywordForm)
+		KeywordAsNakadL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsNakadR);
+	if (keywordForm)
+		KeywordAsNakadR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsClothingL);
+	if (keywordForm)
+		KeywordAsClothingL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsClothingR);
+	if (keywordForm)
+		KeywordAsClothingR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsLightL);
+	if (keywordForm)
+		KeywordAsLightL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsLightR);
+	if (keywordForm)
+		KeywordAsLightR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsHeavyL);
+	if (keywordForm)
+		KeywordAsHeavyL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsHeavyR);
+	if (keywordForm)
+		KeywordAsHeavyR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameNoPushUpL);
+	if (keywordForm)
+		KeywordNoPushUpL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameNoPushUpR);
+	if (keywordForm)
+		KeywordNoPushUpR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+
 	DataHandler* dataHandler = DataHandler::GetSingleton();
 	if (dataHandler)
 	{
@@ -816,6 +983,8 @@ void GameLoad()
 	}
 
 	breastGravityReferenceBoneString = ReturnUsableString(breastGravityReferenceBoneName);
+
+	GroundReferenceBone = ReturnUsableString(GroundReferenceBoneName);
 }
 
 void loadMasterConfig()
@@ -2250,6 +2419,10 @@ void MenuOpened(std::string name)
 	else if (name == "RaceSex Menu")
 	{
 		raceSexMenuOpen.store(true);
+	}
+	else if (name == "Main Menu")
+	{
+
 	}
 }
 
