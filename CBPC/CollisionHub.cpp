@@ -261,7 +261,7 @@ void CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collisi
 
 	for (int j = 0; j < ColliderNodesListPtr->size(); j++)
 	{
-		if (ColliderNodesListPtr->at(j).NodeName == GroundReferenceBoneName)
+		if (GroundReferenceBoneName.compare(ColliderNodesListPtr->at(j).NodeName) == 0)
 		{
 			GroundCollisionEnabled = true;
 			continue;

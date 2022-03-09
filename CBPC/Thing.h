@@ -38,6 +38,9 @@ public:
 	float YminOffset = -5.0f;
 	float ZmaxOffset = 5.0f;
 	float ZminOffset = -5.0f;
+	float XdefaultOffset = 0.0f;
+	float YdefaultOffset = 0.0f;
+	float ZdefaultOffset = 0.0f;
 	float cogOffset = 0.0f; //no
 	float gravityBias = 0.0f; //no
 	float gravityCorrection = 0.0f; //no
@@ -93,6 +96,9 @@ public:
 	float YminOffset_100 = -5.0f;
 	float ZmaxOffset_100 = 5.0f;
 	float ZminOffset_100 = -5.0f;
+	float XdefaultOffset_100 = 0.0f;
+	float YdefaultOffset_100 = 0.0f;
+	float ZdefaultOffset_100 = 0.0f;
 	float cogOffset_100 = 0.0f; //no
 	float gravityBias_100 = 0.0f; //no
 	float gravityCorrection_100 = 0.0f; //no
@@ -148,6 +154,9 @@ public:
 	float YminOffset_0 = -5.0f;
 	float ZmaxOffset_0 = 5.0f;
 	float ZminOffset_0 = -5.0f;
+	float XdefaultOffset_0 = 0.0f;
+	float YdefaultOffset_0 = 0.0f;
+	float ZdefaultOffset_0 = 0.0f;
 	float cogOffset_0 = 0.0f; //no
 	float gravityBias_0 = 0.0f; //no
 	float gravityCorrection_0 = 0.0f; //no

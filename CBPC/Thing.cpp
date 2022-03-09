@@ -39,9 +39,6 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 		return;
 	}
 
-	thingCollisionSpheres = CreateThingCollisionSpheres(actor, name.data, nodescale);
-	thingCollisionCapsules = CreateThingCollisionCapsules(actor, name.data, nodescale);
-
 	oldWorldPos = obj->m_worldTransform.pos;
 	time = clock();
 
@@ -49,6 +46,17 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	IsRightBreastBone = ContainsNoCase(boneName.data, "R Breast");
 	IsBreastBone = ContainsNoCase(boneName.data, "breast");
 	IsBellyBone = strcmp(boneName.data, belly.data) == 0;
+
+	if (IsBellyBone)
+	{
+		thingCollisionSpheres = CreateThingCollisionSpheres(actor, pelvis.data, nodescale);
+		thingCollisionCapsules = CreateThingCollisionCapsules(actor, pelvis.data, nodescale);
+	}
+	else
+	{
+		thingCollisionSpheres = CreateThingCollisionSpheres(actor, name.data, nodescale);
+		thingCollisionCapsules = CreateThingCollisionCapsules(actor, name.data, nodescale);
+	}
 
 	if(updateThingFirstRun)
 	{
@@ -320,6 +328,9 @@ void Thing::updateConfigValues(Actor* actor)
 	YminOffset = GetPercentageValue(YminOffset_0, YminOffset_100, actorWeight);
 	ZmaxOffset = GetPercentageValue(ZmaxOffset_0, ZmaxOffset_100, actorWeight);
 	ZminOffset = GetPercentageValue(ZminOffset_0, ZminOffset_100, actorWeight);
+	XdefaultOffset = GetPercentageValue(XdefaultOffset_0, XdefaultOffset_100, actorWeight);
+	YdefaultOffset = GetPercentageValue(YdefaultOffset_0, YdefaultOffset_100, actorWeight);
+	ZdefaultOffset = GetPercentageValue(ZdefaultOffset_0, ZdefaultOffset_100, actorWeight);
 	cogOffset = GetPercentageValue(cogOffset_0, cogOffset_100, actorWeight);
 	gravityBias = GetPercentageValue(gravityBias_0, gravityBias_100, actorWeight);
 	gravityCorrection = GetPercentageValue(gravityCorrection_0, gravityCorrection_100, actorWeight);
@@ -391,6 +402,10 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		ZmaxOffset_100 = centry["Zmaxoffset"];
 		ZminOffset_100 = centry["Zminoffset"];
 	}
+	XdefaultOffset_100 = centry0weight["Xdefaultoffset_100"];
+	YdefaultOffset_100 = centry0weight["Ydefaultoffset_100"];
+	ZdefaultOffset_100 = centry0weight["Zdefaultoffset_100"];
+
 	timeTick_100 = centry["timetick"];
 	if (timeTick_100 <= 1)
 		timeTick_100 = 1;
@@ -477,6 +492,10 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		ZmaxOffset_0 = centry0weight["Zmaxoffset"];
 		ZminOffset_0 = centry0weight["Zminoffset"];
 	}
+	XdefaultOffset_0 = centry0weight["Xdefaultoffset_0"];
+	YdefaultOffset_0 = centry0weight["Ydefaultoffset_0"];
+	ZdefaultOffset_0 = centry0weight["Zdefaultoffset_0"];
+
 	timeTick_0 = centry0weight["timetick"];
 	if (timeTick_0 <= 1)
 		timeTick_0 = 1;
@@ -681,6 +700,21 @@ void Thing::updatePelvis(Actor *actor)
 			}
 		}
 	}	
+	for (int i = 0; i < thingCollisionCapsules.size(); i++)
+	{
+		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End1_offset100);
+		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End2_offset100);
+		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
+			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
+		for (int m = 0; m<hashIdList.size(); m++)
+		{
+			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
+			{
+				thingIdList.emplace_back(hashIdList[m]);
+			}
+		}
+	}	
+
 
 	NiPoint3 collisionDiff = emptyPoint;
 		
@@ -800,21 +834,27 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
-	
-	std::vector<Sphere> pelvisCollisionSpheres;
-	std::vector<Capsule> pelvisCollisionCapsules;
-
-	Sphere pelvisSphere;
-	pelvisSphere.offset100 = NiPoint3(0, 0, -2);
-	pelvisSphere.radius100 = 3.5f;
-	pelvisCollisionSpheres.emplace_back(pelvisSphere);
 
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
 
-	for (int i = 0; i < pelvisCollisionSpheres.size(); i++)
+	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
-		pelvisCollisionSpheres[i].worldPos = pelvisPosition + (pelvisRotation*pelvisCollisionSpheres[i].offset100);
-		hashIdList = GetHashIdsFromPos(pelvisCollisionSpheres[i].worldPos - playerPos, pelvisCollisionSpheres[i].radius100);
+		thingCollisionSpheres[i].worldPos = pelvisPosition + (pelvisRotation* thingCollisionSpheres[i].offset100);
+		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
+		for (int m = 0; m<hashIdList.size(); m++)
+		{
+			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
+			{
+				thingIdList.emplace_back(hashIdList[m]);
+			}
+		}
+	}
+	for (int i = 0; i < thingCollisionCapsules.size(); i++)
+	{
+		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End1_offset100);
+		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End2_offset100);
+		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
+			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
 		for (int m = 0; m<hashIdList.size(); m++)
 		{
 			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
@@ -848,7 +888,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 
 						partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
-						collisionDiff = partitions[id].partitionCollisions[i].CheckPelvisCollision(pelvisCollisionSpheres, pelvisCollisionCapsules);
+						collisionDiff = partitions[id].partitionCollisions[i].CheckPelvisCollision(thingCollisionSpheres, thingCollisionCapsules);
 
 						if (!CompareNiPoints(collisionDiff, emptyPoint))
 						{
@@ -982,7 +1022,7 @@ void Thing::update(Actor* actor) {
 	}
 
 
-	if (ActorCollisionsEnabled && thing_bellybulgemultiplier > 0 && strcmp(boneName.data, belly.data) == 0)
+	if (strcmp(boneName.data, belly.data) == 0 && ActorCollisionsEnabled && thing_bellybulgemultiplier > 0)
 	{
 		if (ApplyBellyBulge(actor))
 		{
@@ -1348,9 +1388,9 @@ void Thing::update(Actor* actor) {
 		
 	oldWorldPos = (obj->m_parent->m_worldTransform.rot * ldiff) + target;
 		
-	obj->m_localTransform.pos.x = thingDefaultPos.x + ldiff.x * varLinearX + Idiffcol.x;
-	obj->m_localTransform.pos.y = thingDefaultPos.y + ldiff.y * varLinearY + Idiffcol.y;
-	obj->m_localTransform.pos.z = thingDefaultPos.z + ldiff.z * varLinearZ + Idiffcol.z;
+	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + ldiff.x * varLinearX + Idiffcol.x;
+	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + ldiff.y * varLinearY + Idiffcol.y;
+	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + ldiff.z * varLinearZ + Idiffcol.z;
 
 	auto rdiffXnew = (ldiff + Idiffcol) * (varRotationalXnew);
 	auto rdiffYnew = (ldiff + Idiffcol) * (varRotationalYnew);

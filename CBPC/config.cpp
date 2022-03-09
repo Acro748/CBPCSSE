@@ -462,6 +462,9 @@ void loadConfig() {
 			config[it.second]["Yminoffset"] = -5.0f;
 			config[it.second]["Zmaxoffset"] = 5.0f;
 			config[it.second]["Zminoffset"] = -5.0f;
+			config[it.second]["Xdefaultoffset"] = 0.0f;
+			config[it.second]["Ydefaultoffset"] = 0.0f;
+			config[it.second]["Zdefaultoffset"] = 0.0f;
 			config[it.second]["cogOffset"] = 0.0f;
 			config[it.second]["gravityBias"] = 0.0f;
 			config[it.second]["gravityCorrection"] = 0.0f;
@@ -511,6 +514,9 @@ void loadConfig() {
 			config0weight[it.second]["Yminoffset"] = -5.0f;
 			config0weight[it.second]["Zmaxoffset"] = 5.0f;
 			config0weight[it.second]["Zminoffset"] = -5.0f;
+			config0weight[it.second]["Xdefaultoffset"] = 0.0f;
+			config0weight[it.second]["Ydefaultoffset"] = 0.0f;
+			config0weight[it.second]["Zdefaultoffset"] = 0.0f;
 			config0weight[it.second]["cogOffset"] = 0.0f;
 			config0weight[it.second]["gravityBias"] = 0.0f; 
 			config0weight[it.second]["gravityCorrection"] = 0.0f;
@@ -618,6 +624,9 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["Yminoffset"] = -5.0f;
 											newNPCBounceConfig.config[it.second]["Zmaxoffset"] = 5.0f;
 											newNPCBounceConfig.config[it.second]["Zminoffset"] = -5.0f;
+											newNPCBounceConfig.config[it.second]["Xdefaultoffset"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["Ydefaultoffset"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["Zdefaultoffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["cogOffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityBias"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityCorrection"] = 0.0f;
@@ -667,6 +676,9 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["Yminoffset"] = -5.0f;
 											newNPCBounceConfig.config0weight[it.second]["Zmaxoffset"] = 5.0f;
 											newNPCBounceConfig.config0weight[it.second]["Zminoffset"] = -5.0f;
+											newNPCBounceConfig.config0weight[it.second]["Xdefaultoffset"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["Ydefaultoffset"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["Zdefaultoffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["cogOffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityBias"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityCorrection"] = 0.0f;
