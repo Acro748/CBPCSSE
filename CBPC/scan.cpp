@@ -234,6 +234,19 @@ void updateActors()
 		if (frameCount >= 1000000)
 			frameCount = 0;
 	}
+	else if (consoleCollisionReload.load())
+	{
+		consoleCollisionReload.store(false);
+
+		loadMasterConfig();
+		loadCollisionConfig();
+		loadExtraCollisionConfig();
+
+#ifdef RUNTIME_VR_VERSION_1_4_15
+		LoadWeaponCollisionConfig();
+#endif
+		actors.clear();
+	}
 
 
 	//logger.error("scan Cell\n");
@@ -607,6 +620,28 @@ void updateActors()
 	if (configReloadCount && count++ > configReloadCount) 
 	{
 		count = 0;
+		loadConfig();
+		for each (auto & a in actorEntries)
+		{
+			auto objIt = actors.find(a.id);
+			if (objIt == actors.end())
+			{
+				//logger.error("missing Sim Object\n");
+			}
+			else
+			{
+				if (a.actor != nullptr && a.actor->loadedState != nullptr)
+				{
+					SimObj& obj = objIt->second;
+					obj.updateConfig(a.actor);
+				}
+			}
+		}
+	}
+	else if (consoleConfigReload.load())
+	{
+		consoleConfigReload.store(false);
+
 		loadConfig();
 		for each (auto & a in actorEntries)
 		{

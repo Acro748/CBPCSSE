@@ -103,6 +103,8 @@ std::atomic<bool> dialogueMenuOpen = false;
 std::atomic<bool> raceSexMenuClosed = false;
 std::atomic<bool> raceSexMenuOpen = false;
 std::atomic<bool> MainMenuOpen = false;
+std::atomic<bool> consoleConfigReload = false;
+std::atomic<bool> consoleCollisionReload = false;
 
 std::unordered_map<std::string, std::string> configMap;
 std::unordered_map<std::string, Conditions> nodeConditionsMap;

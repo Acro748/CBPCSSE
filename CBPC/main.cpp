@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include <shlobj.h>				// CSIDL_MYCODUMENTS
+#include <skse64/ObScript.h>
 
 
 
@@ -79,7 +80,38 @@ void DoHookNEW();
 //	}
 //}
 
+bool Debug_Execute(const ObScriptParam* paramInfo, ScriptData* scriptData, TESObjectREFR* thisObj,
+	TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result,
+	UInt32& opcodeOffsetPtr)
+{
+	char buffer[MAX_PATH];
+	memset(buffer, 0, MAX_PATH);
+	char buffer2[MAX_PATH];
+	memset(buffer2, 0, MAX_PATH);
 
+	if (!ObjScript_ExtractArgs(paramInfo, scriptData, opcodeOffsetPtr, thisObj, containingObj, scriptObj, locals,
+		buffer, buffer2))
+	{
+		return false;
+	}
+
+	if (_strnicmp(buffer, "reload", MAX_PATH) == 0)
+	{
+		if (tuningModeCollision == 0)
+		{
+			consoleCollisionReload.store(true);
+			Console_Print("Reload CBPC Master / Collision files");
+		}
+
+		if (configReloadCount == 0)
+		{
+			consoleConfigReload.store(true);
+			Console_Print("Reload CBPC Config files");
+		}
+		return true;
+	}
+	return true;
+}
 
 extern "C"
 {
@@ -181,7 +213,35 @@ extern "C"
 			return false;
 		}
 
-		
+		ObScriptCommand* hijackedCommand = nullptr;
+		for (ObScriptCommand* iter = g_firstConsoleCommand; iter->opcode < kObScript_NumConsoleCommands +
+			kObScript_ConsoleOpBase; ++iter)
+		{
+			if (!strcmp(iter->longName, "ShowRenderPasses"))
+			{
+				hijackedCommand = iter;
+				break;
+			}
+		}
+		if (hijackedCommand)
+		{
+			static ObScriptParam params[1];
+			params[0].typeID = ObScriptParam::kType_String;
+			params[0].typeStr = "String (optional)";
+			params[0].isOptional = 1;
+
+			ObScriptCommand cmd = *hijackedCommand;
+
+			cmd.longName = "cbpconfig";
+			cmd.shortName = "cbpc";
+			cmd.helpText = "cbpc <reload>";
+			cmd.needsParent = 0;
+			cmd.numParams = 1;
+			cmd.params = params;
+			cmd.execute = Debug_Execute;
+			cmd.flags = 0;
+			SafeWriteBuf(reinterpret_cast<uintptr_t>(hijackedCommand), &cmd, sizeof(cmd));
+		}
 
 		g_papyrus = (SKSEPapyrusInterface*)skse->QueryInterface(kInterface_Papyrus);
 

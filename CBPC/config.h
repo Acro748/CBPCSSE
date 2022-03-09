@@ -99,6 +99,8 @@ extern std::atomic<bool> dialogueMenuOpen;
 extern std::atomic<bool> raceSexMenuClosed;
 extern std::atomic<bool> raceSexMenuOpen;
 extern std::atomic<bool> MainMenuOpen;
+extern std::atomic<bool> consoleConfigReload;
+extern std::atomic<bool> consoleCollisionReload;
 
 extern std::string breastGravityReferenceBoneName;
 extern BSFixedString breastGravityReferenceBoneString;
