@@ -165,7 +165,6 @@ struct Sphere
 	NiPoint3 offset100 = NiPoint3(0, 0, 0);
 	double radius0 = 4.0;
 	double radius100 = 4.0;
-	double radius100pwr2 = 16.0;
 	NiPoint3 worldPos = NiPoint3(0, 0, 0);
 	std::string NodeName;
 };
@@ -175,12 +174,13 @@ struct Capsule
 	NiPoint3 End1_offset0 = NiPoint3(0, 0, 0);
 	NiPoint3 End1_offset100 = NiPoint3(0, 0, 0);
 	NiPoint3 End1_worldPos = NiPoint3(0, 0, 0);
+	double End1_radius0 = 4.0;
+	double End1_radius100 = 4.0;
 	NiPoint3 End2_offset0 = NiPoint3(0, 0, 0);
 	NiPoint3 End2_offset100 = NiPoint3(0, 0, 0);
 	NiPoint3 End2_worldPos = NiPoint3(0, 0, 0);
-	double radius0 = 4.0;
-	double radius100 = 4.0;
-	double radius100pwr2 = 16.0;
+	double End2_radius0 = 4.0;
+	double End2_radius100 = 4.0;
 
 	std::string NodeName;
 };
@@ -348,7 +348,8 @@ void loadExtraCollisionConfig();
 
 void loadSystemConfig();
 
-void ConfigLineSplitter(std::string &line, Sphere &newSphere);
+void ConfigLineSplitterSphere(std::string &line, Sphere &newSphere);
+void ConfigLineSplitterCapsule(std::string &line, Capsule &newCapsule);
 
 int GetConfigSettingsValue(std::string line, std::string &variable);
 std::string GetConfigSettingsStringValue(std::string line, std::string& variable);

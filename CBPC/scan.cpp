@@ -184,7 +184,7 @@ bool ActorIsInAngle(Actor* actor, float originalHeading, NiPoint3 cameraPosition
 	GetAttitudeAndHeadingFromTwoPoints(cameraPosition, NiPoint3(position.x, position.y, cameraPosition.z), attitude, heading);
 	heading = heading * 57.295776f;
 
-	return AngleDifference(originalHeading, heading) <= (actorAngle / 2);
+	return AngleDifference(originalHeading, heading) <= (actorAngle * 0.5f);
 }
 
 std::atomic<TESObjectCELL *> curCell = nullptr;
@@ -488,6 +488,22 @@ void updateActors()
 							partitions[hashIdList[m]].partitionCollisions.emplace_back(collider.second);
 						}
 					}
+					colliderSphereCount++;
+				}
+				for (int j = 0; j < collider.second.collisionCapsules.size(); j++)
+				{
+					hashIdList = GetHashIdsFromPos((collider.second.collisionCapsules[j].End1_worldPos + collider.second.collisionCapsules[j].End2_worldPos) * 0.5f - playerPos
+						, (collider.second.collisionCapsules[j].End1_radius100 + collider.second.collisionCapsules[j].End2_radius100) * 0.5f);
+					for (int m = 0; m < hashIdList.size(); m++)
+					{
+						if (std::find(ids.begin(), ids.end(), hashIdList[m]) == ids.end())
+						{
+							//LOG_INFO("ids.emplace_back(%d)", hashIdList[m]);
+							ids.emplace_back(hashIdList[m]);
+							partitions[hashIdList[m]].partitionCollisions.emplace_back(collider.second);
+						}
+					}
+					
 					colliderSphereCount++;
 				}
 				#ifdef RUNTIME_VR_VERSION_1_4_15

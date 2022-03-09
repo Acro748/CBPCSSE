@@ -465,7 +465,7 @@ void loadConfig() {
 			config[it.second]["cogOffset"] = 0.0f;
 			config[it.second]["gravityBias"] = 0.0f;
 			config[it.second]["gravityCorrection"] = 0.0f;
-			config[it.second]["timeTick"] = 4.0f;
+			config[it.second]["timetick"] = 4.0f;
 			config[it.second]["linearX"] = 0.0f;
 			config[it.second]["linearY"] = 0.0f;
 			config[it.second]["linearZ"] = 0.0f;
@@ -514,7 +514,7 @@ void loadConfig() {
 			config0weight[it.second]["cogOffset"] = 0.0f;
 			config0weight[it.second]["gravityBias"] = 0.0f; 
 			config0weight[it.second]["gravityCorrection"] = 0.0f;
-			config0weight[it.second]["timeTick"] = 4.0f;
+			config0weight[it.second]["timetick"] = 4.0f;
 			config0weight[it.second]["linearX"] = 0.0f;
 			config0weight[it.second]["linearY"] = 0.0f;
 			config0weight[it.second]["linearZ"] = 0.0f;
@@ -621,7 +621,7 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["cogOffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityBias"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityCorrection"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["timeTick"] = 4.0f;
+											newNPCBounceConfig.config[it.second]["timetick"] = 4.0f;
 											newNPCBounceConfig.config[it.second]["linearX"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearY"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearZ"] = 0.0f;
@@ -670,7 +670,7 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["cogOffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityBias"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityCorrection"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["timeTick"] = 4.0f;
+											newNPCBounceConfig.config0weight[it.second]["timetick"] = 4.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearX"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearY"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearZ"] = 0.0f;
@@ -1273,8 +1273,29 @@ void loadCollisionConfig()
 						#endif
 						else
 						{
-							Sphere newSphere;
-							ConfigLineSplitter(line, newSphere);
+							Sphere newSphere; //type 0
+							Capsule newCapsule; //type 1
+
+							int type = 0;
+							std::vector<std::string> LowHighWeight = split(line, '|');
+
+							std::vector<std::string> PointSplitted;
+							
+							if (LowHighWeight.size() > 1)
+								PointSplitted = split(LowHighWeight[0], '&');
+							else
+								PointSplitted = split(line, '&');
+
+							if (PointSplitted.size() == 1)
+							{
+								ConfigLineSplitterSphere(line, newSphere);
+								type = 0;
+							}
+							else if (PointSplitted.size() == 2)
+							{
+								ConfigLineSplitterCapsule(line, newCapsule);
+								type = 1;
+							}
 
 							std::string trimmedSetting = gettrimmed(currentSetting);
 							#ifdef RUNTIME_VR_VERSION_1_4_15
@@ -1284,8 +1305,16 @@ void loadCollisionConfig()
 								{
 									if (PlayerNodesList[i].NodeName == trimmedSetting)
 									{
-										newSphere.NodeName = PlayerNodesList[i].NodeName;
-										PlayerNodesList[i].CollisionSpheres.emplace_back(newSphere);
+										if (type == 0)
+										{
+											newSphere.NodeName = PlayerNodesList[i].NodeName;
+											PlayerNodesList[i].CollisionSpheres.emplace_back(newSphere);
+										}
+										else if (type == 1)
+										{
+											newCapsule.NodeName = PlayerNodesList[i].NodeName;
+											PlayerNodesList[i].CollisionCapsules.emplace_back(newCapsule);
+										}
 										break;
 									}
 								}
@@ -1297,8 +1326,16 @@ void loadCollisionConfig()
 								{
 									if (AffectedNodesList[i].NodeName == trimmedSetting)
 									{
-										newSphere.NodeName = AffectedNodesList[i].NodeName;
-										AffectedNodesList[i].CollisionSpheres.emplace_back(newSphere);
+										if (type == 0)
+										{
+											newSphere.NodeName = AffectedNodesList[i].NodeName;
+											AffectedNodesList[i].CollisionSpheres.emplace_back(newSphere);
+										}
+										else if (type == 1)
+										{
+											newCapsule.NodeName = AffectedNodesList[i].NodeName;
+											AffectedNodesList[i].CollisionCapsules.emplace_back(newCapsule);
+										}
 										break;
 									}
 								}
@@ -1309,8 +1346,16 @@ void loadCollisionConfig()
 								{
 									if (ColliderNodesList[i].NodeName == trimmedSetting)
 									{
-										newSphere.NodeName = ColliderNodesList[i].NodeName;
-										ColliderNodesList[i].CollisionSpheres.emplace_back(newSphere);
+										if (type == 0)
+										{
+											newSphere.NodeName = ColliderNodesList[i].NodeName;
+											ColliderNodesList[i].CollisionSpheres.emplace_back(newSphere);
+										}
+										else if (type == 1)
+										{
+											newCapsule.NodeName = ColliderNodesList[i].NodeName;
+											ColliderNodesList[i].CollisionCapsules.emplace_back(newCapsule);
+										}
 										break;
 									}
 								}
@@ -1522,8 +1567,29 @@ void loadExtraCollisionConfig()
 								}
 								else
 								{
-									Sphere newSphere;
-									ConfigLineSplitter(line, newSphere);
+									Sphere newSphere; //type 0
+									Capsule newCapsule; //type 1
+
+									int type = 0;
+									std::vector<std::string> LowHighWeight = split(line, '|');
+
+									std::vector<std::string> PointSplitted;
+
+									if (LowHighWeight.size() == 1)
+										PointSplitted = split(line, '&');
+									else
+										PointSplitted = split(LowHighWeight[0], '&');
+
+									if (PointSplitted.size() == 1)
+									{
+										ConfigLineSplitterSphere(line, newSphere);
+										type = 0;
+									}
+									else if (PointSplitted.size() == 2)
+									{
+										ConfigLineSplitterCapsule(line, newCapsule);
+										type = 1;
+									}
 
 									std::string trimmedSetting = gettrimmed(currentSetting);
 
@@ -1533,7 +1599,10 @@ void loadExtraCollisionConfig()
 										{
 											if (newNPCConfig.AffectedNodesList[i].NodeName == trimmedSetting)
 											{
-												newNPCConfig.AffectedNodesList[i].CollisionSpheres.emplace_back(newSphere);
+												if (type == 0)
+													newNPCConfig.AffectedNodesList[i].CollisionSpheres.emplace_back(newSphere);
+												else if (type == 1)
+													newNPCConfig.AffectedNodesList[i].CollisionCapsules.emplace_back(newCapsule);
 												break;
 											}
 										}
@@ -1544,7 +1613,10 @@ void loadExtraCollisionConfig()
 										{
 											if (newNPCConfig.ColliderNodesList[i].NodeName == trimmedSetting)
 											{
-												newNPCConfig.ColliderNodesList[i].CollisionSpheres.emplace_back(newSphere);
+												if (type == 0)
+													newNPCConfig.ColliderNodesList[i].CollisionSpheres.emplace_back(newSphere);
+												else if(type == 1)
+													newNPCConfig.ColliderNodesList[i].CollisionCapsules.emplace_back(newCapsule);
 												break;
 											}
 										}
@@ -1677,7 +1749,7 @@ void ConfigWeaponLineSplitter(std::string &line, Triangle &newTriangle)
 }
 #endif
 
-void ConfigLineSplitter(std::string &line, Sphere &newSphere)
+void ConfigLineSplitterSphere(std::string &line, Sphere &newSphere)
 {
 	std::vector<std::string> lowHighSplitted = split(line, '|');
 	if (lowHighSplitted.size() == 1)
@@ -1740,6 +1812,138 @@ void ConfigLineSplitter(std::string &line, Sphere &newSphere)
 		if (splittedFloats.size()>3)
 		{
 			newSphere.radius100 = strtof(splittedFloats[3].c_str(), 0);
+		}
+	}
+}
+
+void ConfigLineSplitterCapsule(std::string &line, Capsule &newCapsules)
+{
+	std::vector<std::string> lowHighSplitted = split(line, '|');
+
+	if (lowHighSplitted.size() == 1)
+	{
+		std::vector<std::string> EndPointSplitted = split(lowHighSplitted[0], '&');
+
+		std::vector<std::string> splittedFloats = split(EndPointSplitted[0], ',');
+		if (splittedFloats.size()>0)
+		{
+			newCapsules.End1_offset0.x = strtof(splittedFloats[0].c_str(), 0);
+			newCapsules.End1_offset100.x = newCapsules.End1_offset0.x;
+		}
+		if (splittedFloats.size()>1)
+		{
+			newCapsules.End1_offset0.y = strtof(splittedFloats[1].c_str(), 0);
+			newCapsules.End1_offset100.y = newCapsules.End1_offset0.y;
+		}
+		if (splittedFloats.size()>2)
+		{
+			newCapsules.End1_offset0.z = strtof(splittedFloats[2].c_str(), 0);
+			newCapsules.End1_offset100.z = newCapsules.End1_offset0.z;
+		}
+		if (splittedFloats.size()>3)
+		{
+			newCapsules.End1_radius0 = strtof(splittedFloats[3].c_str(), 0);
+			newCapsules.End1_radius100 = newCapsules.End1_radius0;
+		}
+
+		splittedFloats = split(EndPointSplitted[1], ',');
+		if (splittedFloats.size() > 0)
+		{
+			newCapsules.End2_offset0.x = strtof(splittedFloats[0].c_str(), 0);
+			newCapsules.End2_offset100.x = newCapsules.End2_offset0.x;
+		}
+		if (splittedFloats.size() > 1)
+		{
+			newCapsules.End2_offset0.y = strtof(splittedFloats[1].c_str(), 0);
+			newCapsules.End2_offset100.y = newCapsules.End2_offset0.y;
+		}
+		if (splittedFloats.size() > 2)
+		{
+			newCapsules.End2_offset0.z = strtof(splittedFloats[2].c_str(), 0);
+			newCapsules.End2_offset100.z = newCapsules.End2_offset0.z;
+		}
+		if (splittedFloats.size() > 3)
+		{
+			newCapsules.End2_radius0 = strtof(splittedFloats[3].c_str(), 0);
+			newCapsules.End2_radius100 = newCapsules.End2_radius0;
+		}
+	}
+	else if (lowHighSplitted.size() > 1)
+	{
+		std::vector<std::string> EndPointSplitted = split(lowHighSplitted[0], '&');
+
+		std::vector<std::string> splittedFloats = split(EndPointSplitted[0], ',');
+		if (splittedFloats.size()>0)
+		{
+			newCapsules.End1_offset0.x = strtof(splittedFloats[0].c_str(), 0);
+		}
+		if (splittedFloats.size()>1)
+		{
+			newCapsules.End1_offset0.y = strtof(splittedFloats[1].c_str(), 0);
+		}
+		if (splittedFloats.size()>2)
+		{
+			newCapsules.End1_offset0.z = strtof(splittedFloats[2].c_str(), 0);
+		}
+		if (splittedFloats.size()>3)
+		{
+			newCapsules.End1_radius0 = strtof(splittedFloats[3].c_str(), 0);
+		}
+
+		splittedFloats = split(EndPointSplitted[1], ',');
+		if (splittedFloats.size()>0)
+		{
+			newCapsules.End2_offset0.x = strtof(splittedFloats[0].c_str(), 0);
+		}
+		if (splittedFloats.size()>1)
+		{
+			newCapsules.End2_offset0.y = strtof(splittedFloats[1].c_str(), 0);
+		}
+		if (splittedFloats.size()>2)
+		{
+			newCapsules.End2_offset0.z = strtof(splittedFloats[2].c_str(), 0);
+		}
+		if (splittedFloats.size()>3)
+		{
+			newCapsules.End2_radius0 = strtof(splittedFloats[3].c_str(), 0);
+		}
+
+		EndPointSplitted = split(lowHighSplitted[1], '&');
+
+		splittedFloats = split(EndPointSplitted[0], ',');
+		if (splittedFloats.size()>0)
+		{
+			newCapsules.End1_offset100.x = strtof(splittedFloats[0].c_str(), 0);
+		}
+		if (splittedFloats.size()>1)
+		{
+			newCapsules.End1_offset100.y = strtof(splittedFloats[1].c_str(), 0);
+		}
+		if (splittedFloats.size()>2)
+		{
+			newCapsules.End1_offset100.z = strtof(splittedFloats[2].c_str(), 0);
+		}
+		if (splittedFloats.size()>3)
+		{
+			newCapsules.End1_radius100 = strtof(splittedFloats[3].c_str(), 0);
+		}
+
+		splittedFloats = split(EndPointSplitted[1], ',');
+		if (splittedFloats.size()>0)
+		{
+			newCapsules.End2_offset100.x = strtof(splittedFloats[0].c_str(), 0);
+		}
+		if (splittedFloats.size()>1)
+		{
+			newCapsules.End2_offset100.y = strtof(splittedFloats[1].c_str(), 0);
+		}
+		if (splittedFloats.size()>2)
+		{
+			newCapsules.End2_offset100.z = strtof(splittedFloats[2].c_str(), 0);
+		}
+		if (splittedFloats.size()>3)
+		{
+			newCapsules.End2_radius100 = strtof(splittedFloats[3].c_str(), 0);
 		}
 	}
 }

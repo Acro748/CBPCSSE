@@ -295,13 +295,13 @@ void UpdateColliderPositions(std::unordered_map<std::string, Collision> &collide
 		{
 			collider.second.collisionSpheres[j].worldPos = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionSpheres[j].offset100;
 		}
-		/*
+		
 		for (int k = 0; k < collider.second.collisionCapsules.size(); k++)
 		{
 			collider.second.collisionCapsules[k].End1_worldPos = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End1_offset100;
 			collider.second.collisionCapsules[k].End2_worldPos = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End2_offset100;
 		}
-		*/
+		
 		#ifdef RUNTIME_VR_VERSION_1_4_15
 		for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
 		{

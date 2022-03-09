@@ -3,6 +3,7 @@
 #include <time.h>
 #include <vector>
 #include <ppl.h>
+#include <vector>
 
 
 #include "config.h"
@@ -29,7 +30,7 @@ public:
 
 	NiPoint3 lastColliderPosition = emptyPoint;
 		
-	bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Capsule>& collisionCapsules, bool maybe, float ground);
+	bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule> &thingCollisionCapsules, std::vector<Capsule> &collisionCapsules, bool maybe, float ground);
 	
 	NiPoint3 CheckCollision(bool &isItColliding, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, float timeTick, long deltaT, bool maybe, float ground);
 
@@ -56,7 +57,7 @@ public:
 
 static inline NiPoint3 GetPointFromPercentage(NiPoint3 lowWeight, NiPoint3 highWeight, float weight)
 {
-	return ((highWeight - lowWeight) * (weight / 100)) + lowWeight;
+	return ((highWeight - lowWeight) * (weight * 0.01f)) + lowWeight;
 }
 
 static inline NiPoint3 GetVectorFromCollision(NiPoint3 col, NiPoint3 thing, float Scalar, float currentDistance)

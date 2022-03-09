@@ -40,6 +40,7 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	}
 
 	thingCollisionSpheres = CreateThingCollisionSpheres(actor, name.data, nodescale);
+	thingCollisionCapsules = CreateThingCollisionCapsules(actor, name.data, nodescale);
 
 	oldWorldPos = obj->m_worldTransform.pos;
 	time = clock();
@@ -186,13 +187,89 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 				spheres[j].offset100 = GetPointFromPercentage(spheres[j].offset0, spheres[j].offset100, actorWeight) * nodescale;
 
 				spheres[j].radius100 = GetPercentageValue(spheres[j].radius0, spheres[j].radius100, actorWeight) * nodescale;
-
-				spheres[j].radius100pwr2 = spheres[j].radius100*spheres[j].radius100;
 			}
 			break;
 		}
 	}
 	return spheres;
+}
+
+std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::string nodeName, float nodescale)
+{
+	auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
+
+	actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
+
+	std::vector<ConfigLine>* AffectedNodesListPtr;
+
+	const char* actorrefname = "";
+	std::string actorRace = "";
+
+	SpecificNPCConfig snc;
+
+	if (actor->formID == 0x14) //If Player
+	{
+		actorrefname = "Player";
+	}
+	else
+	{
+		actorrefname = CALL_MEMBER_FN(actorRef, GetReferenceName)();
+	}
+
+	if (actor->race)
+	{
+		actorRace = actor->race->fullName.GetName();
+	}
+
+	bool success = GetSpecificNPCConfigForActor(actor, snc);
+
+	if (success)
+	{
+		AffectedNodesListPtr = &(snc.AffectedNodesList);
+		thing_bellybulgemultiplier = snc.cbellybulge;
+		thing_bellybulgemax = snc.cbellybulgemax;
+		thing_bellybulgeposlowest = snc.cbellybulgeposlowest;
+		thing_bellybulgelist = snc.bellybulgenodesList;
+		thing_bellyBulgeReturnTime = snc.bellyBulgeReturnTime;
+		thing_vaginaOpeningLimit = snc.vaginaOpeningLimit;
+		thing_vaginaOpeningMultiplier = snc.vaginaOpeningMultiplier;
+	}
+	else
+	{
+		AffectedNodesListPtr = &AffectedNodesList;
+		thing_bellybulgemultiplier = cbellybulge;
+		thing_bellybulgemax = cbellybulgemax;
+		thing_bellybulgeposlowest = cbellybulgeposlowest;
+		thing_bellybulgelist = bellybulgenodesList;
+		thing_bellyBulgeReturnTime = bellyBulgeReturnTime;
+		thing_vaginaOpeningLimit = vaginaOpeningLimit;
+		thing_vaginaOpeningMultiplier = vaginaOpeningMultiplier;
+	}
+
+	std::vector<Capsule> capsules;
+
+	for (int i = 0; i < AffectedNodesListPtr->size(); i++)
+	{
+		if (AffectedNodesListPtr->at(i).NodeName == nodeName)
+		{
+			capsules = AffectedNodesListPtr->at(i).CollisionCapsules;
+			IgnoredCollidersList = AffectedNodesListPtr->at(i).IgnoredColliders;
+			IgnoredSelfCollidersList = AffectedNodesListPtr->at(i).IgnoredSelfColliders;
+			IgnoreAllSelfColliders = AffectedNodesListPtr->at(i).IgnoreAllSelfColliders;
+			for (int j = 0; j < capsules.size(); j++)
+			{
+				capsules[j].End1_offset100 = GetPointFromPercentage(capsules[j].End1_offset0, capsules[j].End1_offset100, actorWeight) * nodescale;
+
+				capsules[j].End1_radius100 = GetPercentageValue(capsules[j].End1_radius0, capsules[j].End1_radius100, actorWeight) * nodescale;
+
+				capsules[j].End2_offset100 = GetPointFromPercentage(capsules[j].End2_offset0, capsules[j].End2_offset100, actorWeight) * nodescale;
+
+				capsules[j].End2_radius100 = GetPercentageValue(capsules[j].End2_radius0, capsules[j].End2_radius100, actorWeight) * nodescale;
+			}
+			break;
+		}
+	}
+	return capsules;
 }
 
 void showPos(NiPoint3 &p) {
@@ -730,7 +807,6 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	Sphere pelvisSphere;
 	pelvisSphere.offset100 = NiPoint3(0, 0, -2);
 	pelvisSphere.radius100 = 3.5f;
-	pelvisSphere.radius100pwr2 = 12.25f;
 	pelvisCollisionSpheres.emplace_back(pelvisSphere);
 
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
@@ -1134,6 +1210,21 @@ void Thing::update(Actor* actor) {
 				}
 			}
 		}
+		for (int i = 0; i < thingCollisionCapsules.size(); i++)
+		{
+			thingCollisionCapsules[i].End1_worldPos = (maybePos + objRotation * thingCollisionCapsules[i].End1_offset100);
+			thingCollisionCapsules[i].End2_worldPos = (maybePos + objRotation * thingCollisionCapsules[i].End2_offset100);
+			hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
+				, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
+			for (int m = 0; m < hashIdList.size(); m++)
+			{
+				if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
+				{
+					thingIdList.emplace_back(hashIdList[m]);
+				}
+			}
+		}
+
 		//Prevent normal movement to cause collision (This prevents shakes)			
 		collisionVector = emptyPoint;
 		NiPoint3 lastcollisionVector = emptyPoint;
@@ -1179,6 +1270,12 @@ void Thing::update(Actor* actor) {
 						for (int l = 0; l < thingCollisionSpheres.size(); l++)
 						{
 							thingCollisionSpheres[l].worldPos = (maybePos + objRotation * thingCollisionSpheres[l].offset100) + collisionVector;
+						}
+
+						for (int m = 0; m < thingCollisionCapsules.size(); m++)
+						{
+							thingCollisionCapsules[m].End1_worldPos = (maybePos + objRotation * thingCollisionCapsules[m].End1_offset100) + collisionVector;
+							thingCollisionCapsules[m].End2_worldPos = (maybePos + objRotation * thingCollisionCapsules[m].End2_offset100) + collisionVector;
 						}
 					}
 					lastcollisionVector = collisionVector;

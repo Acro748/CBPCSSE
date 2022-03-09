@@ -404,7 +404,7 @@ static inline double GetPercentageValue(double number1, double number2, float pe
 		return number1;
 	else
 	{
-		return number1 + ((number2 - number1)*(perc / 100.0f));
+		return number1 + ((number2 - number1)*(perc * 0.01f));
 	}
 }
 
@@ -416,7 +416,7 @@ static inline float GetPercentageValue(float number1, float number2, float perc)
 		return number1;
 	else
 	{
-		return number1 + ((number2 - number1) * (perc / 100.0f));
+		return number1 + ((number2 - number1) * (perc * 0.01f));
 	}
 }
 
