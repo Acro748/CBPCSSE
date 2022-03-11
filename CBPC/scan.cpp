@@ -483,7 +483,7 @@ void updateActors()
 		auto objIt = actors.find(actorEntries[u].id);
 		if (objIt != actors.end())
 		{				
-			UpdateColliderPositions(objIt->second.actorColliders);
+			UpdateColliderPositions(objIt->second.actorColliders, actorEntries[u].actor);
 
 			for (auto &collider : objIt->second.actorColliders)
 			{
@@ -662,7 +662,7 @@ void updateActors()
 	}
 	//logger.error("Updating %d entites\n", actorEntries.size());
 
-	if (useParallelProcessing >= 2 && !raceSexMenuOpen.load())
+	if (useParallelProcessing >= 2)
 	{
 		concurrency::parallel_for_each(actorEntries.begin(), actorEntries.end(), [&](const auto& a)
 		{

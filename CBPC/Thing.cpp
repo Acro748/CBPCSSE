@@ -368,6 +368,8 @@ void Thing::updateConfigValues(Actor* actor)
 
 	collisionFriction = GetPercentageValue(collisionFriction_0, collisionFriction_100, actorWeight);
 	collisionPenetration = GetPercentageValue(collisionPenetration_0, collisionPenetration_100, actorWeight);
+	collisionMultipler = GetPercentageValue(collisionMultipler_0, collisionMultipler_100, actorWeight);
+	collisionMultiplerRot = GetPercentageValue(collisionMultiplerRot_0, collisionMultiplerRot_100, actorWeight);
 
 	collisionXmaxOffset = GetPercentageValue(collisionXmaxOffset_0, collisionXmaxOffset_100, actorWeight);
 	collisionXminOffset = GetPercentageValue(collisionXminOffset_0, collisionXminOffset_100, actorWeight);
@@ -460,6 +462,9 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	else if (collisionPenetration_100 > 1.0f)
 		collisionPenetration_100 = 1.0f;
 
+	collisionMultipler_100 = centry["collisionMultipler"];
+	collisionMultiplerRot_100 = centry["collisionMultiplerRot"];
+
 	collisionXmaxOffset_100 = centry["collisionXmaxoffset"];
 	collisionXminOffset_100 = centry["collisionXminoffset"];
 	collisionYmaxOffset_100 = centry["collisionYmaxoffset"];
@@ -549,6 +554,9 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		collisionPenetration_0 = 0.0f;
 	else if (collisionPenetration_0 > 1.0f)
 		collisionPenetration_0 = 1.0f;
+
+	collisionMultipler_0 = centry0weight["collisionMultipler"];
+	collisionMultiplerRot_0 = centry0weight["collisionMultiplerRot"];
 
 	collisionXmaxOffset_0 = centry0weight["collisionXmaxoffset"];
 	collisionXminOffset_0 = centry0weight["collisionXminoffset"];
@@ -1212,6 +1220,8 @@ void Thing::update(Actor* actor) {
 		deltaT -= timeTick;
 	} while (deltaT >= timeTick);
 
+	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
+
 	if (collisionsOn && ActorCollisionsEnabled)
 	{
 		float groundPos = -10000.0f;
@@ -1234,7 +1244,7 @@ void Thing::update(Actor* actor) {
 		}
 
 		//LOG("Before Maybe Collision Stuff Start");
-		NiPoint3 maybePos = newPos + posDelta + (objRotation * (thingDefaultPos * nodeScale)); //add missing local pos
+		NiPoint3 maybePos = newPos + posDelta + (obj->m_parent->m_worldTransform.rot * (thingDefaultPos * nodeScale)); //add missing local pos
 
 		//After cbp movement collision detection
 		thingIdList.clear();
@@ -1319,7 +1329,7 @@ void Thing::update(Actor* actor) {
 						}
 					}
 					lastcollisionVector = collisionVector;
-
+					
 					bool colliding = false;
 					collisionDiff = partitions[id].partitionCollisions[i].CheckCollision(colliding, thingCollisionSpheres, thingCollisionCapsules, timeTick, originalDeltaT, false, groundPos);
 					if (colliding)
@@ -1327,6 +1337,11 @@ void Thing::update(Actor* actor) {
 						velocity *= collisionFriction;
 						maybeNot = true;
 						collisionVector = collisionVector + collisionDiff;
+						NiPoint3 IcollisionVector = invRot * collisionVector;
+						IcollisionVector.x = clamp(IcollisionVector.x, collisionXminOffset, collisionXmaxOffset);
+						IcollisionVector.y = clamp(IcollisionVector.y, collisionYminOffset, collisionYmaxOffset);
+						IcollisionVector.z = clamp(IcollisionVector.z, collisionZminOffset, collisionZmaxOffset);
+						collisionVector = obj->m_parent->m_worldTransform.rot * IcollisionVector;
 					}
 
 					collisionCheckCount++;
@@ -1334,24 +1349,17 @@ void Thing::update(Actor* actor) {
 			}
 		}
 
-		newPos = newPos + posDelta;
-
 		if (maybeNot)
 		{
-			collisionVector.x = clamp(collisionVector.x, collisionXminOffset, collisionXmaxOffset);
-			collisionVector.y = clamp(collisionVector.y, collisionYminOffset, collisionYmaxOffset);
-			collisionVector.z = clamp(collisionVector.z, collisionZminOffset, collisionZmaxOffset);
 			collisionVector = collisionVector * collisionPenetration;
 			IsThereCollision = true;
 		}
 
 		//LOG("After Maybe Collision Stuff End");
 	}
-	else
-	{
-		newPos = newPos + posDelta;
-	}
-	
+
+	newPos = newPos + posDelta;
+
 	// clamp the difference to stop the breast severely lagging at low framerates
 	NiPoint3 newdiff = newPos - target;
 
@@ -1365,12 +1373,9 @@ void Thing::update(Actor* actor) {
 		}
 	}
 	
-	oldWorldPos = newdiff + collisionVector + target;
-
 	//logger.error("set positions\n");
 	// move the bones based on the supplied weightings
 	// Convert the world translations into local coordinates
-	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
 
 	varLinearX = varLinearX * forceAmplitude;
 	varLinearY = varLinearY * forceAmplitude;
@@ -1379,22 +1384,34 @@ void Thing::update(Actor* actor) {
 	varRotationalYnew = varRotationalYnew * forceAmplitude;
 	varRotationalZnew = varRotationalZnew * forceAmplitude;
 
-	newdiff.x = clamp(newdiff.x, XminOffset, XmaxOffset);
-	newdiff.y = clamp(newdiff.y, YminOffset, YmaxOffset);
-	newdiff.z = clamp(newdiff.z - varGravityCorrection, ZminOffset, ZmaxOffset) + varGravityCorrection;
-
 	auto ldiff = invRot * newdiff;
 	auto Idiffcol = invRot * collisionVector;
-		
+
+	ldiff.x = clamp(ldiff.x, XminOffset, XmaxOffset);
+	ldiff.y = clamp(ldiff.y, YminOffset, YmaxOffset);
+	ldiff.z = clamp(ldiff.z - varGravityCorrection, ZminOffset, ZmaxOffset) + varGravityCorrection;
+
+	//Add more collision force for weak bone weights but virtually for maintain collision by node position
+	NiPoint3 maybeIdiffcol = emptyPoint;
+
+	if (maybeNot)
+	{
+		maybeIdiffcol = Idiffcol * collisionMultipler;
+		NiPoint3 CollisionSyncOffset = Idiffcol - maybeIdiffcol;
+		NodeCollisionSync[GetActorNodeString(actor, boneName)] = CollisionSyncOffset;
+	}
+	else
+		NodeCollisionSync[GetActorNodeString(actor, boneName)] = emptyPoint;
+	
 	oldWorldPos = (obj->m_parent->m_worldTransform.rot * ldiff) + target;
 		
-	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + ldiff.x * varLinearX + Idiffcol.x;
-	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + ldiff.y * varLinearY + Idiffcol.y;
-	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + ldiff.z * varLinearZ + Idiffcol.z;
+	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (ldiff.x * varLinearX) + maybeIdiffcol.x;
+	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (ldiff.y * varLinearY) + maybeIdiffcol.y;
+	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (ldiff.z * varLinearZ) + maybeIdiffcol.z;
 
-	auto rdiffXnew = (ldiff + Idiffcol) * (varRotationalXnew);
-	auto rdiffYnew = (ldiff + Idiffcol) * (varRotationalYnew);
-	auto rdiffZnew = (ldiff + Idiffcol) * (varRotationalZnew);
+	auto rdiffXnew = (ldiff + (Idiffcol * collisionMultiplerRot)) * (varRotationalXnew);
+	auto rdiffYnew = (ldiff + (Idiffcol * collisionMultiplerRot)) * (varRotationalYnew);
+	auto rdiffZnew = (ldiff + (Idiffcol * collisionMultiplerRot)) * (varRotationalZnew);
 
 	rdiffXnew.x *= linearXrotationX;
 	rdiffXnew.y *= linearYrotationX;
@@ -1441,4 +1458,3 @@ void Thing::CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool lef
 		collisionDiff = emptyPoint;
 	}
 }
-

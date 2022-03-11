@@ -81,20 +81,7 @@ int useParallelProcessing = 0;
 
 int fpsCorrectionEnabled = 0;
 
-std::vector<std::string> noJitterFixNodesList = { 
-"NPC Genitals01[Gen01]",
-"NPC Genitals02[Gen02]",
-"NPC Genitals03[Gen03]",
-"NPC Genitals04[Gen04]",
-"NPC Genitals05[Gen05]",
-"NPC Genitals06[Gen06]",
-"GenitalsLag01",
-"GenitalsLag02",
-"GenitalsLag03",
-"GenitalsLag04",
-"GenitalsLag05",
-"GenitalsLag06",
-"GenitalsScrotumLag" };
+std::vector<std::string> noJitterFixNodesList;
 
 
 //int useOldHook = 1;
@@ -498,6 +485,8 @@ void loadConfig() {
 			config[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
 			config[it.second]["collisionFriction"] = 0.2f;
 			config[it.second]["collisionPenetration"] = 0.0f;
+			config[it.second]["collisionMultipler"] = 1.0f;
+			config[it.second]["collisionMultiplerRot"] = 1.0f;
 			config[it.second]["collisionXmaxoffset"] = 100.0f;
 			config[it.second]["collisionXminoffset"] = -100.0f;
 			config[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -550,6 +539,8 @@ void loadConfig() {
 			config0weight[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
 			config0weight[it.second]["collisionFriction"] = 0.2f;
 			config0weight[it.second]["collisionPenetration"] = 0.0f;
+			config0weight[it.second]["collisionMultipler"] = 1.0f;
+			config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
 			config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
 			config0weight[it.second]["collisionXminoffset"] = -100.0f;
 			config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -660,6 +651,8 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["collisionFriction"] = 0.2f;
 											newNPCBounceConfig.config[it.second]["collisionPenetration"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["collisionMultipler"] = 1.0f;
+											newNPCBounceConfig.config[it.second]["collisionMultiplerRot"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["collisionXmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config[it.second]["collisionXminoffset"] = -100.0f;
 											newNPCBounceConfig.config[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -712,6 +705,8 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionFriction"] = 0.2f;
 											newNPCBounceConfig.config0weight[it.second]["collisionPenetration"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionMultipler"] = 1.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionXminoffset"] = -100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -2640,7 +2635,8 @@ void MenuOpened(std::string name)
 	}
 	else if (name == "Main Menu")
 	{
-
+		MainMenuOpen.store(true);
+		ActorNodeStoppedPhysicsMap.clear();
 	}
 }
 

@@ -3,7 +3,7 @@
 
 PartitionMap partitions;
 
-
+std::unordered_map<std::string, NiPoint3> NodeCollisionSync;
 
 
 //debug variable
@@ -287,19 +287,24 @@ bool CheckPelvisArmor(Actor* actor)
 	return papyrusActor::GetWornForm(actor, 49) != NULL && papyrusActor::GetWornForm(actor, 52) != NULL && papyrusActor::GetWornForm(actor, 53) != NULL && papyrusActor::GetWornForm(actor, 54) != NULL && papyrusActor::GetWornForm(actor, 56) != NULL && papyrusActor::GetWornForm(actor, 58) != NULL;
 }
 
-void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList)
+void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, Actor* actor)
 {
 	for (auto &collider : colliderList)
 	{
+		NiPoint3 VirtualOffset = emptyPoint;
+		
+		if (NodeCollisionSync.find(GetActorNodeString(actor, collider.second.CollisionObject->m_name)) != NodeCollisionSync.end())
+			VirtualOffset = collider.second.CollisionObject->m_parent->m_worldTransform.rot * NodeCollisionSync[GetActorNodeString(actor, collider.second.CollisionObject->m_name)];
+
 		for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
 		{
-			collider.second.collisionSpheres[j].worldPos = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionSpheres[j].offset100;
+			collider.second.collisionSpheres[j].worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionSpheres[j].offset100) + VirtualOffset;
 		}
 		
 		for (int k = 0; k < collider.second.collisionCapsules.size(); k++)
 		{
-			collider.second.collisionCapsules[k].End1_worldPos = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End1_offset100;
-			collider.second.collisionCapsules[k].End2_worldPos = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End2_offset100;
+			collider.second.collisionCapsules[k].End1_worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End1_offset100) + VirtualOffset;
+			collider.second.collisionCapsules[k].End2_worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End2_offset100) + VirtualOffset;
 		}
 		
 		#ifdef RUNTIME_VR_VERSION_1_4_15

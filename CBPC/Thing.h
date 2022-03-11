@@ -77,6 +77,8 @@ public:
 
 	float collisionFriction = 0.8f;
 	float collisionPenetration = 1.0f;
+	float collisionMultipler = 1.0f;
+	float collisionMultiplerRot = 1.0f;
 
 	float collisionXmaxOffset = 100.0f;
 	float collisionXminOffset = -100.0f;
@@ -135,6 +137,8 @@ public:
 
 	float collisionFriction_100 = 0.8f;
 	float collisionPenetration_100 = 1.0f;
+	float collisionMultipler_100 = 1.0f;
+	float collisionMultiplerRot_100 = 1.0f;
 
 	float collisionXmaxOffset_100 = 100.0f;
 	float collisionXminOffset_100 = -100.0f;
@@ -193,6 +197,8 @@ public:
 
 	float collisionFriction_0 = 0.8f;
 	float collisionPenetration_0 = 1.0f;
+	float collisionMultipler_0 = 1.0f;
+	float collisionMultiplerRot_0 = 1.0f;
 
 	float collisionXmaxOffset_0 = 100.0f;
 	float collisionXminOffset_0 = -100.0f;

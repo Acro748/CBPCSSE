@@ -14,7 +14,7 @@ extern long callCount;
 
 void CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collision> &actorCollidersList, bool &GroundCollisionEnabled);
 
-void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList);
+void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, Actor* actor);
 
 
 struct Partition
@@ -35,4 +35,5 @@ std::vector<int> GetHashIdsFromPos(NiPoint3 pos, float radius);
 bool CheckPelvisArmor(Actor* actor);
 
 
+extern std::unordered_map<std::string, NiPoint3> NodeCollisionSync;
 
