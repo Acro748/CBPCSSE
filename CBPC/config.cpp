@@ -81,7 +81,14 @@ int useParallelProcessing = 0;
 
 int fpsCorrectionEnabled = 0;
 
-std::vector<std::string> noJitterFixNodesList;
+std::vector<std::string> noJitterFixNodesList = {
+"NPC Genitals01[Gen01]",
+"NPC Genitals02[Gen02]",
+"NPC Genitals03[Gen03]",
+"NPC Genitals04[Gen04]",
+"NPC Genitals05[Gen05]",
+"NPC Genitals06[Gen06]"
+};
 
 
 //int useOldHook = 1;
