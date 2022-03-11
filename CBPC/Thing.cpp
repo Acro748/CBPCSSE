@@ -44,7 +44,7 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 
 	IsLeftBreastBone = ContainsNoCase(boneName.data, "L Breast");
 	IsRightBreastBone = ContainsNoCase(boneName.data, "R Breast");
-	IsBreastBone = ContainsNoCase(boneName.data, "breast");
+	IsBreastBone = ContainsNoCase(boneName.data, "Breast");
 	IsBellyBone = strcmp(boneName.data, belly.data) == 0;
 
 	if (IsBellyBone)
@@ -1071,24 +1071,24 @@ void Thing::update(Actor* actor) {
 
 	NiPoint3 target = obj->m_parent->m_worldTransform.pos;
 
-	//Get the reference bone to know which way the breasts are orientated
-	NiAVObject* breastGravityReferenceBone = loadedState->node->GetObjectByName(&breastGravityReferenceBoneString.data);
-
-	if (breastGravityReferenceBone != nullptr)
+	if (IsBreastBone) //other bones don't need to edited gravity by NPC Spine2 [Spn2] node
 	{
-		//Get the orientation (here the Z element of the rotation matrix (1.0 when standing up, -1.0 when upside down))			
-		float gravityRatio = (breastGravityReferenceBone->m_worldTransform.rot.data[2][2] + 1.0f) * 0.5f;
-
-		//Remap the value from 0.0 => 1.0 to user defined values and clamps it
-		gravityRatio = remap(gravityRatio, gravityInvertedCorrectionStart, gravityInvertedCorrectionEnd, 0.0, 1.0);
-		gravityRatio = clamp(gravityRatio, 0.0f, 1.0f);
-
-		//Calculate the resulting gravity
-		varGravityCorrection = (gravityRatio * gravityCorrection) + ((1.0 - gravityRatio) * gravityInvertedCorrection);
+		//Get the reference bone to know which way the breasts are orientated
+		NiAVObject* breastGravityReferenceBone = loadedState->node->GetObjectByName(&breastGravityReferenceBoneString.data);
 
 		//Code sent by KheiraDjet(modified)
-		if (IsBreastBone)
+		if (breastGravityReferenceBone != nullptr)
 		{
+			//Get the orientation (here the Z element of the rotation matrix (1.0 when standing up, -1.0 when upside down))			
+			float gravityRatio = (breastGravityReferenceBone->m_worldTransform.rot.data[2][2] + 1.0f) * 0.5f;
+
+			//Remap the value from 0.0 => 1.0 to user defined values and clamps it
+			gravityRatio = remap(gravityRatio, gravityInvertedCorrectionStart, gravityInvertedCorrectionEnd, 0.0, 1.0);
+			gravityRatio = clamp(gravityRatio, 0.0f, 1.0f);
+
+			//Calculate the resulting gravity
+			varGravityCorrection = (gravityRatio * gravityCorrection) + ((1.0 - gravityRatio) * gravityInvertedCorrection);
+
 			//Determine which armor the actor is wearing
 			if (skipArmorCheck <= 0) //This is a little heavy, check only on equip/unequip events
 			{
@@ -1181,6 +1181,8 @@ void Thing::update(Actor* actor) {
 	//Offset to move Center of Mass make rotaional motion more significant  
 	NiPoint3 diff = target - oldWorldPos;
 
+	//varGravityCorrection = varGravityCorrection / (fpsCorrectionEnabled ? fpsCorrection : 1.0f);
+
 	diff += NiPoint3(0, 0, varGravityCorrection);
 
 	if (fabs(diff.x) > 100 || fabs(diff.y) > 100 || fabs(diff.z) > 100) //prevent shakes
@@ -1208,19 +1210,36 @@ void Thing::update(Actor* actor) {
 		//velocity = (velocity + (force * timeStep)) * (1 - (damping * timeStep));
 		velocity = (velocity + (force * timeStep)) - (velocity * (damping * timeStep)); //edited
 
-		if (fpsCorrectionEnabled)
-		{
-			posDelta += (velocity * timeStep * fpsCorrection);
-		}
-		else
-		{
-			posDelta += (velocity * timeStep);
-		}
+		posDelta += (velocity * timeStep * (fpsCorrectionEnabled ? fpsCorrection : 1.0f));
 
 		deltaT -= timeTick;
 	} while (deltaT >= timeTick);
 
+
+	newPos = newPos + posDelta;
+
 	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
+
+	// clamp the difference to stop the breast severely lagging at low framerates
+	NiPoint3 newdiff = newPos - target;
+
+	varLinearX = varLinearX * forceAmplitude;
+	varLinearY = varLinearY * forceAmplitude;
+	varLinearZ = varLinearZ * forceAmplitude;
+	varRotationalXnew = varRotationalXnew * forceAmplitude;
+	varRotationalYnew = varRotationalYnew * forceAmplitude;
+	varRotationalZnew = varRotationalZnew * forceAmplitude;
+
+	auto ldiff = invRot * newdiff;
+
+	ldiff.x = clamp(ldiff.x, XminOffset, XmaxOffset);
+	ldiff.y = clamp(ldiff.y, YminOffset, YmaxOffset);
+	ldiff.z = clamp(ldiff.z, ZminOffset, ZmaxOffset);
+
+	//same the clamp(diff.z - varGravityCorrection, -maxOffset, maxOffset) + varGravityCorrection
+	//this is reason for the endless shaking when unstable fps
+	//auto maybediff = (obj->m_parent->m_worldTransform.rot * ldiff) + NiPoint3(0, 0, varGravityCorrection);
+	//ldiff = invRot * maybediff;
 
 	if (collisionsOn && ActorCollisionsEnabled)
 	{
@@ -1244,7 +1263,12 @@ void Thing::update(Actor* actor) {
 		}
 
 		//LOG("Before Maybe Collision Stuff Start");
-		NiPoint3 maybePos = newPos + posDelta + (obj->m_parent->m_worldTransform.rot * (thingDefaultPos * nodeScale)); //add missing local pos
+		auto maybeldiff = ldiff;
+		maybeldiff.x = maybeldiff.x * varLinearX;
+		maybeldiff.y = maybeldiff.y * varLinearY;
+		maybeldiff.z = maybeldiff.z * varLinearZ;
+
+		NiPoint3 maybePos = target + (obj->m_parent->m_worldTransform.rot * (maybeldiff + (thingDefaultPos * nodeScale))); //add missing local pos
 
 		//After cbp movement collision detection
 		thingIdList.clear();
@@ -1358,11 +1382,6 @@ void Thing::update(Actor* actor) {
 		//LOG("After Maybe Collision Stuff End");
 	}
 
-	newPos = newPos + posDelta;
-
-	// clamp the difference to stop the breast severely lagging at low framerates
-	NiPoint3 newdiff = newPos - target;
-
 	//Logging
 	if (logging != 0)
 	{
@@ -1377,19 +1396,7 @@ void Thing::update(Actor* actor) {
 	// move the bones based on the supplied weightings
 	// Convert the world translations into local coordinates
 
-	varLinearX = varLinearX * forceAmplitude;
-	varLinearY = varLinearY * forceAmplitude;
-	varLinearZ = varLinearZ * forceAmplitude;
-	varRotationalXnew = varRotationalXnew * forceAmplitude;
-	varRotationalYnew = varRotationalYnew * forceAmplitude;
-	varRotationalZnew = varRotationalZnew * forceAmplitude;
-
-	auto ldiff = invRot * newdiff;
 	auto Idiffcol = invRot * collisionVector;
-
-	ldiff.x = clamp(ldiff.x, XminOffset, XmaxOffset);
-	ldiff.y = clamp(ldiff.y, YminOffset, YmaxOffset);
-	ldiff.z = clamp(ldiff.z - varGravityCorrection, ZminOffset, ZmaxOffset) + varGravityCorrection;
 
 	//Add more collision force for weak bone weights but virtually for maintain collision by node position
 	NiPoint3 maybeIdiffcol = emptyPoint;

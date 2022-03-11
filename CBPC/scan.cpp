@@ -474,6 +474,7 @@ void updateActors()
 
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
 	int colliderSphereCount = 0;
+	int colliderCapsuleCount = 0;
 
 	for (int u = 0; u < actorEntries.size(); u++)
 	{
@@ -517,7 +518,7 @@ void updateActors()
 						}
 					}
 					
-					colliderSphereCount++;
+					colliderCapsuleCount++;
 				}
 				#ifdef RUNTIME_VR_VERSION_1_4_15
 				for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
@@ -570,6 +571,7 @@ void updateActors()
 		}
 	}
 	LOG("Collider sphere count = %d", colliderSphereCount);
+	LOG("Collider capsule count = %d", colliderCapsuleCount);
 
 	//Print partitions
 	/*LOG("============================");
