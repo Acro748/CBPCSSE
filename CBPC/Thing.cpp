@@ -1020,7 +1020,6 @@ void Thing::update(Actor* actor) {
 		}
 
 		obj = loadedState->node->GetObjectByName(&boneName.data);
-		objRotation = loadedState->node->m_worldTransform.rot;
 #ifdef RUNTIME_VR_VERSION_1_4_15	
 	}
 #endif
@@ -1029,6 +1028,7 @@ void Thing::update(Actor* actor) {
 		return;
 	}
 
+	objRotation = obj->m_worldTransform.rot;
 
 	if (strcmp(boneName.data, belly.data) == 0 && ActorCollisionsEnabled && thing_bellybulgemultiplier > 0)
 	{
@@ -1050,6 +1050,8 @@ void Thing::update(Actor* actor) {
 
 	const float ScaleMult = 1 / nodeScale;
 
+	//The x, y, z axes expand according to the node scale
+	//so need to correct them in order to change the x, y, z move distances absolutely rather than relative
 	float varLinearX = linearX * ScaleMult;
 	float varLinearY = linearY * ScaleMult;
 	float varLinearZ = linearZ * ScaleMult;
@@ -1237,9 +1239,12 @@ void Thing::update(Actor* actor) {
 	ldiff.z = clamp(ldiff.z, ZminOffset, ZmaxOffset);
 
 	//same the clamp(diff.z - varGravityCorrection, -maxOffset, maxOffset) + varGravityCorrection
-	//this is reason for the endless shaking when unstable fps
+	//this is reason for the endless shaking when unstable fps in v1.4.1x
 	//auto maybediff = (obj->m_parent->m_worldTransform.rot * ldiff) + NiPoint3(0, 0, varGravityCorrection);
 	//ldiff = invRot * maybediff;
+
+
+
 
 	if (collisionsOn && ActorCollisionsEnabled)
 	{

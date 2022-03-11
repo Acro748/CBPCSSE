@@ -80,6 +80,7 @@ void DoHookNEW();
 //	}
 //}
 
+//console debug
 bool Debug_Execute(const ObScriptParam* paramInfo, ScriptData* scriptData, TESObjectREFR* thisObj,
 	TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result,
 	UInt32& opcodeOffsetPtr)
@@ -213,6 +214,7 @@ extern "C"
 			return false;
 		}
 
+		//console debug
 		ObScriptCommand* hijackedCommand = nullptr;
 		for (ObScriptCommand* iter = g_firstConsoleCommand; iter->opcode < kObScript_NumConsoleCommands +
 			kObScript_ConsoleOpBase; ++iter)

@@ -49,7 +49,7 @@ std::unordered_map<std::string, bool> ActorNodeStoppedPhysicsMap;
 //
 //std::unordered_map<Actor*, nodeCollisionAmountMap> BreastCollisionAmountMap;
 
-int configReloadCount = 60;
+int configReloadCount = 0;
 int gridsize = 25;
 int adjacencyValue = 5;
 int tuningModeCollision = 0;
