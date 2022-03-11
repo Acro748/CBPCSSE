@@ -994,8 +994,6 @@ void Thing::update(Actor* actor) {
 		return;
 	}
 
-	NiMatrix33 objRotation;
-
 	NiAVObject* obj;
 	auto loadedState = actor->loadedState;
 
@@ -1028,7 +1026,7 @@ void Thing::update(Actor* actor) {
 		return;
 	}
 
-	objRotation = obj->m_worldTransform.rot;
+	NiMatrix33 objRotation = obj->m_worldTransform.rot;
 
 	if (strcmp(boneName.data, belly.data) == 0 && ActorCollisionsEnabled && thing_bellybulgemultiplier > 0)
 	{
