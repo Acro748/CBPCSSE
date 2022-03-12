@@ -277,6 +277,8 @@ public:
 	NiPoint3 thingDefaultPos;
 	NiMatrix33 thingDefaultRot;
 
+	NiMatrix33 oldNoCollisionRot;
+
 	//Extra variables
 	float lastMaxOffsetY = 0.0f;
 	float lastMaxOffsetZ = 0.0f;

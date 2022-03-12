@@ -483,8 +483,11 @@ void updateActors()
 
 		auto objIt = actors.find(actorEntries[u].id);
 		if (objIt != actors.end())
-		{				
-			UpdateColliderPositions(objIt->second.actorColliders, actorEntries[u].actor);
+		{	
+			if (actorEntries[u].actor != nullptr)
+				UpdateColliderPositions(objIt->second.actorColliders, actorEntries[u].actor);
+			else
+				continue;
 
 			for (auto &collider : objIt->second.actorColliders)
 			{
@@ -517,7 +520,6 @@ void updateActors()
 							partitions[hashIdList[m]].partitionCollisions.emplace_back(collider.second);
 						}
 					}
-					
 					colliderCapsuleCount++;
 				}
 				#ifdef RUNTIME_VR_VERSION_1_4_15

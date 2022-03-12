@@ -289,9 +289,6 @@ bool CheckPelvisArmor(Actor* actor)
 
 void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, Actor* actor)
 {
-	if (!actor || !actor->loadedState || !actor->loadedState->node)
-		return;
-
 	for (auto &collider : colliderList)
 	{
 		if (!collider.second.CollisionObject)
@@ -299,8 +296,9 @@ void UpdateColliderPositions(std::unordered_map<std::string, Collision> &collide
 
 		NiPoint3 VirtualOffset = emptyPoint;
 		
-		if (NodeCollisionSync.find(GetActorNodeString(actor, collider.second.CollisionObject->m_name)) != NodeCollisionSync.end())
-			VirtualOffset = collider.second.CollisionObject->m_parent->m_worldTransform.rot * NodeCollisionSync[GetActorNodeString(actor, collider.second.CollisionObject->m_name)];
+		if (actor != nullptr)
+			if (NodeCollisionSync.find(GetActorNodeString(actor, collider.second.CollisionObject->m_name)) != NodeCollisionSync.end())
+				VirtualOffset = collider.second.CollisionObject->m_parent->m_worldTransform.rot * NodeCollisionSync[GetActorNodeString(actor, collider.second.CollisionObject->m_name)];
 
 		for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
 		{

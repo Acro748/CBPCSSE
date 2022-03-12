@@ -30,9 +30,9 @@ public:
 
 	NiPoint3 lastColliderPosition = emptyPoint;
 		
-	bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule> &thingCollisionCapsules, std::vector<Capsule> &collisionCapsules, bool maybe, float ground);
+	bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule> &thingCollisionCapsules, std::vector<Capsule> &collisionCapsules, bool maybe, float timeMultiplier);
 	
-	NiPoint3 CheckCollision(bool &isItColliding, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, float timeTick, long deltaT, bool maybe, float ground);
+	NiPoint3 CheckCollision(bool &isItColliding, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, float timeMultiplier, bool maybe);
 
 	NiPoint3 CheckPelvisCollision(std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules);
 	std::vector<Sphere> collisionSpheres;

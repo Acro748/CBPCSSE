@@ -105,6 +105,8 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 		{
 			thingDefaultRot = rotMap->second;
 		}
+
+		oldNoCollisionRot.SetEulerAngles(0.0f, 0.0f, 0.0f);
 	}
 
 	skipFramesCount = collisionSkipFrames;
@@ -1026,7 +1028,7 @@ void Thing::update(Actor* actor) {
 		return;
 	}
 
-	NiMatrix33 objRotation = obj->m_worldTransform.rot;
+	NiMatrix33 objRotation = obj->m_parent->m_worldTransform.rot * oldNoCollisionRot;
 
 	if (strcmp(boneName.data, belly.data) == 0 && ActorCollisionsEnabled && thing_bellybulgemultiplier > 0)
 	{
@@ -1246,25 +1248,6 @@ void Thing::update(Actor* actor) {
 
 	if (collisionsOn && ActorCollisionsEnabled)
 	{
-		float groundPos = -10000.0f;
-		if (GroundCollisionEnabled)
-		{
-			NiAVObject* groundobj;
-			groundobj = loadedState->node->GetObjectByName(&GroundReferenceBone.data);
-			if (groundobj)
-			{
-				auto groundWPos = groundobj->m_worldTransform.pos;
-				groundPos = groundWPos.z; //Get ground by NPC Root [Root] node
-			}
-
-			NiAVObject* highheelobj;
-			highheelobj = loadedState->node->GetObjectByName(&highheel.data);
-			if (highheelobj)
-			{
-				groundPos = groundPos - highheelobj->m_localTransform.pos.z; //Get highheel offset by NPC node
-			}
-		}
-
 		//LOG("Before Maybe Collision Stuff Start");
 		auto maybeldiff = ldiff;
 		maybeldiff.x = maybeldiff.x * varLinearX;
@@ -1344,26 +1327,47 @@ void Thing::update(Actor* actor) {
 
 					if (!CompareNiPoints(lastcollisionVector, collisionVector))
 					{
+						auto maybeIdiffcol = invRot * collisionVector;
+
+						auto mayberdiffcolXnew = (maybeIdiffcol * collisionMultiplerRot) * varRotationalXnew;
+						auto mayberdiffcolYnew = (maybeIdiffcol * collisionMultiplerRot) * varRotationalYnew;
+						auto mayberdiffcolZnew = (maybeIdiffcol * collisionMultiplerRot) * varRotationalZnew;
+
+						mayberdiffcolXnew.x *= linearXrotationX;
+						mayberdiffcolXnew.y *= linearYrotationX;
+						mayberdiffcolXnew.z *= linearZrotationX;
+
+						mayberdiffcolYnew.x *= linearXrotationY;
+						mayberdiffcolYnew.y *= linearYrotationY;
+						mayberdiffcolYnew.z *= linearZrotationY;
+
+						mayberdiffcolZnew.x *= linearXrotationZ;
+						mayberdiffcolZnew.y *= linearYrotationZ;
+						mayberdiffcolZnew.z *= linearZrotationZ;
+
+						NiMatrix33 maybenewcolRot;
+						maybenewcolRot.SetEulerAngles(mayberdiffcolYnew.x + mayberdiffcolYnew.y + mayberdiffcolYnew.z, mayberdiffcolZnew.x + mayberdiffcolZnew.y + mayberdiffcolZnew.z, mayberdiffcolXnew.x + mayberdiffcolXnew.y + mayberdiffcolXnew.z);
+
 						for (int l = 0; l < thingCollisionSpheres.size(); l++)
 						{
-							thingCollisionSpheres[l].worldPos = (maybePos + objRotation * thingCollisionSpheres[l].offset100) + collisionVector;
+							thingCollisionSpheres[l].worldPos = (maybePos + (objRotation * maybenewcolRot) * thingCollisionSpheres[l].offset100) + collisionVector;
 						}
 
 						for (int m = 0; m < thingCollisionCapsules.size(); m++)
 						{
-							thingCollisionCapsules[m].End1_worldPos = (maybePos + objRotation * thingCollisionCapsules[m].End1_offset100) + collisionVector;
-							thingCollisionCapsules[m].End2_worldPos = (maybePos + objRotation * thingCollisionCapsules[m].End2_offset100) + collisionVector;
+							thingCollisionCapsules[m].End1_worldPos = (maybePos + (objRotation * maybenewcolRot) * thingCollisionCapsules[m].End1_offset100) + collisionVector;
+							thingCollisionCapsules[m].End2_worldPos = (maybePos + (objRotation * maybenewcolRot) * thingCollisionCapsules[m].End2_offset100) + collisionVector;
 						}
 					}
 					lastcollisionVector = collisionVector;
 					
 					bool colliding = false;
-					collisionDiff = partitions[id].partitionCollisions[i].CheckCollision(colliding, thingCollisionSpheres, thingCollisionCapsules, timeTick, originalDeltaT, false, groundPos);
+					collisionDiff = partitions[id].partitionCollisions[i].CheckCollision(colliding, thingCollisionSpheres, thingCollisionCapsules, timeMultiplier, false);
 					if (colliding)
 					{
 						velocity *= collisionFriction;
 						maybeNot = true;
-						collisionVector = collisionVector + collisionDiff;
+						collisionVector = collisionVector + (collisionDiff * collisionPenetration);
 						NiPoint3 IcollisionVector = invRot * collisionVector;
 						IcollisionVector.x = clamp(IcollisionVector.x, collisionXminOffset, collisionXmaxOffset);
 						IcollisionVector.y = clamp(IcollisionVector.y, collisionYminOffset, collisionYmaxOffset);
@@ -1376,10 +1380,94 @@ void Thing::update(Actor* actor) {
 			}
 		}
 
-		if (maybeNot)
+		//ground collision	
+		if (GroundCollisionEnabled)
 		{
-			collisionVector = collisionVector * collisionPenetration;
-			IsThereCollision = true;
+			float groundPos = -10000.0f;
+
+			NiAVObject* groundobj;
+			groundobj = loadedState->node->GetObjectByName(&GroundReferenceBone.data);
+			if (groundobj)
+			{
+				groundPos = groundobj->m_worldTransform.pos.z; //Get ground by NPC Root [Root] node
+			}
+
+			NiAVObject* highheelobj;
+			highheelobj = loadedState->node->GetObjectByName(&highheel.data);
+			if (highheelobj)
+			{
+				groundPos = groundPos - highheelobj->m_localTransform.pos.z; //Get highheel offset by NPC node
+			}
+
+			float bottomPos = groundPos;
+			float bottomRadius = 0.0f;
+
+			auto maybeIdiffcol = invRot * collisionVector;
+
+			auto mayberdiffcolXnew = (maybeIdiffcol * collisionMultiplerRot) * varRotationalXnew;
+			auto mayberdiffcolYnew = (maybeIdiffcol * collisionMultiplerRot) * varRotationalYnew;
+			auto mayberdiffcolZnew = (maybeIdiffcol * collisionMultiplerRot) * varRotationalZnew;
+
+			mayberdiffcolXnew.x *= linearXrotationX;
+			mayberdiffcolXnew.y *= linearYrotationX;
+			mayberdiffcolXnew.z *= linearZrotationX;
+
+			mayberdiffcolYnew.x *= linearXrotationY;
+			mayberdiffcolYnew.y *= linearYrotationY;
+			mayberdiffcolYnew.z *= linearZrotationY;
+
+			mayberdiffcolZnew.x *= linearXrotationZ;
+			mayberdiffcolZnew.y *= linearYrotationZ;
+			mayberdiffcolZnew.z *= linearZrotationZ;
+
+			NiMatrix33 maybenewcolRot;
+			maybenewcolRot.SetEulerAngles(mayberdiffcolYnew.x + mayberdiffcolYnew.y + mayberdiffcolYnew.z, mayberdiffcolZnew.x + mayberdiffcolZnew.y + mayberdiffcolZnew.z, mayberdiffcolXnew.x + mayberdiffcolXnew.y + mayberdiffcolXnew.z);
+
+			for (int l = 0; l < thingCollisionSpheres.size(); l++)
+			{
+				thingCollisionSpheres[l].worldPos = (maybePos + (objRotation * maybenewcolRot) * thingCollisionSpheres[l].offset100) + collisionVector;
+				if (thingCollisionSpheres[l].worldPos.z - thingCollisionSpheres[l].radius100 < bottomPos - bottomRadius)
+				{
+					bottomPos = thingCollisionSpheres[l].worldPos.z;
+					bottomRadius = thingCollisionSpheres[l].radius100;
+				}
+			}
+
+			for (int m = 0; m < thingCollisionCapsules.size(); m++)
+			{
+				thingCollisionCapsules[m].End1_worldPos = (maybePos + (objRotation * maybenewcolRot) * thingCollisionCapsules[m].End1_offset100) + collisionVector;
+				thingCollisionCapsules[m].End2_worldPos = (maybePos + (objRotation * maybenewcolRot) * thingCollisionCapsules[m].End2_offset100) + collisionVector;
+
+				if (thingCollisionCapsules[m].End1_worldPos.z - thingCollisionCapsules[m].End1_radius100 < thingCollisionCapsules[m].End2_worldPos.z - thingCollisionCapsules[m].End2_radius100)
+				{
+					if (thingCollisionCapsules[m].End1_worldPos.z - thingCollisionCapsules[m].End1_radius100 < bottomPos - bottomRadius)
+					{
+						bottomPos = thingCollisionCapsules[m].End1_worldPos.z;
+						bottomRadius = thingCollisionCapsules[m].End1_radius100;
+					}
+				}
+				else
+				{
+					if (thingCollisionCapsules[m].End2_worldPos.z - thingCollisionCapsules[m].End2_radius100 < bottomPos - bottomRadius)
+					{
+						bottomPos = thingCollisionCapsules[m].End2_worldPos.z;
+						bottomRadius = thingCollisionCapsules[m].End2_radius100;
+					}
+				}
+			}
+
+			if (bottomPos - bottomRadius < groundPos)
+			{
+				maybeNot = true;
+
+				float Scalar = groundPos - (bottomPos - bottomRadius);
+
+				if (Scalar > bottomRadius)
+					Scalar = bottomRadius;
+
+				NiPoint3 groundCollisionVector = NiPoint3(0, 0, Scalar);
+				collisionVector = collisionVector + (groundCollisionVector * collisionPenetration);
+			}
 		}
 
 		//LOG("After Maybe Collision Stuff End");
@@ -1419,9 +1507,13 @@ void Thing::update(Actor* actor) {
 	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (ldiff.y * varLinearY) + maybeIdiffcol.y;
 	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (ldiff.z * varLinearZ) + maybeIdiffcol.z;
 
-	auto rdiffXnew = (ldiff + (Idiffcol * collisionMultiplerRot)) * (varRotationalXnew);
-	auto rdiffYnew = (ldiff + (Idiffcol * collisionMultiplerRot)) * (varRotationalYnew);
-	auto rdiffZnew = (ldiff + (Idiffcol * collisionMultiplerRot)) * (varRotationalZnew);
+	auto rdiffXnew = ldiff * varRotationalXnew;
+	auto rdiffYnew = ldiff * varRotationalYnew;
+	auto rdiffZnew = ldiff * varRotationalZnew;
+
+	auto rcoldiffXnew = Idiffcol * collisionMultipler * varRotationalXnew;
+	auto rcoldiffYnew = Idiffcol * collisionMultipler * varRotationalYnew;
+	auto rcoldiffZnew = Idiffcol * collisionMultipler * varRotationalZnew;
 
 	rdiffXnew.x *= linearXrotationX;
 	rdiffXnew.y *= linearYrotationX;
@@ -1434,11 +1526,27 @@ void Thing::update(Actor* actor) {
 	rdiffZnew.x *= linearXrotationZ;
 	rdiffZnew.y *= linearYrotationZ;
 	rdiffZnew.z *= linearZrotationZ;
+	
+	rcoldiffXnew.x *= linearXrotationX;
+	rcoldiffXnew.y *= linearYrotationX;
+	rcoldiffXnew.z *= linearZrotationX;
 
-	NiMatrix33 newRot;
+	rcoldiffYnew.x *= linearXrotationY;
+	rcoldiffYnew.y *= linearYrotationY;
+	rcoldiffYnew.z *= linearZrotationY;
+
+	rcoldiffZnew.x *= linearXrotationZ;
+	rcoldiffZnew.y *= linearYrotationZ;
+	rcoldiffZnew.z *= linearZrotationZ;
+
+	NiMatrix33 newRot, newcolRot;
 	newRot.SetEulerAngles(rdiffYnew.x + rdiffYnew.y + rdiffYnew.z, rdiffZnew.x + rdiffZnew.y + rdiffZnew.z, rdiffXnew.x + rdiffXnew.y + rdiffXnew.z);
+	newcolRot.SetEulerAngles(rcoldiffYnew.x + rcoldiffYnew.y + rcoldiffYnew.z, rcoldiffZnew.x + rcoldiffZnew.y + rcoldiffZnew.z, rcoldiffXnew.x + rcoldiffXnew.y + rcoldiffXnew.z);
 		
-	obj->m_localTransform.rot = thingDefaultRot * newRot;
+	//Like in checking the linear collision, Rot only considers rotation from bounce
+	oldNoCollisionRot = thingDefaultRot * newRot;
+
+	obj->m_localTransform.rot = thingDefaultRot * newRot * newcolRot;
 
 	RefreshNode(obj);
 
