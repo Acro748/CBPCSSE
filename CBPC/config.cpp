@@ -82,12 +82,12 @@ int useParallelProcessing = 0;
 int fpsCorrectionEnabled = 0;
 
 std::vector<std::string> noJitterFixNodesList = {
-"NPC Genitals01[Gen01]",
-"NPC Genitals02[Gen02]",
-"NPC Genitals03[Gen03]",
-"NPC Genitals04[Gen04]",
-"NPC Genitals05[Gen05]",
-"NPC Genitals06[Gen06]"
+"NPC Genitals01 [Gen01]",
+"NPC Genitals02 [Gen02]",
+"NPC Genitals03 [Gen03]",
+"NPC Genitals04 [Gen04]",
+"NPC Genitals05 [Gen05]",
+"NPC Genitals06 [Gen06]"
 };
 
 
@@ -481,6 +481,13 @@ void loadConfig() {
 			config[it.second]["linearZrotationY"] = 0.0f;
 			config[it.second]["linearZrotationZ"] = 0.0f;
 			config[it.second]["timeStep"] = 1.0f;
+			config[it.second]["linearXspreadforceY"] = 0.0f;
+			config[it.second]["linearXspreadforceZ"] = 0.0f;
+			config[it.second]["linearYspreadforceX"] = 0.0f;
+			config[it.second]["linearYspreadforceZ"] = 0.0f;
+			config[it.second]["linearZspreadforceX"] = 0.0f;
+			config[it.second]["linearZspreadforceY"] = 0.0f;
+			config[it.second]["forceMultipler"] = 1.0f;
 			config[it.second]["gravityInvertedCorrection"] = 0.0f;
 			config[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
 			config[it.second]["gravityInvertedCorrectionEnd"] = 0.0f;
@@ -494,6 +501,7 @@ void loadConfig() {
 			config[it.second]["collisionPenetration"] = 0.0f;
 			config[it.second]["collisionMultipler"] = 1.0f;
 			config[it.second]["collisionMultiplerRot"] = 1.0f;
+			config[it.second]["collisionElastic"] = 0.0f;
 			config[it.second]["collisionXmaxoffset"] = 100.0f;
 			config[it.second]["collisionXminoffset"] = -100.0f;
 			config[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -535,6 +543,13 @@ void loadConfig() {
 			config0weight[it.second]["linearZrotationY"] = 0.0f;
 			config0weight[it.second]["linearZrotationZ"] = 0.0f;
 			config0weight[it.second]["timeStep"] = 1.0f;
+			config0weight[it.second]["linearXspreadforceY"] = 0.0f;
+			config0weight[it.second]["linearXspreadforceZ"] = 0.0f;
+			config0weight[it.second]["linearYspreadforceX"] = 0.0f;
+			config0weight[it.second]["linearYspreadforceZ"] = 0.0f;
+			config0weight[it.second]["linearZspreadforceX"] = 0.0f;
+			config0weight[it.second]["linearZspreadforceY"] = 0.0f;
+			config0weight[it.second]["forceMultipler"] = 1.0f;
 			config0weight[it.second]["gravityInvertedCorrection"] = 0.0f;
 			config0weight[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
 			config0weight[it.second]["gravityInvertedCorrectionEnd"] = 0.0f;
@@ -548,6 +563,7 @@ void loadConfig() {
 			config0weight[it.second]["collisionPenetration"] = 0.0f;
 			config0weight[it.second]["collisionMultipler"] = 1.0f;
 			config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
+			config0weight[it.second]["collisionElastic"] = 0.0f;
 			config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
 			config0weight[it.second]["collisionXminoffset"] = -100.0f;
 			config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -647,6 +663,13 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["linearZrotationY"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearZrotationZ"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["timeStep"] = 1.0f;
+											newNPCBounceConfig.config[it.second]["linearXspreadforceY"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["linearXspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["linearYspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["linearYspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["linearZspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["linearZspreadforceY"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["forceMultipler"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["gravityInvertedCorrection"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityInvertedCorrectionEnd"] = 0.0f;
@@ -660,6 +683,7 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["collisionPenetration"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["collisionMultipler"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["collisionMultiplerRot"] = 1.0f;
+											newNPCBounceConfig.config[it.second]["collisionElastic"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["collisionXmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config[it.second]["collisionXminoffset"] = -100.0f;
 											newNPCBounceConfig.config[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -701,6 +725,13 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["linearZrotationY"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearZrotationZ"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["timeStep"] = 1.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearXspreadforceY"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearXspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearYspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearYspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearZspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["linearZspreadforceY"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["forceMultipler"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityInvertedCorrection"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityInvertedCorrectionEnd"] = 0.0f;
@@ -714,6 +745,7 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["collisionPenetration"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionMultipler"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionElastic"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionXminoffset"] = -100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionYmaxoffset"] = 100.0f;

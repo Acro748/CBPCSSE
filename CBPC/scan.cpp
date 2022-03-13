@@ -483,11 +483,11 @@ void updateActors()
 
 		auto objIt = actors.find(actorEntries[u].id);
 		if (objIt != actors.end())
-		{	
-			if (actorEntries[u].actor != nullptr)
-				UpdateColliderPositions(objIt->second.actorColliders, actorEntries[u].actor);
-			else
+		{				
+			if (actorEntries[u].actor == nullptr || actorEntries[u].actor->loadedState == nullptr)
 				continue;
+
+			UpdateColliderPositions(objIt->second.actorColliders, actorEntries[u].actor);
 
 			for (auto &collider : objIt->second.actorColliders)
 			{

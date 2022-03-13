@@ -63,6 +63,15 @@ public:
 	float linearZrotationZ = 0.0f;
 	float timeStep = 1.0f;
 
+	float linearXspreadforceY = 0.0f;
+	float linearXspreadforceZ = 0.0f;
+	float linearYspreadforceX = 0.0f;
+	float linearYspreadforceZ = 0.0f;
+	float linearZspreadforceX = 0.0f;
+	float linearZspreadforceY = 0.0f;
+
+	float forceMultipler = 1.0f;
+
 	float gravityInvertedCorrection = 0.0f;
 	float gravityInvertedCorrectionStart = 0.0f;
 	float gravityInvertedCorrectionEnd = 0.0f;
@@ -79,6 +88,8 @@ public:
 	float collisionPenetration = 1.0f;
 	float collisionMultipler = 1.0f;
 	float collisionMultiplerRot = 1.0f;
+
+	bool collisionElastic = false;
 
 	float collisionXmaxOffset = 100.0f;
 	float collisionXminOffset = -100.0f;
@@ -123,6 +134,15 @@ public:
 	float linearZrotationZ_100 = 0.0f;
 	float timeStep_100 = 1.0f;
 
+	float linearXspreadforceY_100 = 0.0f;
+	float linearXspreadforceZ_100 = 0.0f;
+	float linearYspreadforceX_100 = 0.0f;
+	float linearYspreadforceZ_100 = 0.0f;
+	float linearZspreadforceX_100 = 0.0f;
+	float linearZspreadforceY_100 = 0.0f;
+
+	float forceMultipler_100 = 1.0f;
+
 	float gravityInvertedCorrection_100 = 0.0f;
 	float gravityInvertedCorrectionStart_100 = 0.0f;
 	float gravityInvertedCorrectionEnd_100 = 0.0f;
@@ -139,6 +159,8 @@ public:
 	float collisionPenetration_100 = 1.0f;
 	float collisionMultipler_100 = 1.0f;
 	float collisionMultiplerRot_100 = 1.0f;
+
+	float collisionElastic_100 = 0.0f;
 
 	float collisionXmaxOffset_100 = 100.0f;
 	float collisionXminOffset_100 = -100.0f;
@@ -183,6 +205,15 @@ public:
 	float linearZrotationZ_0 = 0.0f;
 	float timeStep_0 = 1.0f;
 
+	float linearXspreadforceY_0 = 0.0f;
+	float linearXspreadforceZ_0 = 0.0f;
+	float linearYspreadforceX_0 = 0.0f;
+	float linearYspreadforceZ_0 = 0.0f;
+	float linearZspreadforceX_0 = 0.0f;
+	float linearZspreadforceY_0 = 0.0f;
+
+	float forceMultipler_0 = 1.0f;
+
 	float gravityInvertedCorrection_0 = 0.0f;
 	float gravityInvertedCorrectionStart_0 = 0.0f;
 	float gravityInvertedCorrectionEnd_0 = 0.0f;
@@ -199,6 +230,8 @@ public:
 	float collisionPenetration_0 = 1.0f;
 	float collisionMultipler_0 = 1.0f;
 	float collisionMultiplerRot_0 = 1.0f;
+
+	float collisionElastic_0 = 1.0f;
 
 	float collisionXmaxOffset_0 = 100.0f;
 	float collisionXminOffset_0 = -100.0f;
@@ -261,8 +294,8 @@ public:
 	std::vector<Collision> ownColliders;
 
 
-	std::vector<Sphere> CreateThingCollisionSpheres(Actor* actor, std::string nodeName, float nodescale);
-	std::vector<Capsule> CreateThingCollisionCapsules(Actor * actor, std::string nodeName, float nodescale);
+	std::vector<Sphere> CreateThingCollisionSpheres(Actor* actor, std::string nodeName);
+	std::vector<Capsule> CreateThingCollisionCapsules(Actor * actor, std::string nodeName);
 
 	float movementMultiplier = 0.8f;
 
@@ -277,7 +310,10 @@ public:
 	NiPoint3 thingDefaultPos;
 	NiMatrix33 thingDefaultRot;
 
-	NiMatrix33 oldNoCollisionRot;
+	NiMatrix33 oldLocalRot;
+
+	float nodeScale = 1.0f;
+	float ScaleMult = 1.0f;
 
 	//Extra variables
 	float lastMaxOffsetY = 0.0f;
