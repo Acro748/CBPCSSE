@@ -1215,6 +1215,18 @@ void Thing::update(Actor* actor) {
 			}
 		}
 	}
+	else //other nodes are based on parent node
+	{
+		//Get the orientation (here the Z element of the rotation matrix (1.0 when standing up, -1.0 when upside down))			
+		float gravityRatio = (obj->m_parent->m_worldTransform.rot.data[2][2] + 1.0f) * 0.5f;
+
+		//Remap the value from 0.0 => 1.0 to user defined values and clamps it
+		gravityRatio = remap(gravityRatio, gravityInvertedCorrectionStart, gravityInvertedCorrectionEnd, 0.0, 1.0);
+		gravityRatio = clamp(gravityRatio, 0.0f, 1.0f);
+
+		//Calculate the resulting gravity
+		varGravityCorrection = (gravityRatio * gravityCorrection) + ((1.0 - gravityRatio) * gravityInvertedCorrection);
+	}
 
 	//Offset to move Center of Mass make rotaional motion more significant  
 	NiPoint3 diff = (target - oldWorldPos) * forceMultipler;
