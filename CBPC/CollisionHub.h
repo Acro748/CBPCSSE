@@ -12,9 +12,9 @@ void UpdatePlayerColliders(std::unordered_map<std::string, Collision> &actorColl
 
 extern long callCount;
 
-void CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collision> &actorCollidersList, bool &GroundCollisionEnabled);
+bool CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collision> &actorCollidersList);
 
-void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, Actor* actor);
+void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, UInt32 formid);
 
 
 struct Partition

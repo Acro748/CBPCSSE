@@ -2722,6 +2722,11 @@ std::string GetActorNodeString(Actor* actor, BSFixedString nodeName)
 	return num2hex(actor->formID, 8) + ":" + nodeName.c_str();
 }
 
+std::string GetFormIdNodeString(UInt32 id, BSFixedString nodeName)
+{
+	return num2hex(id, 8) + ":" + nodeName.c_str();
+}
+
 void StartPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName)
 {
 	if (actor != nullptr)

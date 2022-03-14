@@ -219,7 +219,7 @@ extern "C"
 		for (ObScriptCommand* iter = g_firstConsoleCommand; iter->opcode < kObScript_NumConsoleCommands +
 			kObScript_ConsoleOpBase; ++iter)
 		{
-			if (!strcmp(iter->longName, "ShowRenderPasses"))
+			if (!strcmp(iter->longName, "ShowPivot"))
 			{
 				hijackedCommand = iter;
 				break;
@@ -243,6 +243,12 @@ extern "C"
 			cmd.execute = Debug_Execute;
 			cmd.flags = 0;
 			SafeWriteBuf(reinterpret_cast<uintptr_t>(hijackedCommand), &cmd, sizeof(cmd));
+
+			LOG_ERR("Console interface Loaded");
+		}
+		else
+		{
+			LOG_ERR("Couldn't get Console interface");
 		}
 
 		g_papyrus = (SKSEPapyrusInterface*)skse->QueryInterface(kInterface_Papyrus);

@@ -373,6 +373,7 @@ bool ConditionCheck(Actor* actor, ConditionItem& condition);
 bool CheckActorForConditions(Actor* actor, Conditions& conditions);
 
 std::string GetActorNodeString(Actor* actor, BSFixedString nodeName);
+std::string GetFormIdNodeString(UInt32 id, BSFixedString nodeName);
 
 
 bool RegisterFuncs(VMClassRegistry* registry);

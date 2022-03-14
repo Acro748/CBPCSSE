@@ -316,6 +316,8 @@ public:
 	float ScaleMult = 1.0f;
 
 	//Extra variables
+	NiPoint3 collisionBuffer;
+
 	float lastMaxOffsetY = 0.0f;
 	float lastMaxOffsetZ = 0.0f;
 	int bellyBulgeCountDown = 0;

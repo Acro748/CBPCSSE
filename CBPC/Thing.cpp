@@ -106,6 +106,7 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 		}
 
 		oldLocalRot.SetEulerAngles(0.0f, 0.0f, 0.0f);
+		collisionBuffer = emptyPoint;
 	}
 
 	skipFramesCount = collisionSkipFrames;
@@ -1072,6 +1073,9 @@ void Thing::update(Actor* actor) {
 		}
 	}
 
+	if (!obj->m_parent)
+		return;
+
 	NiMatrix33 objRotation = obj->m_parent->m_worldTransform.rot * oldLocalRot;
 
 	bool IsThereCollision = false;
@@ -1526,17 +1530,23 @@ void Thing::update(Actor* actor) {
 	auto ldiffcol = invRot * collisionVector;
 	auto ldiffGcol = invRot * GroundCollisionVector;
 
+	//add collision vector buffer of one frame to some reduce jitter and add softness by collision
+	auto ldiffcoltmp = ldiffcol;
+	ldiffcol = (ldiffcol + collisionBuffer) * 0.5;
+	collisionBuffer = ldiffcoltmp;
+
+
 	//Add more collision force for weak bone weights but virtually for maintain collision by node position
 	NiPoint3 maybeIdiffcol = emptyPoint;
 
 	if (maybeNot)
 	{
-		maybeIdiffcol = (ldiffcol + ldiffGcol) * collisionMultipler;
+		maybeIdiffcol = ldiffcol * collisionMultipler;
 		NiPoint3 CollisionSyncOffset = ldiffcol - maybeIdiffcol;
-		NodeCollisionSync[GetActorNodeString(actor, boneName)] = CollisionSyncOffset;
+		NodeCollisionSync[GetFormIdNodeString(actor->formID, boneName)] = obj->m_parent->m_worldTransform.rot * CollisionSyncOffset;
 	}
 	else
-		NodeCollisionSync[GetActorNodeString(actor, boneName)] = emptyPoint;
+		NodeCollisionSync[GetFormIdNodeString(actor->formID, boneName)] = emptyPoint;
 	
 	//If put the result of collision into the next frame, the quality of collision and movement will improve, but there may be some jitter
 	//so recommended to use only for some parts
@@ -1545,9 +1555,9 @@ void Thing::update(Actor* actor) {
 	else
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol)) + target;
 
-	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (ldiff.x * varLinearX) + maybeIdiffcol.x;
-	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (ldiff.y * varLinearY) + maybeIdiffcol.y;
-	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (ldiff.z * varLinearZ) + maybeIdiffcol.z;
+	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (ldiff.x * varLinearX) + maybeIdiffcol.x + ldiffGcol.x;
+	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (ldiff.y * varLinearY) + maybeIdiffcol.y + ldiffGcol.y;
+	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (ldiff.z * varLinearZ) + maybeIdiffcol.z + ldiffGcol.z;
 
 	auto rdiffXnew = ldiff * varRotationalXnew;
 	auto rdiffYnew = ldiff * varRotationalYnew;
@@ -1583,8 +1593,8 @@ void Thing::update(Actor* actor) {
 
 	NiMatrix33 newRot, newcolRot;
 	newRot.SetEulerAngles(rdiffYnew.x + rdiffYnew.y + rdiffYnew.z, rdiffZnew.x + rdiffZnew.y + rdiffZnew.z, rdiffXnew.x + rdiffXnew.y + rdiffXnew.z);
-	newcolRot.SetEulerAngles(rcoldiffYnew.x + rcoldiffYnew.y + rcoldiffYnew.z, rcoldiffZnew.x + rcoldiffZnew.y + rcoldiffZnew.z, rcoldiffXnew.x + rcoldiffXnew.y + rcoldiffXnew.z);
-		
+	//newcolRot.SetEulerAngles(rcoldiffYnew.x + rcoldiffYnew.y + rcoldiffYnew.z, rcoldiffZnew.x + rcoldiffZnew.y + rcoldiffZnew.z, rcoldiffXnew.x + rcoldiffXnew.y + rcoldiffXnew.z);
+	newcolRot.SetEulerAngles(0, 0, 0);
 	//If put the result of collision into the next frame, the quality of collision and movement will improve, but there may be some jitter
 	//so recommended to use only for some parts
 	if (!collisionElastic)

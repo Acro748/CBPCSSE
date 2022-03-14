@@ -204,8 +204,9 @@ void UpdatePlayerColliders(std::unordered_map<std::string, Collision> &actorColl
 }
 #endif
 
-void CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collision> &actorCollidersList, bool &GroundCollisionEnabled)
+bool CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collision> &actorCollidersList)
 {
+	bool GroundCollisionEnabled = false;
 	NiNode* mostInterestingRoot;
 	
 	#ifdef RUNTIME_VR_VERSION_1_4_15
@@ -218,7 +219,7 @@ void CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collisi
 		if (rootNodeFP != nullptr)
 			mostInterestingRoot = rootNodeFP;
 		else
-			return;
+			return false;
 	}
 	else
 	{
@@ -228,7 +229,7 @@ void CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collisi
 			mostInterestingRoot = actor->loadedState->node;
 		}
 		else
-			return;
+			return false;
 #ifdef RUNTIME_VR_VERSION_1_4_15
 	}
 #endif
@@ -279,6 +280,7 @@ void CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collisi
 			actorCollidersList.emplace(ColliderNodesListPtr->at(j).NodeName, newCol);
 		}
 	}
+	return GroundCollisionEnabled;
 }
 
 //Unfortunately this doesn't work.
@@ -287,18 +289,17 @@ bool CheckPelvisArmor(Actor* actor)
 	return papyrusActor::GetWornForm(actor, 49) != NULL && papyrusActor::GetWornForm(actor, 52) != NULL && papyrusActor::GetWornForm(actor, 53) != NULL && papyrusActor::GetWornForm(actor, 54) != NULL && papyrusActor::GetWornForm(actor, 56) != NULL && papyrusActor::GetWornForm(actor, 58) != NULL;
 }
 
-void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, Actor* actor)
+void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, UInt32 formid)
 {
 	for (auto &collider : colliderList)
 	{
-		if (!collider.second.CollisionObject)
+		if (collider.second.CollisionObject == nullptr)
 			continue;
 
 		NiPoint3 VirtualOffset = emptyPoint;
 		
-		if (actor != nullptr)
-			if (NodeCollisionSync.find(GetActorNodeString(actor, collider.second.CollisionObject->m_name)) != NodeCollisionSync.end())
-				VirtualOffset = collider.second.CollisionObject->m_parent->m_worldTransform.rot * NodeCollisionSync[GetActorNodeString(actor, collider.second.CollisionObject->m_name)];
+		if (NodeCollisionSync.find(GetFormIdNodeString(formid, collider.second.CollisionObject->m_name)) != NodeCollisionSync.end())
+			VirtualOffset = NodeCollisionSync[GetFormIdNodeString(formid, collider.second.CollisionObject->m_name)];
 
 		for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
 		{

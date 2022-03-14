@@ -76,7 +76,7 @@ bool SimObj::bind(Actor *actor, bool isMale)
 		}
 		updateConfig(actor);
 			
-		CreateActorColliders(actor, actorColliders, GroundCollisionEnabled);
+		GroundCollisionEnabled = CreateActorColliders(actor, actorColliders);
 
 		#ifdef RUNTIME_VR_VERSION_1_4_15
 		if (actor->formID == 0x14)
