@@ -1,33 +1,33 @@
 #include "Collision.h"
 
-Collision::Collision(NiAVObject* node, std::vector<Sphere> &spheres, std::vector<Capsule> &capsules, float actorWeight)
+Collision::Collision(NiAVObject* node, std::vector<Sphere> &colliderspheres, std::vector<Capsule> &collidercapsules, float actorWeight)
 {
 	CollisionObject = node;
 
 	ColliderWeight = actorWeight;
 	
-	collisionSpheres = spheres;
+	collisionSpheres = colliderspheres;
 	for (int j = 0; j < collisionSpheres.size(); j++)
 	{
-		collisionSpheres[j].offset100 = GetPointFromPercentage(spheres[j].offset0, spheres[j].offset100, ColliderWeight) * node->m_worldTransform.scale;
+		collisionSpheres[j].offset100 = GetPointFromPercentage(colliderspheres[j].offset0, colliderspheres[j].offset100, ColliderWeight) * node->m_worldTransform.scale;
 
-		collisionSpheres[j].radius100 = GetPercentageValue(spheres[j].radius0, spheres[j].radius100, ColliderWeight) * node->m_worldTransform.scale;
+		collisionSpheres[j].radius100 = GetPercentageValue(colliderspheres[j].radius0, colliderspheres[j].radius100, ColliderWeight) * node->m_worldTransform.scale;
 
-		collisionSpheres[j].NodeName = spheres[j].NodeName;
+		collisionSpheres[j].NodeName = colliderspheres[j].NodeName;
 	}
 
-	collisionCapsules = capsules;
+	collisionCapsules = collidercapsules;
 	for (int k = 0; k < collisionCapsules.size(); k++)
 	{
-		collisionCapsules[k].End1_offset100 = GetPointFromPercentage(capsules[k].End1_offset0, capsules[k].End1_offset100, ColliderWeight) * node->m_worldTransform.scale;
+		collisionCapsules[k].End1_offset100 = GetPointFromPercentage(collidercapsules[k].End1_offset0, collidercapsules[k].End1_offset100, ColliderWeight) * node->m_worldTransform.scale;
 		
-		collisionCapsules[k].End1_radius100 = GetPercentageValue(capsules[k].End1_radius0, capsules[k].End1_radius100, ColliderWeight) * node->m_worldTransform.scale;
+		collisionCapsules[k].End1_radius100 = GetPercentageValue(collidercapsules[k].End1_radius0, collidercapsules[k].End1_radius100, ColliderWeight) * node->m_worldTransform.scale;
 	
-		collisionCapsules[k].End2_offset100 = GetPointFromPercentage(capsules[k].End2_offset0, capsules[k].End2_offset100, ColliderWeight) * node->m_worldTransform.scale;
+		collisionCapsules[k].End2_offset100 = GetPointFromPercentage(collidercapsules[k].End2_offset0, collidercapsules[k].End2_offset100, ColliderWeight) * node->m_worldTransform.scale;
 
-		collisionCapsules[k].End2_radius100 = GetPercentageValue(capsules[k].End2_radius0, capsules[k].End2_radius100, ColliderWeight) * node->m_worldTransform.scale;
+		collisionCapsules[k].End2_radius100 = GetPercentageValue(collidercapsules[k].End2_radius0, collidercapsules[k].End2_radius100, ColliderWeight) * node->m_worldTransform.scale;
 
-		collisionCapsules[k].NodeName = capsules[k].NodeName;
+		collisionCapsules[k].NodeName = collidercapsules[k].NodeName;
 	}
 }
 #ifdef RUNTIME_VR_VERSION_1_4_15

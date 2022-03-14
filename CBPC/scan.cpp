@@ -484,7 +484,7 @@ void updateActors()
 		auto objIt = actors.find(actorEntries[u].id);
 		if (objIt != actors.end())
 		{				
-			UpdateColliderPositions(objIt->second.actorColliders, actorEntries[u].id);
+			UpdateColliderPositions(objIt->second.actorColliders, objIt->second.NodeCollisionSync);
 
 			for (auto &collider : objIt->second.actorColliders)
 			{
@@ -663,7 +663,7 @@ void updateActors()
 	}
 	//logger.error("Updating %d entites\n", actorEntries.size());
 
-	if (useParallelProcessing >= 2)
+	if (useParallelProcessing == 2 || useParallelProcessing == 3)
 	{
 		concurrency::parallel_for_each(actorEntries.begin(), actorEntries.end(), [&](const auto& a)
 		{

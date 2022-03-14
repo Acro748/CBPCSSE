@@ -3,8 +3,6 @@
 
 PartitionMap partitions;
 
-std::unordered_map<std::string, NiPoint3> NodeCollisionSync;
-
 
 //debug variable
 long callCount = 0;
@@ -289,17 +287,14 @@ bool CheckPelvisArmor(Actor* actor)
 	return papyrusActor::GetWornForm(actor, 49) != NULL && papyrusActor::GetWornForm(actor, 52) != NULL && papyrusActor::GetWornForm(actor, 53) != NULL && papyrusActor::GetWornForm(actor, 54) != NULL && papyrusActor::GetWornForm(actor, 56) != NULL && papyrusActor::GetWornForm(actor, 58) != NULL;
 }
 
-void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, UInt32 formid)
+void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, std::unordered_map<std::string, NiPoint3>& NodeCollisionSyncList)
 {
 	for (auto &collider : colliderList)
 	{
-		if (collider.second.CollisionObject == nullptr)
-			continue;
-
 		NiPoint3 VirtualOffset = emptyPoint;
 		
-		if (NodeCollisionSync.find(GetFormIdNodeString(formid, collider.second.CollisionObject->m_name)) != NodeCollisionSync.end())
-			VirtualOffset = NodeCollisionSync[GetFormIdNodeString(formid, collider.second.CollisionObject->m_name)];
+		if (NodeCollisionSyncList.find(collider.second.colliderNodeName) != NodeCollisionSyncList.end())
+			VirtualOffset = NodeCollisionSyncList[collider.second.colliderNodeName];
 
 		for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
 		{

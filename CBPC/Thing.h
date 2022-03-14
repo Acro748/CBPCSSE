@@ -23,6 +23,7 @@ class Thing {
 public:
 	bool ActorCollisionsEnabled = true;
 	bool GroundCollisionEnabled = true;
+	bool VirtualCollisionEnabled = false;
 	bool IsBreastBone = false;
 	bool IsLeftBreastBone = false;
 	bool IsRightBreastBone = false;
@@ -317,6 +318,7 @@ public:
 
 	//Extra variables
 	NiPoint3 collisionBuffer;
+	NiPoint3 collisionSync;
 
 	float lastMaxOffsetY = 0.0f;
 	float lastMaxOffsetZ = 0.0f;

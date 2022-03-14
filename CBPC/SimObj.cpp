@@ -103,11 +103,15 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 	if (!bound)
 		return;
 	//logger.error("update\n");
-	if (useParallelProcessing == 1 && !raceSexMenuOpen.load())
+	if ((useParallelProcessing == 1 || useParallelProcessing == 3) && !raceSexMenuOpen.load())
 	{
 		concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
 		{
-			if (ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)] == false)
+			bool isStopPhysics = false;
+			if (ActorNodeStoppedPhysicsMap.find(GetActorNodeString(actor, t.first)) != ActorNodeStoppedPhysicsMap.end())
+				isStopPhysics = ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)];
+
+			if (!isStopPhysics)
 			{
 				t.second.ActorCollisionsEnabled = CollisionsEnabled;
 				t.second.GroundCollisionEnabled = GroundCollisionEnabled;
@@ -118,6 +122,8 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				else
 				{
 					t.second.update(actor);
+					if (t.second.VirtualCollisionEnabled)
+						NodeCollisionSync[t.first] = t.second.collisionSync;
 				}
 			}
 		});
@@ -126,7 +132,11 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 	{
 		for (auto &t : things) 
 		{
-			if (ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)] == false)
+			bool isStopPhysics = false;
+			if (ActorNodeStoppedPhysicsMap.find(GetActorNodeString(actor, t.first)) != ActorNodeStoppedPhysicsMap.end())
+				isStopPhysics = ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)];
+
+			if (!isStopPhysics)
 			{
 				t.second.ActorCollisionsEnabled = CollisionsEnabled;
 				t.second.GroundCollisionEnabled = GroundCollisionEnabled;
@@ -137,6 +147,8 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				else
 				{
 					t.second.update(actor);
+					if (t.second.VirtualCollisionEnabled)
+						NodeCollisionSync[t.first] = t.second.collisionSync;
 				}
 			}
 		}

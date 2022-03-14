@@ -107,6 +107,7 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 
 		oldLocalRot.SetEulerAngles(0.0f, 0.0f, 0.0f);
 		collisionBuffer = emptyPoint;
+		collisionSync = emptyPoint;
 	}
 
 	skipFramesCount = collisionSkipFrames;
@@ -380,6 +381,8 @@ void Thing::updateConfigValues(Actor* actor)
 	collisionFriction = GetPercentageValue(collisionFriction_0, collisionFriction_100, actorWeight);
 	collisionPenetration = GetPercentageValue(collisionPenetration_0, collisionPenetration_100, actorWeight);
 	collisionMultipler = GetPercentageValue(collisionMultipler_0, collisionMultipler_100, actorWeight);
+	if (collisionMultipler >= 1.01f || collisionMultipler <= 0.99f)
+		VirtualCollisionEnabled = true;
 	collisionMultiplerRot = GetPercentageValue(collisionMultiplerRot_0, collisionMultiplerRot_100, actorWeight);
 
 	float collisionReactionValue = GetPercentageValue(collisionElastic_0, collisionElastic_100, actorWeight);
@@ -431,10 +434,15 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearX_100 = centry["linearX"];
 	linearY_100 = centry["linearY"];
 	linearZ_100 = centry["linearZ"];
-	rotationalXnew_100 = centry["rotational"];
-	rotationalXnew_100 = centry["rotationalX"];
-	rotationalYnew_100 = centry["rotationalY"];
-	rotationalZnew_100 = centry["rotationalZ"];
+
+	if (centry.find("rotational") != centry.end())
+		rotationalXnew_100 = centry["rotational"];
+	else
+	{
+		rotationalXnew_100 = centry["rotationalX"];
+		rotationalYnew_100 = centry["rotationalY"];
+		rotationalZnew_100 = centry["rotationalZ"];
+	}
 
 	linearXrotationX_100 = centry["linearXrotationX"];
 	linearXrotationY_100 = centry["linearXrotationY"];
@@ -489,6 +497,7 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		collisionPenetration_100 = 1.0f;
 
 	collisionMultipler_100 = centry["collisionMultipler"];
+
 	collisionMultiplerRot_100 = centry["collisionMultiplerRot"];
 	collisionElastic_100 = centry["collisionElastic"];
 
@@ -534,8 +543,14 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearX_0 = centry0weight["linearX"];
 	linearY_0 = centry0weight["linearY"];
 	linearZ_0 = centry0weight["linearZ"];
-	rotationalXnew_0 = centry0weight["rotational"];
-	rotationalXnew_0 = centry0weight["rotationalX"];
+
+	if (centry0weight.find("rotational") != centry0weight.end())
+		rotationalXnew_0 = centry0weight["rotational"];
+	else
+	{
+		rotationalXnew_0 = centry0weight["rotationalX"];
+	}
+		
 	rotationalYnew_0 = centry0weight["rotationalY"];
 	rotationalZnew_0 = centry0weight["rotationalZ"];
 
@@ -1550,15 +1565,15 @@ void Thing::update(Actor* actor) {
 
 	//Add more collision force for weak bone weights but virtually for maintain collision by node position
 	NiPoint3 maybeIdiffcol = emptyPoint;
+	NiPoint3 CollisionSyncOffset = emptyPoint;
 
 	if (maybeNot)
 	{
 		maybeIdiffcol = ldiffcol * collisionMultipler;
-		NiPoint3 CollisionSyncOffset = ldiffcol - maybeIdiffcol;
-		NodeCollisionSync[GetFormIdNodeString(actor->formID, boneName)] = obj->m_parent->m_worldTransform.rot * CollisionSyncOffset;
+		CollisionSyncOffset = obj->m_parent->m_worldTransform.rot * (ldiffcol - maybeIdiffcol);
 	}
-	else
-		NodeCollisionSync[GetFormIdNodeString(actor->formID, boneName)] = emptyPoint;
+	
+	collisionSync = CollisionSyncOffset;
 	
 	//If put the result of collision into the next frame, the quality of collision and movement will improve, but there may be some jitter
 	//so recommended to use only for some parts

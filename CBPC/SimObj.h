@@ -47,6 +47,8 @@ class SimObj {
 public:
 	std::unordered_map<const char *, Thing> things;
 	std::unordered_map<std::string, Collision> actorColliders;
+	std::unordered_map<std::string, NiPoint3> NodeCollisionSync;
+
 	Actor* ownerActor;
 	float actorDistSqr;
 

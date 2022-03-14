@@ -19,7 +19,7 @@ class Collision
 
 public:
 
-	Collision(NiAVObject* node, std::vector<Sphere> &colliderSpheres, std::vector<Capsule>& capsules, float actorWeight);
+	Collision(NiAVObject* node, std::vector<Sphere> &colliderSpheres, std::vector<Capsule>& collidercapsules, float actorWeight);
 	~Collision();
 
 	float CollidedWeight = 50;
