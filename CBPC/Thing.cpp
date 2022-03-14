@@ -1620,8 +1620,8 @@ void Thing::update(Actor* actor) {
 
 	NiMatrix33 newRot, newcolRot;
 	newRot.SetEulerAngles(rdiffYnew.x + rdiffYnew.y + rdiffYnew.z, rdiffZnew.x + rdiffZnew.y + rdiffZnew.z, rdiffXnew.x + rdiffXnew.y + rdiffXnew.z);
-	//newcolRot.SetEulerAngles(rcoldiffYnew.x + rcoldiffYnew.y + rcoldiffYnew.z, rcoldiffZnew.x + rcoldiffZnew.y + rcoldiffZnew.z, rcoldiffXnew.x + rcoldiffXnew.y + rcoldiffXnew.z);
-	newcolRot.SetEulerAngles(0, 0, 0);
+	newcolRot.SetEulerAngles(rcoldiffYnew.x + rcoldiffYnew.y + rcoldiffYnew.z, rcoldiffZnew.x + rcoldiffZnew.y + rcoldiffZnew.z, rcoldiffXnew.x + rcoldiffXnew.y + rcoldiffXnew.z);
+
 	//If put the result of collision into the next frame, the quality of collision and movement will improve, but there may be some jitter
 	//so recommended to use only for some parts
 	if (!collisionElastic)
