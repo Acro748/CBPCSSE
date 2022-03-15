@@ -255,7 +255,18 @@ void updateActors()
 	if (tuningModeCollision != 0 || consoleCollisionReload.load())
 	{
 		if (consoleCollisionReload.load())
+		{
 			consoleCollisionReload.store(false);
+
+			loadMasterConfig();
+			loadCollisionConfig();
+			loadExtraCollisionConfig();
+
+#ifdef RUNTIME_VR_VERSION_1_4_15
+			LoadWeaponCollisionConfig();
+#endif
+			actors.clear();
+		}
 		else
 		{
 			frameCount++;
@@ -647,29 +658,26 @@ void updateActors()
 	static int count = 0;
 	if ((configReloadCount && count++ > configReloadCount) || consoleConfigReload.load())
 	{
-		if (consoleConfigReload.load())
-			consoleConfigReload.store(false);
-		else
+		consoleConfigReload.store(false);
+		count = 0;
+		loadConfig();
+		for each (auto & a in actorEntries)
 		{
-			count = 0;
-			loadConfig();
-			for each (auto & a in actorEntries)
+			auto objIt = actors.find(a.id);
+			if (objIt == actors.end())
 			{
-				auto objIt = actors.find(a.id);
-				if (objIt == actors.end())
+				//logger.error("missing Sim Object\n");
+			}
+			else
+			{
+				if (a.actor != nullptr && a.actor->loadedState != nullptr)
 				{
-					//logger.error("missing Sim Object\n");
-				}
-				else
-				{
-					if (a.actor != nullptr && a.actor->loadedState != nullptr)
-					{
-						SimObj& obj = objIt->second;
-						obj.updateConfig(a.actor);
-					}
+					SimObj& obj = objIt->second;
+					obj.updateConfig(a.actor);
 				}
 			}
 		}
+
 	}
 	//logger.error("Updating %d entites\n", actorEntries.size());
 
