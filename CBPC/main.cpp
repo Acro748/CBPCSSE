@@ -116,8 +116,10 @@ bool Debug_Execute(const ObScriptParam* paramInfo, ScriptData* scriptData, TESOb
 		Console_Print("Reload CBPC system file");
 		loadSystemConfig();
 		LOG_ERR("Loaded System config");
+		return true;
 	}
-	return true;
+
+	return false;
 }
 
 extern "C"
