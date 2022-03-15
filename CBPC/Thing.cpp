@@ -6,6 +6,29 @@ BSFixedString belly("HDT Belly");
 BSFixedString pelvis("NPC Pelvis [Pelv]");
 BSFixedString highheel("NPC");
 
+//## thing_Refresh_node_lock
+// editing the node update time seems to affect the entire node tree even if without editing entire node tree
+
+//## thing_map_lock
+// Maps are sorted every edit time, so if it is parallel processing then a high probability of overloading
+
+//## thing_SetNode_lock
+// There's nothing problem with editing, but if editing once then all node world positions are updated.
+// so it seems that a high probability of overloading if it is processed by parallel processing.
+
+//## thing_ReadNode_lock
+// It seems that a read error occurs when the GetObjectByName() function is called simultaneously
+
+//## thing_config_lock
+// unordered_map is not thread safety, also just by calling [] then it'll be writing it even if there's not value, so lock is needed
+// but i think call [] for an object that already has a value is some thread safety even if parallel processing
+// so i think it would be okay to remove the lock if can put all the values in the beforehand
+
+//## thing_armorKeyword_lock
+// I didn't check it definitely, but i just locked it because it was a heavy process and it's processing sometimes
+// If necessary, we can make more optimizations later
+
+std::shared_mutex thing_Refresh_node_lock, thing_map_lock, thing_SetNode_lock, thing_ReadNode_lock, thing_config_lock, thing_armorKeyword_lock;
 
 Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	: boneName(name)
@@ -62,6 +85,9 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 		updateThingFirstRun = false;
 
 		auto mypair = std::make_pair(actor->baseForm->formID, name.data);
+
+		if (useParallelProcessing > 0)
+			thing_map_lock.lock();
 		std::map<std::pair<UInt32, const char *>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(mypair);
 
 		if (posMap == thingDefaultPosList.end())
@@ -90,21 +116,20 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 			}
 		}
 		LOG_INFO("%s default pos -> %g %g %g", boneName.data, thingDefaultPos.x, thingDefaultPos.y, thingDefaultPos.z);
-
 		std::map<std::pair<UInt32, const char*>, NiMatrix33>::const_iterator rotMap = thingDefaultRotList.find(mypair);
 
 		if (rotMap == thingDefaultRotList.end())
 		{
 			//Add it to the list
 			thingDefaultRot = obj->m_localTransform.rot;
-
 			thingDefaultRotList[mypair] = thingDefaultRot;
 		}
 		else
 		{
 			thingDefaultRot = rotMap->second;
 		}
-
+		if (useParallelProcessing > 0)
+			thing_map_lock.unlock();
 		oldLocalRot.SetEulerAngles(0.0f, 0.0f, 0.0f);
 		collisionBuffer = emptyPoint;
 		collisionSync = emptyPoint;
@@ -128,7 +153,12 @@ void RefreshNode(NiAVObject* node)
 	NiAVObject::ControllerUpdateContext ctx;
 	ctx.flags = 0;
 	ctx.delta = 0;
+
+	if (useParallelProcessing > 0)
+		thing_Refresh_node_lock.lock();
 	node->UpdateWorldData(&ctx);
+	if (useParallelProcessing > 0)
+		thing_Refresh_node_lock.unlock();
 }
 
 std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::string nodeName)
@@ -402,6 +432,8 @@ void Thing::updateConfigValues(Actor* actor)
 
 void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& centry0weight) {
 	//100 weight
+	if (useParallelProcessing > 0)
+		thing_config_lock.lock();
 	stiffness_100 = centry["stiffness"];
 	stiffness2_100 = centry["stiffness2"];
 	damping_100 = centry["damping"];
@@ -618,7 +650,8 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	collisionZmaxOffset_0 = centry0weight["collisionZmaxoffset"];
 	collisionZminOffset_0 = centry0weight["collisionZminoffset"];
 
-
+	if (useParallelProcessing > 0)
+		thing_config_lock.unlock();
 	updateConfigValues(actor);
 
 	//zOffset = solveQuad(stiffness2, stiffness, -gravityBias);
@@ -673,9 +706,13 @@ void Thing::updatePelvis(Actor *actor)
 		return;
 	}
 
+	if (useParallelProcessing > 0)
+		thing_ReadNode_lock.lock();
 	NiAVObject* leftPusObj = loadedState->node->GetObjectByName(&leftPus.data);
 	NiAVObject* rightPusObj = loadedState->node->GetObjectByName(&rightPus.data);
-		
+	if (useParallelProcessing > 0)
+		thing_ReadNode_lock.unlock();
+
 	if (!leftPusObj || !rightPusObj)
 	{
 		return;
@@ -687,13 +724,14 @@ void Thing::updatePelvis(Actor *actor)
 			updatePussyFirstRun = false;
 			
 			auto leftpair = std::make_pair(actor->baseForm->formID, leftPus.data);
+			if (useParallelProcessing > 0)
+				thing_map_lock.lock();
 			std::map<std::pair<UInt32, const char *>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(leftpair);
 
 			if (posMap == thingDefaultPosList.end())
 			{
 				//Add it to the list
 				leftPussyDefaultPos = leftPusObj->m_localTransform.pos;
-
 				thingDefaultPosList[leftpair] = leftPussyDefaultPos;
 				LOG("Adding %s to default list for %08x -> %g %g %g", leftPus.data, actor->baseForm->formID, leftPussyDefaultPos.x, leftPussyDefaultPos.y, leftPussyDefaultPos.z);
 
@@ -710,7 +748,6 @@ void Thing::updatePelvis(Actor *actor)
 			{
 				//Add it to the list
 				rightPussyDefaultPos = rightPusObj->m_localTransform.pos;
-
 				thingDefaultPosList[rightpair] = rightPussyDefaultPos;
 				LOG("Adding %s to default list for %08x -> %g %g %g", rightPus.data, actor->baseForm->formID, rightPussyDefaultPos.x, rightPussyDefaultPos.y, rightPussyDefaultPos.z);
 
@@ -719,13 +756,25 @@ void Thing::updatePelvis(Actor *actor)
 			{
 				rightPussyDefaultPos = posMap->second;
 			}
-			
+			if (useParallelProcessing > 0)
+				thing_map_lock.unlock();
 			LOG_INFO("Left pussy default pos -> %g %g %g , Right pussy default pos ->  %g %g %g", leftPussyDefaultPos.x, leftPussyDefaultPos.y, leftPussyDefaultPos.z, rightPussyDefaultPos.x, rightPussyDefaultPos.y, rightPussyDefaultPos.z);
 		}
 		
+		//There's nothing problem with editing, but if editing once then all node world positions are updated.
+		//so it seems that a high probability of overloading if it is processed by parallel processing.
+		if (useParallelProcessing > 0)
+			thing_SetNode_lock.lock();
 		leftPusObj->m_localTransform.pos = leftPussyDefaultPos;
+		if (useParallelProcessing > 0)
+			thing_SetNode_lock.unlock();
 
+
+		if (useParallelProcessing > 0)
+			thing_SetNode_lock.lock();
 		rightPusObj->m_localTransform.pos = rightPussyDefaultPos;
+		if (useParallelProcessing > 0)
+			thing_SetNode_lock.unlock();
 	}
 
 	if (!ActorCollisionsEnabled)
@@ -739,7 +788,12 @@ void Thing::updatePelvis(Actor *actor)
 	NiMatrix33 pelvisRotation;
 	NiPoint3 pelvisPosition;
 	
+	if (useParallelProcessing > 0)
+		thing_ReadNode_lock.lock();
 	NiAVObject* pelvisObj = loadedState->node->GetObjectByName(&pelvis.data);
+	if (useParallelProcessing > 0)
+		thing_ReadNode_lock.unlock();
+
 	if (!pelvisObj)
 		return;
 	
@@ -819,10 +873,21 @@ void Thing::updatePelvis(Actor *actor)
 	CalculateDiffVagina(rightVector, opening, false);
 
 	NormalizeNiPoint(leftVector, thing_vaginaOpeningLimit*-1.0f, thing_vaginaOpeningLimit);
+
+	if (useParallelProcessing > 0)
+		thing_SetNode_lock.lock();
 	leftPusObj->m_localTransform.pos = leftPussyDefaultPos + leftVector;
+	if (useParallelProcessing > 0)
+		thing_SetNode_lock.unlock();
 
 	NormalizeNiPoint(rightVector, thing_vaginaOpeningLimit*-1.0f, thing_vaginaOpeningLimit);
+	
+
+	if (useParallelProcessing > 0)
+		thing_SetNode_lock.lock();
 	rightPusObj->m_localTransform.pos = rightPussyDefaultPos + rightVector;
+	if (useParallelProcessing > 0)
+		thing_SetNode_lock.unlock();
 
 	RefreshNode(leftPusObj);
 	RefreshNode(rightPusObj);
@@ -845,7 +910,12 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	NiMatrix33 pelvisRotation;
 	NiPoint3 pelvisPosition;
 
+	if (useParallelProcessing > 0)
+		thing_ReadNode_lock.lock();
 	NiAVObject* bellyObj = actor->loadedState->node->GetObjectByName(&belly.data);
+	if (useParallelProcessing > 0)
+		thing_ReadNode_lock.unlock();
+
 	if (!bellyObj)
 		return false;
 
@@ -854,6 +924,8 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 		updateBellyFirstRun = false;
 
 		auto mypair = std::make_pair(actor->baseForm->formID, belly.data);
+		if (useParallelProcessing > 0)
+			thing_map_lock.lock();
 		std::map<std::pair<UInt32, const char *>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(mypair);
 
 		//if (posMap == thingDefaultPosList.end())
@@ -873,7 +945,6 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 		{
 			//Add it to the list
 			bellyDefaultPos = emptyPoint;
-
 			thingDefaultPosList[mypair] = bellyDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", belly.data, actor->baseForm->formID, bellyDefaultPos.x, bellyDefaultPos.y, bellyDefaultPos.z);
 		}
@@ -881,11 +952,16 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 		{
 			bellyDefaultPos = emptyPoint;
 		}
-		
+		if (useParallelProcessing > 0)
+			thing_map_lock.unlock();
 		LOG_INFO("Belly default pos -> %g %g %g", bellyDefaultPos.x, bellyDefaultPos.y, bellyDefaultPos.z);
 	}
 
+	if (useParallelProcessing > 0)
+		thing_ReadNode_lock.lock();
 	NiAVObject* pelvisObj = actor->loadedState->node->GetObjectByName(&pelvis.data);
+	if (useParallelProcessing > 0)
+		thing_ReadNode_lock.unlock();
 	if (!pelvisObj)
 		return false;
 
@@ -974,7 +1050,12 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 			
 			float horPos = opening * thing_bellybulgemultiplier;
 			horPos = clamp(horPos, 0.0f, thing_bellybulgemax);
+
+			if (useParallelProcessing > 0)
+				thing_SetNode_lock.lock();
 			bellyObj->m_localTransform.pos.y = bellyDefaultPos.y + horPos;
+			if (useParallelProcessing > 0)
+				thing_SetNode_lock.unlock();
 
 			//float vertPos = opening * bellybulgeposmultiplier;
 			//vertPos = clamp(vertPos, bellybulgeposlowest, 0.0f);
@@ -994,7 +1075,13 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	if(bellyBulgeCountDown > 0)
 	{
 		bellyBulgeCountDown--;
+
+		if (useParallelProcessing > 0)
+			thing_SetNode_lock.lock();
 		bellyObj->m_localTransform.pos.z = bellyDefaultPos.z + thing_bellybulgeposlowest;
+		if (useParallelProcessing > 0)
+			thing_SetNode_lock.unlock();
+
 	}
 	return false;
 }
@@ -1059,7 +1146,12 @@ void Thing::update(Actor* actor) {
 
 		NiNode* mostInterestingRoot = (rootNodeFP != nullptr) ? rootNodeFP : rootNodeTP;
 
+		if (useParallelProcessing > 0)
+			thing_ReadNode_lock.lock();
 		obj = ni_cast(mostInterestingRoot->GetObjectByName(&boneName.data), NiNode);
+		if (useParallelProcessing > 0)
+			thing_ReadNode_lock.unlock();
+
 		objRotation = mostInterestingRoot->GetAsNiNode()->m_worldTransform.rot;
 	}
 	else
@@ -1069,8 +1161,11 @@ void Thing::update(Actor* actor) {
 			LOG("No loaded state for actor %08x\n", actor->formID);
 			return;
 		}
-
+		if (useParallelProcessing > 0)
+			thing_ReadNode_lock.lock();
 		obj = loadedState->node->GetObjectByName(&boneName.data);
+		if (useParallelProcessing > 0)
+			thing_ReadNode_lock.unlock();
 #ifdef RUNTIME_VR_VERSION_1_4_15	
 	}
 #endif
@@ -1127,7 +1222,11 @@ void Thing::update(Actor* actor) {
 	if (IsBreastBone) //other bones don't need to edited gravity by NPC Spine2 [Spn2] node
 	{
 		//Get the reference bone to know which way the breasts are orientated
+		if (useParallelProcessing > 0)
+			thing_ReadNode_lock.lock();
 		NiAVObject* breastGravityReferenceBone = loadedState->node->GetObjectByName(&breastGravityReferenceBoneString.data);
+		if (useParallelProcessing > 0)
+			thing_ReadNode_lock.unlock();
 
 		//Code sent by KheiraDjet(modified)
 		if (breastGravityReferenceBone != nullptr)
@@ -1146,7 +1245,8 @@ void Thing::update(Actor* actor) {
 			if (skipArmorCheck <= 0) //This is a little heavy, check only on equip/unequip events
 			{
 				forceAmplitude = 1.0f;
-
+				if (useParallelProcessing > 0)
+					thing_armorKeyword_lock.lock();
 				TESForm* wornForm = papyrusActor::GetWornForm(actor, 0x00000004);
 
 				if (wornForm != nullptr)
@@ -1207,7 +1307,10 @@ void Thing::update(Actor* actor) {
 					isLightArmor = false;
 					isHeavyArmor = false;
 				}
-				skipArmorCheck = 1;
+				skipArmorCheck = -1;
+
+				if (useParallelProcessing > 0)
+					thing_armorKeyword_lock.unlock();
 			}
 
 			if (isHeavyArmor)
@@ -1250,11 +1353,15 @@ void Thing::update(Actor* actor) {
 
 	diff += NiPoint3(0, 0, varGravityCorrection);
 
-	if (fabs(diff.x) > 100 || fabs(diff.y) > 100 || fabs(diff.z) > 100) //prevent shakes
+	if (fabs(diff.x) > 1000 || fabs(diff.y) > 1000 || fabs(diff.z) > 1000) //prevent shakes
 	{
 		//logger.error("transform reset\n");
+		if (useParallelProcessing > 0)
+			thing_SetNode_lock.lock();
 		obj->m_localTransform.pos = thingDefaultPos;
 		obj->m_localTransform.rot = thingDefaultRot;
+		if (useParallelProcessing > 0)
+			thing_SetNode_lock.unlock();
 		oldWorldPos = target;
 		velocity = emptyPoint;
 		time = clock();
@@ -1453,13 +1560,21 @@ void Thing::update(Actor* actor) {
 		if (GroundCollisionEnabled)
 		{
 			NiAVObject* groundobj;
+			if (useParallelProcessing > 0)
+				thing_ReadNode_lock.lock();
 			groundobj = loadedState->node->GetObjectByName(&GroundReferenceBone.data);
+			if (useParallelProcessing > 0)
+				thing_ReadNode_lock.unlock();
 			if (groundobj)
 			{
 				float groundPos = groundobj->m_worldTransform.pos.z; //Get ground by NPC Root [Root] node
 
 				NiAVObject* highheelobj;
+				if (useParallelProcessing > 0)
+					thing_ReadNode_lock.lock();
 				highheelobj = loadedState->node->GetObjectByName(&highheel.data);
+				if (useParallelProcessing > 0)
+					thing_ReadNode_lock.unlock();
 				if (highheelobj)
 				{
 					groundPos = groundPos - highheelobj->m_localTransform.pos.z; //Get highheel offset by NPC node
@@ -1582,9 +1697,13 @@ void Thing::update(Actor* actor) {
 	else
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol)) + target;
 
+	if (useParallelProcessing > 0)
+		thing_SetNode_lock.lock();
 	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (ldiff.x * varLinearX) + maybeIdiffcol.x + ldiffGcol.x;
 	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (ldiff.y * varLinearY) + maybeIdiffcol.y + ldiffGcol.y;
 	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (ldiff.z * varLinearZ) + maybeIdiffcol.z + ldiffGcol.z;
+	if (useParallelProcessing > 0)
+		thing_SetNode_lock.unlock();
 
 	auto rdiffXnew = ldiff * varRotationalXnew;
 	auto rdiffYnew = ldiff * varRotationalYnew;
@@ -1628,8 +1747,12 @@ void Thing::update(Actor* actor) {
 		oldLocalRot = thingDefaultRot * newRot;
 	else
 		oldLocalRot = thingDefaultRot * newRot * newcolRot;
-
+	
+	if (useParallelProcessing > 0)
+		thing_SetNode_lock.lock();
 	obj->m_localTransform.rot = thingDefaultRot * newRot * newcolRot;
+	if (useParallelProcessing > 0)
+		thing_SetNode_lock.unlock();
 
 	RefreshNode(obj);
 

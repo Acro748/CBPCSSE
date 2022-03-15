@@ -111,6 +111,11 @@ bool Debug_Execute(const ObScriptParam* paramInfo, ScriptData* scriptData, TESOb
 		}
 		return true;
 	}
+	else if (_strnicmp(buffer, "sysreload", MAX_PATH) == 0)
+	{
+		loadSystemConfig();
+		LOG_ERR("Loaded System config");
+	}
 	return true;
 }
 

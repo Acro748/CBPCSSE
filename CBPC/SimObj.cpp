@@ -30,6 +30,17 @@ std::vector<std::string> femaleSpecificBones = { leftBreastName, rightBreastName
 //	{ leftButtName, "Butt" },{ rightButtName, "Butt" },
 //	{ bellyName, "Belly" },{ scrotumName, "Scrotum" } };
 
+//## obj_bind_lock
+// Although I didn't look closely
+// it's used unordered_map [] so that's not thread safety
+// and I felt like needed to lock a lot of things on the parts where the collider attach part
+// but it work once per actor, so I just locked entirety
+// If necessary, we can make more optimizations later
+
+//## obj_sync_lock
+// unordered_map [] and new write value is not thread safety, so locked it
+
+std::shared_mutex obj_bind_lock, obj_sync_lock;
 
 SimObj::SimObj(Actor *actor)
 	: things(){
@@ -44,7 +55,9 @@ SimObj::~SimObj() {
 bool SimObj::bind(Actor *actor, bool isMale)
 {
 	//logger.error("bind\n");
-	
+	if (useParallelProcessing > 0)
+		std::lock_guard<std::shared_mutex> obj_bind_guard(obj_bind_lock);
+
 	auto loadedState = actor->loadedState;
 	if (loadedState && loadedState->node) 
 	{
@@ -123,7 +136,11 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				{
 					t.second.update(actor);
 					if (t.second.VirtualCollisionEnabled)
+					{
+						obj_sync_lock.lock();
 						NodeCollisionSync[t.first] = t.second.collisionSync;
+						obj_sync_lock.unlock();
+					}
 				}
 			}
 		});
@@ -148,7 +165,9 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				{
 					t.second.update(actor);
 					if (t.second.VirtualCollisionEnabled)
+					{
 						NodeCollisionSync[t.first] = t.second.collisionSync;
+					}
 				}
 			}
 		}

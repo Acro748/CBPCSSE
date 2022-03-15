@@ -3,8 +3,8 @@
 #include <skse64/PapyrusGame.cpp>
 
 
-std::string versionStr = "1.4.16";
-UInt32 version = 0x010416;
+std::string versionStr = "1.4.ff";
+UInt32 version = 0x0104ff;
 
 
 #pragma warning(disable : 4996)
@@ -2771,7 +2771,7 @@ bool RegisterFuncs(VMClassRegistry* registry)
 	return true;
 }
 
-
+std::shared_mutex log_lock; //yeah, this is required to avoid conflicts with logging when parallel processing
 
 void Log(const int msgLogLevel, const char * fmt, ...)
 {
@@ -2779,6 +2779,9 @@ void Log(const int msgLogLevel, const char * fmt, ...)
 	{
 		return;
 	}
+
+	if (useParallelProcessing > 0)
+		std::lock_guard<std::shared_mutex> log_guard(log_lock);
 
 	va_list args;
 	char logBuffer[4096];

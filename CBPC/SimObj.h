@@ -41,6 +41,8 @@
 
 #define NINODE_CHILDREN(ninode) ((NiTArray <NiAVObject *> *) ((char*)(&(ninode->m_children))))
 
+extern std::shared_mutex obj_bind_lock, obj_sync_lock;
+
 class SimObj {
 	UInt32 id = 0;
 	bool bound = false;

@@ -5,6 +5,8 @@
 #include <string>
 #include <fstream>
 
+#include <shared_mutex>
+
 #include "skse64/NiGeometry.h"
 #include "skse64\GameReferences.h"
 #include "skse64\PapyrusEvents.h"
@@ -146,6 +148,8 @@ enum eLogLevels
 };
 
 void Log(const int msgLogLevel, const char * fmt, ...);
+
+extern std::shared_mutex log_lock;
 
 #define LOG(fmt, ...) Log(LOGLEVEL_WARN, fmt, ##__VA_ARGS__)
 #define LOG_ERR(fmt, ...) Log(LOGLEVEL_ERR, fmt, ##__VA_ARGS__)

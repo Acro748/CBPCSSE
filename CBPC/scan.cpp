@@ -200,10 +200,45 @@ int skipFramesScanCount = 0;
 LARGE_INTEGER startingTime, endingTime, elapsedMicroseconds;
 LARGE_INTEGER frequency;
 
+
+bool debugtimelog = false;
+bool firsttimeloginit = true;
+LARGE_INTEGER totaltime;
+int debugtimelog_framecount = 1;
+
+///Average Update Time per 1000 frames
+///
+///#UseParallelProcessingOLD = 3
+///Average Update Time = 702435 ns
+///Average Update Time = 626482 ns
+///Average Update Time = 626149 ns
+///Average Update Time = 682146 ns
+///Average Update Time = 674943 ns
+///Average Update Time = 738473 ns
+///Average Update Time = 715636 ns
+///Average Update Time = 773313 ns
+///
+///#UseParallelProcessingOLD = 0
+///Average Update Time = 1247070 ns
+///Average Update Time = 1088073 ns
+///Average Update Time = 1171247 ns
+///Average Update Time = 1254823 ns
+///Average Update Time = 1611882 ns
+///Average Update Time = 1671157 ns
+///Average Update Time = 1661606 ns
+///Average Update Time = 1504056 ns
+
 void updateActors() 
 {	
-	if (logging)
+	if (debugtimelog || logging)
 	{
+		if (firsttimeloginit)
+		{
+			firsttimeloginit = false;
+			totaltime.QuadPart = 0;
+
+		}
+
 		QueryPerformanceFrequency(&frequency);
 		QueryPerformanceCounter(&startingTime);
 	}
@@ -217,35 +252,27 @@ void updateActors()
 	if ((mm->IsGamePaused()) && !raceSexMenuOpen.load())
 		return;
 
-	if (tuningModeCollision != 0)
+	if (tuningModeCollision != 0 || consoleCollisionReload.load())
 	{
-		frameCount++;
-		if (frameCount % (120 * tuningModeCollision) == 0)
+		if (consoleCollisionReload.load())
+			consoleCollisionReload.store(false);
+		else
 		{
-			loadMasterConfig();
-			loadCollisionConfig();
-			loadExtraCollisionConfig();
+			frameCount++;
+			if (frameCount % (120 * tuningModeCollision) == 0)
+			{
+				loadMasterConfig();
+				loadCollisionConfig();
+				loadExtraCollisionConfig();
 
 #ifdef RUNTIME_VR_VERSION_1_4_15
-			LoadWeaponCollisionConfig();
+				LoadWeaponCollisionConfig();
 #endif
-			actors.clear();
+				actors.clear();
+			}
+			if (frameCount >= 1000000)
+				frameCount = 0;
 		}
-		if (frameCount >= 1000000)
-			frameCount = 0;
-	}
-	else if (consoleCollisionReload.load())
-	{
-		consoleCollisionReload.store(false);
-
-		loadMasterConfig();
-		loadCollisionConfig();
-		loadExtraCollisionConfig();
-
-#ifdef RUNTIME_VR_VERSION_1_4_15
-		LoadWeaponCollisionConfig();
-#endif
-		actors.clear();
 	}
 
 
@@ -618,45 +645,28 @@ void updateActors()
 	//}
 
 	static int count = 0;
-	if (configReloadCount && count++ > configReloadCount) 
+	if ((configReloadCount && count++ > configReloadCount) || consoleConfigReload.load())
 	{
-		count = 0;
-		loadConfig();
-		for each (auto & a in actorEntries)
+		if (consoleConfigReload.load())
+			consoleConfigReload.store(false);
+		else
 		{
-			auto objIt = actors.find(a.id);
-			if (objIt == actors.end())
+			count = 0;
+			loadConfig();
+			for each (auto & a in actorEntries)
 			{
-				//logger.error("missing Sim Object\n");
-			}
-			else
-			{
-				if (a.actor != nullptr && a.actor->loadedState != nullptr)
+				auto objIt = actors.find(a.id);
+				if (objIt == actors.end())
 				{
-					SimObj& obj = objIt->second;
-					obj.updateConfig(a.actor);
+					//logger.error("missing Sim Object\n");
 				}
-			}
-		}
-	}
-	else if (consoleConfigReload.load())
-	{
-		consoleConfigReload.store(false);
-
-		loadConfig();
-		for each (auto & a in actorEntries)
-		{
-			auto objIt = actors.find(a.id);
-			if (objIt == actors.end())
-			{
-				//logger.error("missing Sim Object\n");
-			}
-			else
-			{
-				if (a.actor != nullptr && a.actor->loadedState != nullptr)
+				else
 				{
-					SimObj& obj = objIt->second;
-					obj.updateConfig(a.actor);
+					if (a.actor != nullptr && a.actor->loadedState != nullptr)
+					{
+						SimObj& obj = objIt->second;
+						obj.updateConfig(a.actor);
+					}
 				}
 			}
 		}
@@ -717,14 +727,22 @@ void updateActors()
 	}
 	//LOG("Collider Check Call Count: %d", callCount);
 
-	if (logging)
+	if (debugtimelog || logging)
 	{
 		QueryPerformanceCounter(&endingTime);
 		elapsedMicroseconds.QuadPart = endingTime.QuadPart - startingTime.QuadPart;
 		elapsedMicroseconds.QuadPart *= 1000000000LL;
 		elapsedMicroseconds.QuadPart /= frequency.QuadPart;
 		//long long avg = elapsedMicroseconds.QuadPart / callCount;
-		LOG("Collider Check Call Count: %d - Update Time = %lld ns\n", callCount, elapsedMicroseconds.QuadPart);
+		totaltime.QuadPart += elapsedMicroseconds.QuadPart;
+		LOG_ERR("Collider Check Call Count: %d - Update Time = %lld ns", callCount, elapsedMicroseconds.QuadPart);
+		if (debugtimelog_framecount % 1000 == 0)
+		{
+			LOG_ERR("Average Update Time = %lld ns\n", totaltime.QuadPart / debugtimelog_framecount);
+			totaltime.QuadPart = 0;
+			debugtimelog_framecount = 0;
+		}
+		debugtimelog_framecount++;
 	}
 	//logger.info("Update Time = %lld ns\n", elapsedMicroseconds.QuadPart);
 
@@ -734,6 +752,43 @@ void updateActors()
 
 EventDispatcher<TESEquipEvent>* g_TESEquipEventDispatcher;
 TESEquipEventHandler g_TESEquipEventHandler;
+
+/*
+UInt32 kSlotMask30 = 0x00000001;
+UInt32 kSlotMask31 = 0x00000002;
+*/
+UInt32 kSlotMask32 = 0x00000004;
+/*
+UInt32 kSlotMask33 = 0x00000008;
+UInt32 kSlotMask34 = 0x00000010;
+UInt32 kSlotMask35 = 0x00000020;
+UInt32 kSlotMask36 = 0x00000040;
+UInt32 kSlotMask37 = 0x00000080;
+UInt32 kSlotMask38 = 0x00000100;
+UInt32 kSlotMask39 = 0x00000200;
+UInt32 kSlotMask40 = 0x00000400;
+UInt32 kSlotMask41 = 0x00000800;
+UInt32 kSlotMask42 = 0x00001000;
+UInt32 kSlotMask43 = 0x00002000;
+UInt32 kSlotMask44 = 0x00004000;
+UInt32 kSlotMask45 = 0x00008000;
+UInt32 kSlotMask46 = 0x00010000;
+UInt32 kSlotMask47 = 0x00020000;
+UInt32 kSlotMask48 = 0x00040000;
+UInt32 kSlotMask49 = 0x00080000;
+UInt32 kSlotMask50 = 0x00100000;
+UInt32 kSlotMask51 = 0x00200000;
+UInt32 kSlotMask52 = 0x00400000;
+UInt32 kSlotMask53 = 0x00800000;
+UInt32 kSlotMask54 = 0x01000000;
+UInt32 kSlotMask55 = 0x02000000;
+UInt32 kSlotMask56 = 0x04000000;
+UInt32 kSlotMask57 = 0x08000000;
+UInt32 kSlotMask58 = 0x10000000;
+UInt32 kSlotMask59 = 0x20000000;
+UInt32 kSlotMask60 = 0x40000000;
+UInt32 kSlotMask61 = 0x80000000;
+*/
 
 EventResult TESEquipEventHandler::ReceiveEvent(TESEquipEvent* evn, EventDispatcher<TESEquipEvent>* dispatcher)
 {
@@ -757,7 +812,7 @@ EventResult TESEquipEventHandler::ReceiveEvent(TESEquipEvent* evn, EventDispatch
 	if (armor == nullptr)
 		return EventResult::kEvent_Continue;
 						
-	if (isWantSlot(armor, 0x00000004)) // body
+	if (isWantSlot(armor, kSlotMask32)) // body
 	{
 		Actor* actor = DYNAMIC_CAST(evn->actor, TESObjectREFR, Actor);
 
