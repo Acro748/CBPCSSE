@@ -1,0 +1,234 @@
+Only explain newly added parameters and features
+
+#######################
+CBPConfig_*.txt
+################
+#physics parameters
+
+Xmaxoffset (default : 5.0)
+limit of move to right by physics / recommended to use positive number
+
+Xminoffset (default : -5.0)
+limit of move to left by physics / recommended to use negative number
+
+Ymaxoffset (default : 5.0)
+limit of move to front by physics / recommended to use positive number
+
+Yminoffset (default : -5.0)
+limit of move to rear by physics / recommended to use negative number
+
+Zmaxoffset (default : 5.0)
+limit of move to up by physics / recommended to use positive number
+
+Zminoffset (default : -5.0)
+limit of move to down by physics / recommended to use negative number
+
+**If used maxoffset, the above 6 parameters are ignored
+
+
+Xdefaultoffset (default : 0.0)
+Set the default node position on the X-axis
+
+Ydefaultoffset (default : 0.0)
+Set the default node position on the Y-axis
+
+Zdefaultoffset (default : 0.0)
+Set the default node position on the Z-axis
+
+
+linearXrotationX (default : 0.0)
+X-axis movement (left and right) is deliver to the X-axis rotation (front and rear)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearXrotationY (default : 1.0)
+X-axis movement (left and right) is deliver to the Y-axis rotation (up and down)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearXrotationZ (default : 0.0)
+X-axis movement (left and right) is deliver to the Z-axis rotation (left and right)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearYrotationX (default : 0.0)
+Y-axis movement (front and rear) is deliver to the X-axis rotation (front and rear)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearYrotationY (default : 0.0)
+Y-axis movement (front and rear) is deliver to the Y-axis rotation (up and down)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearYrotationZ (default : 1.0)
+Y-axis movement (front and rear) is deliver to the Z-axis rotation (left and right)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearZrotationX (default : 1.0)
+Z-axis movement (up and down) is deliver to the X-axis rotation (front and rear)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearZrotationY (default : 0.0)
+Z-axis movement (up and down) is deliver to the Y-axis rotation (up and down)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearZrotationZ (default : 0.0)
+Z-axis movement (up and down) is deliver to the Z-axis rotation (left and right)
+0.5 is half, 2 is twice, 0 is not deliver
+
+
+linearXspreadforceY (default : 0.0)
+If X-axis movement (left and right) is lost by min/maxoffset, the excess force is deliver to the Y-axis movement (front and rear)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearXspreadforceZ (default : 0.0)
+If X-axis movement (left and right is lost by min/maxoffset, the excess force is deliver to the Z-axis movement (up and down)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearYspreadforceX (default : 0.0)
+If Y-axis movement (front and rear) is lost by min/maxoffset, the excess force is deliver to the X-axis movement (left and right)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearYspreadforceZ (default : 0.0)
+If Y-axis movement (front and rear) is lost by min/maxoffset, the excess force is deliver to the Z-axis movement (up and down)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearZspreadforceX (default : 0.0)
+If Z-axis movement (up and down) is lost by min/maxoffset, the excess force is deliver to the X-axis movement (left and right)
+0.5 is half, 2 is twice, 0 is not deliver
+
+linearZspreadforceY (default : 0.0)
+If Z-axis movement (up and down) is lost by min/maxoffset, the excess force is deliver to the Y-axis movement (front and rear)
+0.5 is half, 2 is twice, 0 is not deliver
+
+
+forceMultipler (default : 1.0) (haven't tested it yet)
+Reduces all receive the forces
+I think it's thought to be useful when giving physics to those nodes while multiple nodes are connected
+0.5 is half, 2 is twice, 0 is not deliver
+
+
+###################
+CBPConfig_*.txt
+#################
+#physics parameters related to collisions
+
+collisionXmaxoffset (default : 100.0)
+limit of move to right by collision / recommended to use positive number
+
+collisionXminoffset (default : -100.0)
+limit of move to left by collision / recommended to use negative number
+
+collisionYmaxoffset (default : 100.0)
+limit of move to front by collision / recommended to use positive number
+
+collisionYminoffset (default : -100.0)
+limit of move to rear by collision / recommended to use negative number
+
+collisionZmaxoffset (default : 100.0)
+limit of move to up by collision / recommended to use positive number
+
+collisionZminoffset (default : -100.0)
+limit of move to down by collision / recommended to use negative number
+
+collisionFriction (default : 0.2)
+causes friction and reduces inertia
+You can set 0.0 ~ 1.0
+larger the value, more drag
+smaller the value, more slide
+
+collisionPenetration (default : 0.0)
+Adjust the force to push when colliding
+You can set 0.0 ~ 1.0 (If exceeds 1, the collision becomes very strange so it don't allow other value)
+It affects the actual location of the collider
+
+collisionMultipler (default : 1.0)
+Adjust the force to push when colliding
+0.5 is half, 2 is twice, 0 is not pushed
+It's not affects the actual location of the collider
+
+collisionMultiplerRot (default : 1.0)
+Set how much more force will be applied to force of rotation when colliding 
+0.5 is half, 2 is twice, 0 is not rotate by colliding
+
+collisionElastic (default : 0.0)
+Set whether to add elastic collision by collision to the physics calculation in next frame
+Unlike other parameters, this is on/off format 
+it turns off if value is 0.0 and on if value is 1.0
+The physics quality gets better when collision, but sometimes it can occur jitter when collision
+
+
+
+#####################
+CBPCollisionConfig*.txt
+##################
+#how to set the capsule collider
+
+[NPC L UpperArm [LUar]] #insert defined node name
+0.5,0.25,8,4 & 0.5,0.25,18,3.6 | 0.5,0.25,8,4 & 0.5,0.25,18,3.6 
+#A center point X position, A center point Y position, A center point Z position, A radius size & B center point X position, B center point Y position, B center point Z position, B radius size
+It's like set up two spheres collider, but if combine them with &, it becomes capsule collider
+It's basically capsule collider, but also can use as cone collide
+
+I think you already know the meaning of "|" so I'll skip it
+
+
+#how to add the ground collider
+just add NPC Root [Root] to the [ColliderNodes] part, it automatically added ground collision
+don't need to set the collider like sphere and capsule
+
+
+
+######################
+CBPCSystem.ini
+######################
+UseParallelProcessingOLD = 3
+1 is parallel processing of each node unit
+2 is parallel processing of each actor unit
+3 is all parallel processing of each actor unit and each node unit
+
+3 has improved performance by 50% to 100% compared to 0 (based on CPU 4770K)
+
+
+
+####################
+#About armor keywords
+
+breastClothedPushup
+breastLightArmoredPushup
+breastHeavyArmoredPushup
+breastClothedAmplitude
+breastLightArmoredAmplitude
+breastHeavyArmoredAmplitude
+
+#The above parameters effect to physics by the material of the armour
+#the below keywords are for extra manage of those parameters
+#It works with the keyword name
+#so even if don't have a master plugin(esp/esm/esl)
+#just create a new keyword then define the name correctly and attach it then it work
+
+CBPCAsNakadL
+-regard the left breast as nakad
+
+CBPCAsNakadR
+-regard the right breast as nakad
+
+CBPCAsClothingL
+-regard the left breast as clothing
+
+CBPCAsClothingR
+-regard the right breast as clothing
+
+CBPCAsLightL
+-regard the left breast as light armor
+
+CBPCAsLightR
+-regard the right breast as light armor
+
+CBPCAsHeavyL
+-regard the left breast as heavy armor
+
+CBPCAsHeavyR
+-regard the right breast as heavy armor
+
+CBPCNoPushUpL
+-remove the pushup effect on the left breast
+
+CBPCNoPushUpR
+-remove the pushup effect on the right breast
