@@ -205,6 +205,7 @@ bool debugtimelog = false;
 bool firsttimeloginit = true;
 LARGE_INTEGER totaltime;
 int debugtimelog_framecount = 1;
+int totalcallcount = 0;
 
 ///Average Update Time per 1000 frames
 ///
@@ -681,8 +682,8 @@ void updateActors()
 	}
 	//logger.error("Updating %d entites\n", actorEntries.size());
 
-	if (useParallelProcessing == 2 || useParallelProcessing == 3)
-	{
+//	if (useParallelProcessing == 2 || useParallelProcessing == 3)
+//	{
 		concurrency::parallel_for_each(actorEntries.begin(), actorEntries.end(), [&](const auto& a)
 		{
 			auto objIt = actors.find(a.id);
@@ -706,7 +707,7 @@ void updateActors()
 				}
 			}
 		});
-	}
+/* }
 	else
 	{
 		for each(auto &a in actorEntries) 
@@ -732,7 +733,7 @@ void updateActors()
 				}
 			}
 		}
-	}
+	}*/
 	//LOG("Collider Check Call Count: %d", callCount);
 
 	if (debugtimelog || logging)
@@ -743,12 +744,14 @@ void updateActors()
 		elapsedMicroseconds.QuadPart /= frequency.QuadPart;
 		//long long avg = elapsedMicroseconds.QuadPart / callCount;
 		totaltime.QuadPart += elapsedMicroseconds.QuadPart;
-		LOG_ERR("Collider Check Call Count: %d - Update Time = %lld ns", callCount, elapsedMicroseconds.QuadPart);
+		totalcallcount += callCount;
+		//LOG_ERR("Collider Check Call Count: %d - Update Time = %lld ns", callCount, elapsedMicroseconds.QuadPart);
 		if (debugtimelog_framecount % 1000 == 0)
 		{
-			LOG_ERR("Average Update Time = %lld ns\n", totaltime.QuadPart / debugtimelog_framecount);
+			LOG_ERR("Collider Check Call Count: %.2f - Average Update Time in 1000 frame = %lld ns\n", (float)totalcallcount / (float)debugtimelog_framecount, totaltime.QuadPart / debugtimelog_framecount);
 			totaltime.QuadPart = 0;
 			debugtimelog_framecount = 0;
+			totalcallcount = 0;
 		}
 		debugtimelog_framecount++;
 	}

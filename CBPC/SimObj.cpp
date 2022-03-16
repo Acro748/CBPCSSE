@@ -55,7 +55,7 @@ SimObj::~SimObj() {
 bool SimObj::bind(Actor *actor, bool isMale)
 {
 	//logger.error("bind\n");
-	if (useParallelProcessing > 0)
+	//if (useParallelProcessing > 0)
 		std::lock_guard<std::shared_mutex> obj_bind_guard(obj_bind_lock);
 
 	auto loadedState = actor->loadedState;
@@ -116,8 +116,8 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 	if (!bound)
 		return;
 	//logger.error("update\n");
-	if ((useParallelProcessing == 1 || useParallelProcessing == 3) && !raceSexMenuOpen.load())
-	{
+//	if ((useParallelProcessing == 1 || useParallelProcessing == 3) && !raceSexMenuOpen.load())
+//	{
 		concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
 		{
 			bool isStopPhysics = false;
@@ -144,7 +144,7 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				}
 			}
 		});
-	}
+/* }
 	else
 	{
 		for (auto &t : things) 
@@ -171,7 +171,7 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				}
 			}
 		}
-	}
+	}*/
 	//logger.error("end SimObj update\n");
 }
 

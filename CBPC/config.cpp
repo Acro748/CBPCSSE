@@ -2780,7 +2780,7 @@ void Log(const int msgLogLevel, const char * fmt, ...)
 		return;
 	}
 
-	if (useParallelProcessing > 0)
+//	if (useParallelProcessing > 0)
 		std::lock_guard<std::shared_mutex> log_guard(log_lock);
 
 	va_list args;
