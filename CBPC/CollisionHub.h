@@ -14,7 +14,7 @@ extern long callCount;
 
 bool CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collision> &actorCollidersList);
 
-void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, std::unordered_map<std::string, NiPoint3> &NodeCollisionSyncList);
+void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, std::unordered_map<std::string, NiPoint3> NodeCollisionSyncList);
 
 
 struct Partition

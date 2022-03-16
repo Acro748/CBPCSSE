@@ -87,8 +87,6 @@ extern int logging;
 
 extern int useCamera;
 
-extern int useParallelProcessing;
-
 extern int fpsCorrectionEnabled;
 
 extern std::vector<std::string> noJitterFixNodesList;

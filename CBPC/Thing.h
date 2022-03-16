@@ -92,7 +92,7 @@ public:
 	float collisionMultipler = 1.0f;
 	float collisionMultiplerRot = 1.0f;
 
-	bool collisionElastic = false;
+	bool collisionElastic = true;
 
 	float collisionXmaxOffset = 100.0f;
 	float collisionXminOffset = -100.0f;
@@ -163,7 +163,7 @@ public:
 	float collisionMultipler_100 = 1.0f;
 	float collisionMultiplerRot_100 = 1.0f;
 
-	float collisionElastic_100 = 0.0f;
+	float collisionElastic_100 = 1.0f;
 
 	float collisionXmaxOffset_100 = 100.0f;
 	float collisionXminOffset_100 = -100.0f;
@@ -313,7 +313,7 @@ public:
 	NiPoint3 thingDefaultPos;
 	NiMatrix33 thingDefaultRot;
 
-	NiMatrix33 oldLocalRot;
+	NiPoint3 oldWorldColPos;
 
 	float nodeScale = 1.0f;
 	float ScaleMult = 1.0f;

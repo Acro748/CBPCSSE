@@ -55,8 +55,7 @@ SimObj::~SimObj() {
 bool SimObj::bind(Actor *actor, bool isMale)
 {
 	//logger.error("bind\n");
-	//if (useParallelProcessing > 0)
-		std::lock_guard<std::shared_mutex> obj_bind_guard(obj_bind_lock);
+	std::lock_guard<std::shared_mutex> obj_bind_guard(obj_bind_lock);
 
 	auto loadedState = actor->loadedState;
 	if (loadedState && loadedState->node) 
@@ -116,62 +115,32 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 	if (!bound)
 		return;
 	//logger.error("update\n");
-//	if ((useParallelProcessing == 1 || useParallelProcessing == 3) && !raceSexMenuOpen.load())
-//	{
-		concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
-		{
-			bool isStopPhysics = false;
-			if (ActorNodeStoppedPhysicsMap.find(GetActorNodeString(actor, t.first)) != ActorNodeStoppedPhysicsMap.end())
-				isStopPhysics = ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)];
-
-			if (!isStopPhysics)
-			{
-				t.second.ActorCollisionsEnabled = CollisionsEnabled;
-				t.second.GroundCollisionEnabled = GroundCollisionEnabled;
-				if (strcmp(t.first, pelvis) == 0)
-				{
-					t.second.updatePelvis(actor);
-				}
-				else
-				{
-					t.second.update(actor);
-					if (t.second.VirtualCollisionEnabled)
-					{
-						obj_sync_lock.lock();
-						NodeCollisionSync[t.first] = t.second.collisionSync;
-						obj_sync_lock.unlock();
-					}
-				}
-			}
-		});
-/* }
-	else
+	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
 	{
-		for (auto &t : things) 
-		{
-			bool isStopPhysics = false;
-			if (ActorNodeStoppedPhysicsMap.find(GetActorNodeString(actor, t.first)) != ActorNodeStoppedPhysicsMap.end())
-				isStopPhysics = ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)];
+		bool isStopPhysics = false;
+		if (ActorNodeStoppedPhysicsMap.find(GetActorNodeString(actor, t.first)) != ActorNodeStoppedPhysicsMap.end())
+			isStopPhysics = ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)];
 
-			if (!isStopPhysics)
+		if (!isStopPhysics)
+		{
+			t.second.ActorCollisionsEnabled = CollisionsEnabled;
+			t.second.GroundCollisionEnabled = GroundCollisionEnabled;
+			if (strcmp(t.first, pelvis) == 0)
 			{
-				t.second.ActorCollisionsEnabled = CollisionsEnabled;
-				t.second.GroundCollisionEnabled = GroundCollisionEnabled;
-				if (strcmp(t.first, pelvis) == 0)
+				t.second.updatePelvis(actor);
+			}
+			else
+			{
+				t.second.update(actor);
+				if (t.second.VirtualCollisionEnabled)
 				{
-					t.second.updatePelvis(actor);
-				}
-				else
-				{
-					t.second.update(actor);
-					if (t.second.VirtualCollisionEnabled)
-					{
-						NodeCollisionSync[t.first] = t.second.collisionSync;
-					}
+					obj_sync_lock.lock();
+					NodeCollisionSync[t.first] = t.second.collisionSync;
+					obj_sync_lock.unlock();
 				}
 			}
 		}
-	}*/
+	});
 	//logger.error("end SimObj update\n");
 }
 

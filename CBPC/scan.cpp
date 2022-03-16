@@ -682,58 +682,30 @@ void updateActors()
 	}
 	//logger.error("Updating %d entites\n", actorEntries.size());
 
-//	if (useParallelProcessing == 2 || useParallelProcessing == 3)
-//	{
-		concurrency::parallel_for_each(actorEntries.begin(), actorEntries.end(), [&](const auto& a)
-		{
-			auto objIt = actors.find(a.id);
-			if (objIt == actors.end())
-			{
-				//logger.error("missing Sim Object\n");
-			}
-			else
-			{
-				if (a.actor != nullptr && a.actor->loadedState != nullptr)
-				{
-					SimObj& obj = objIt->second;
-					if (obj.isBound())
-					{
-						obj.update(a.actor, a.collisionsEnabled);
-					}
-					else
-					{
-						obj.bind(a.actor, a.sex == 1);
-					}
-				}
-			}
-		});
-/* }
-	else
+	concurrency::parallel_for_each(actorEntries.begin(), actorEntries.end(), [&](const auto& a)
 	{
-		for each(auto &a in actorEntries) 
+		auto objIt = actors.find(a.id);
+		if (objIt == actors.end())
 		{
-			auto objIt = actors.find(a.id);
-			if (objIt == actors.end()) 
+			//logger.error("missing Sim Object\n");
+		}
+		else
+		{
+			if (a.actor != nullptr && a.actor->loadedState != nullptr)
 			{
-				//logger.error("missing Sim Object\n");
-			}
-			else 
-			{
-				if (a.actor != nullptr && a.actor->loadedState != nullptr)
+				SimObj& obj = objIt->second;
+				if (obj.isBound())
 				{
-					SimObj& obj = objIt->second;
-					if (obj.isBound())
-					{
-						obj.update(a.actor, a.collisionsEnabled);
-					}
-					else
-					{
-						obj.bind(a.actor, a.sex == 1);
-					}
+					obj.update(a.actor, a.collisionsEnabled);
+				}
+				else
+				{
+					obj.bind(a.actor, a.sex == 1);
 				}
 			}
 		}
-	}*/
+	});
+
 	//LOG("Collider Check Call Count: %d", callCount);
 
 	if (debugtimelog || logging)

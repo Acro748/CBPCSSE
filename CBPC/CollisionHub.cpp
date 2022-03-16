@@ -287,7 +287,7 @@ bool CheckPelvisArmor(Actor* actor)
 	return papyrusActor::GetWornForm(actor, 49) != NULL && papyrusActor::GetWornForm(actor, 52) != NULL && papyrusActor::GetWornForm(actor, 53) != NULL && papyrusActor::GetWornForm(actor, 54) != NULL && papyrusActor::GetWornForm(actor, 56) != NULL && papyrusActor::GetWornForm(actor, 58) != NULL;
 }
 
-void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, std::unordered_map<std::string, NiPoint3>& NodeCollisionSyncList)
+void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, std::unordered_map<std::string, NiPoint3> NodeCollisionSyncList)
 {
 	for (auto &collider : colliderList)
 	{

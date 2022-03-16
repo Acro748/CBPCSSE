@@ -77,8 +77,6 @@ int logging = 0;
 
 int useCamera = 1;
 
-int useParallelProcessing = 0;
-
 int fpsCorrectionEnabled = 0;
 
 std::vector<std::string> noJitterFixNodesList = {
@@ -501,7 +499,7 @@ void loadConfig() {
 			config[it.second]["collisionPenetration"] = 0.0f;
 			config[it.second]["collisionMultipler"] = 1.0f;
 			config[it.second]["collisionMultiplerRot"] = 1.0f;
-			config[it.second]["collisionElastic"] = 0.0f;
+			config[it.second]["collisionElastic"] = 1.0f;
 			config[it.second]["collisionXmaxoffset"] = 100.0f;
 			config[it.second]["collisionXminoffset"] = -100.0f;
 			config[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -563,7 +561,7 @@ void loadConfig() {
 			config0weight[it.second]["collisionPenetration"] = 0.0f;
 			config0weight[it.second]["collisionMultipler"] = 1.0f;
 			config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
-			config0weight[it.second]["collisionElastic"] = 0.0f;
+			config0weight[it.second]["collisionElastic"] = 1.0f;
 			config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
 			config0weight[it.second]["collisionXminoffset"] = -100.0f;
 			config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -683,7 +681,7 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["collisionPenetration"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["collisionMultipler"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["collisionMultiplerRot"] = 1.0f;
-											newNPCBounceConfig.config[it.second]["collisionElastic"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["collisionElastic"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["collisionXmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config[it.second]["collisionXminoffset"] = -100.0f;
 											newNPCBounceConfig.config[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -745,7 +743,7 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["collisionPenetration"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionMultipler"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionElastic"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionElastic"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionXminoffset"] = -100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -880,9 +878,7 @@ void loadSystemConfig()
 						std::string variableName;
 						
 						int variableValue = GetConfigSettingsValue(line, variableName);
-						if (variableName == "UseParallelProcessingOLD")
-							useParallelProcessing = variableValue;
-						else if (variableName == "SkipFrames")
+						if (variableName == "SkipFrames")
 							collisionSkipFrames = variableValue;
 						else if (variableName == "SkipFramesPelvis")
 							collisionSkipFramesPelvis = variableValue;
@@ -2780,8 +2776,7 @@ void Log(const int msgLogLevel, const char * fmt, ...)
 		return;
 	}
 
-//	if (useParallelProcessing > 0)
-		std::lock_guard<std::shared_mutex> log_guard(log_lock);
+	std::lock_guard<std::shared_mutex> log_guard(log_lock);
 
 	va_list args;
 	char logBuffer[4096];
