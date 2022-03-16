@@ -1666,6 +1666,10 @@ void Thing::update(Actor* actor) {
 
 
 	//Add more collision force for weak bone weights but virtually for maintain collision by node position
+	//For example, if a node has a bone weight value of about 0.1, that shape seems actually moves by 0.1 even if the node moves by 1
+	//However, simply applying the multipler then changes the actual node position,so that's making the collisions out of sync
+	//Therefore to make perfect collision
+	//it seems to be pushed out as much as colliding to the naked eye, but the actual position of the colliding node must be maintained
 	NiPoint3 maybeIdiffcol = emptyPoint;
 	NiPoint3 CollisionSyncOffset = emptyPoint;
 
@@ -1677,11 +1681,8 @@ void Thing::update(Actor* actor) {
 	
 	collisionSync = CollisionSyncOffset;
 	
-	//Add more collision force for weak bone weights but virtually for maintain collision by node position
-	//For example, if a node has a bone weight value of about 0.1, that shape seems actually moves by 0.1 even if the node moves by 1
-	//However, simply applying the multipler then changes the actual node position,so that's making the collisions out of sync
-	//Therefore to make perfect collision
-	//it seems to be pushed out as much as colliding to the naked eye, but the actual position of the colliding node must be maintained
+	//If put the result of collision into the next frame, the quality of collision and movement will improve, but there may be some jitter
+	//so recommended to use only for some parts
 	if (!collisionElastic)
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * ldiff) + target;
 	else
