@@ -1312,7 +1312,7 @@ void Thing::update(Actor* actor) {
 
 	diff += NiPoint3(0, 0, varGravityCorrection);
 
-	if (fabs(diff.x) > 1000 || fabs(diff.y) > 1000 || fabs(diff.z) > 1000) //prevent shakes
+	if (fabs(diff.x) > 100 || fabs(diff.y) > 100 || fabs(diff.z) > 100) //prevent shakes
 	{
 		//logger.error("transform reset\n");
 		thing_SetNode_lock.lock();
