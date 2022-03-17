@@ -499,7 +499,7 @@ void loadConfig() {
 			config[it.second]["collisionPenetration"] = 0.0f;
 			config[it.second]["collisionMultipler"] = 1.0f;
 			config[it.second]["collisionMultiplerRot"] = 1.0f;
-			config[it.second]["collisionElastic"] = 1.0f;
+			config[it.second]["collisionElastic"] = 0.0f;
 			config[it.second]["collisionXmaxoffset"] = 100.0f;
 			config[it.second]["collisionXminoffset"] = -100.0f;
 			config[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -561,7 +561,7 @@ void loadConfig() {
 			config0weight[it.second]["collisionPenetration"] = 0.0f;
 			config0weight[it.second]["collisionMultipler"] = 1.0f;
 			config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
-			config0weight[it.second]["collisionElastic"] = 1.0f;
+			config0weight[it.second]["collisionElastic"] = 0.0f;
 			config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
 			config0weight[it.second]["collisionXminoffset"] = -100.0f;
 			config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -681,7 +681,7 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["collisionPenetration"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["collisionMultipler"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["collisionMultiplerRot"] = 1.0f;
-											newNPCBounceConfig.config[it.second]["collisionElastic"] = 1.0f;
+											newNPCBounceConfig.config[it.second]["collisionElastic"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["collisionXmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config[it.second]["collisionXminoffset"] = -100.0f;
 											newNPCBounceConfig.config[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -743,7 +743,7 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["collisionPenetration"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionMultipler"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionElastic"] = 1.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionElastic"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionXminoffset"] = -100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
