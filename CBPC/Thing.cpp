@@ -1118,7 +1118,7 @@ void Thing::update(Actor* actor) {
 		obj = ni_cast(mostInterestingRoot->GetObjectByName(&boneName.data), NiNode);
 		thing_ReadNode_lock.unlock();
 
-		objRotation = mostInterestingRoot->GetAsNiNode()->m_worldTransform.rot;
+	//	objRotation = mostInterestingRoot->GetAsNiNode()->m_worldTransform.rot;
 	}
 	else
 	{
@@ -1505,7 +1505,7 @@ void Thing::update(Actor* actor) {
 					lastcollisionVector = collisionVector;
 
 					bool colliding = false;
-					collisionDiff = partitions[id].partitionCollisions[i].CheckCollision(colliding, thingCollisionSpheres, thingCollisionCapsules, timeMultiplier, false);
+					collisionDiff = partitions[id].partitionCollisions[i].CheckCollision(colliding, thingCollisionSpheres, thingCollisionCapsules, false);
 					if (colliding)
 					{
 						velocity *= collisionFriction;

@@ -265,7 +265,7 @@ public:
 	bool IgnoreAllSelfColliders = false;
 
 
-	void Thing::updateConfigValues(Actor* actor);
+	void updateConfigValues(Actor* actor);
 	void updateConfig(Actor* actor, configEntry_t &centry, configEntry_t& centry0weight);
 	void dump();
 	
@@ -275,7 +275,7 @@ public:
 	void CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool left);
 	void reset();
 
-	static float Thing::remap(float value, float start1, float stop1, float start2, float stop2) 
+	static float remap(float value, float start1, float stop1, float start2, float stop2) 
 	{
 		return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1));
 	}

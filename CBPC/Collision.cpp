@@ -59,7 +59,7 @@ void HandHapticFeedbackEffect(bool left)
 	}
 }
 #endif
-bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule> &thingCollisionCapsules, std::vector<Capsule> &collisionCapsules, bool maybe, float timeMultiplier)
+bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule> &thingCollisionCapsules, std::vector<Capsule> &collisionCapsules, bool maybe)
 {	
 	/*LARGE_INTEGER startingTime, endingTime, elapsedMicroseconds;
 	LARGE_INTEGER frequency;
@@ -335,7 +335,7 @@ bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thing
 }
 
 #ifdef RUNTIME_VR_VERSION_1_4_15
-bool Collision::IsItCollidingTriangleToSphere(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Triangle> &collisionTriangles, float maxOffset, bool maybe)
+bool Collision::IsItCollidingTriangleToAffectedNodes(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Triangle> &collisionTriangles, bool maybe)
 {
 	/*LARGE_INTEGER startingTime, endingTime, elapsedMicroseconds;
 	LARGE_INTEGER frequency;
@@ -504,12 +504,12 @@ NiPoint3 Collision::CheckPelvisCollision(std::vector<Sphere> &thingCollisionSphe
 
 	if (CollisionObject != nullptr)
 	{
-		IsItColliding(collisionDiff, thingCollisionSpheres, collisionSpheres, thingCollisionCapsules, collisionCapsules, false, 1.0f);
+		IsItColliding(collisionDiff, thingCollisionSpheres, collisionSpheres, thingCollisionCapsules, collisionCapsules, false);
 
 		#ifdef RUNTIME_VR_VERSION_1_4_15
 		if (collisionTriangles.size() > 0)
 		{
-			IsItCollidingTriangleToSphere(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, collisionTriangles, 99, false);
+			IsItCollidingTriangleToAffectedNodes(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, collisionTriangles, false);
 		}
 		#endif
 	}
@@ -522,7 +522,7 @@ NiPoint3 Collision::CheckPelvisCollision(std::vector<Sphere> &thingCollisionSphe
 	return collisionDiff;
 }
 
-NiPoint3 Collision::CheckCollision(bool &isItColliding, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, float timeMultiplier, bool maybe)
+NiPoint3 Collision::CheckCollision(bool &isItColliding, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, bool maybe)
 {
 	/*LARGE_INTEGER startingTime, endingTime, elapsedMicroseconds;
 	LARGE_INTEGER frequency;
@@ -534,7 +534,7 @@ NiPoint3 Collision::CheckCollision(bool &isItColliding, std::vector<Sphere> &thi
 	bool isColliding = false;
 	if (CollisionObject != nullptr)
 	{
-		isColliding = IsItColliding(collisionDiff, thingCollisionSpheres, collisionSpheres, thingCollisionCapsules, collisionCapsules, maybe, timeMultiplier);
+		isColliding = IsItColliding(collisionDiff, thingCollisionSpheres, collisionSpheres, thingCollisionCapsules, collisionCapsules, maybe);
 		if (isColliding)
 		{
 			isItColliding = true;
@@ -545,7 +545,7 @@ NiPoint3 Collision::CheckCollision(bool &isItColliding, std::vector<Sphere> &thi
 		#ifdef RUNTIME_VR_VERSION_1_4_15
 		if (collisionTriangles.size() > 0)
 		{
-			isColliding = IsItCollidingTriangleToSphere(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, collisionTriangles, maxOffset, maybe);
+			isColliding = IsItCollidingTriangleToAffectedNodes(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, collisionTriangles, maybe);
 			if (isColliding)
 			{
 				isItColliding = true;

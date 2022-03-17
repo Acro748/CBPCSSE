@@ -30,9 +30,9 @@ public:
 
 	NiPoint3 lastColliderPosition = emptyPoint;
 		
-	bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule> &thingCollisionCapsules, std::vector<Capsule> &collisionCapsules, bool maybe, float timeMultiplier);
+	bool IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule> &thingCollisionCapsules, std::vector<Capsule> &collisionCapsules, bool maybe);
 	
-	NiPoint3 CheckCollision(bool &isItColliding, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, float timeMultiplier, bool maybe);
+	NiPoint3 CheckCollision(bool &isItColliding, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, bool maybe);
 
 	NiPoint3 CheckPelvisCollision(std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules);
 	std::vector<Sphere> collisionSpheres;
@@ -45,7 +45,7 @@ public:
 	NiPoint3 ClosestPointOnLineSegment(NiPoint3 lineStart, NiPoint3 lineEnd, NiPoint3 point);
 
 	#ifdef RUNTIME_VR_VERSION_1_4_15
-	bool Collision::IsItCollidingTriangleToSphere(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Triangle> &collisionTriangles, float maxOffset, bool maybe);
+	bool IsItCollidingTriangleToAffectedNodes(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Triangle> &collisionTriangle, bool maybe);
 
 	std::vector<Triangle> collisionTriangles;
 	
