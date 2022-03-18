@@ -43,7 +43,6 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 			if (obj)
 			{
 				nodeScale = obj->m_worldTransform.scale;
-				ScaleMult = 1 / nodeScale;
 				ownerActor = actor;
 				node = obj;
 			}
@@ -1017,6 +1016,8 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	{
 		if (thing_bellybulgemultiplier > 0 && genitalPenetration)
 		{
+			LOG_ERR("%f, %f, %f", collisionDiff.x, collisionDiff.y, collisionDiff.z);
+
 			//LOG("opening:%g", opening);
 			bellyBulgeCountDown = 1000;
 			
@@ -1161,9 +1162,9 @@ void Thing::update(Actor* actor) {
 
 	//The x, y, z axes expand according to the node scale
 	//so need to correct them in order to change the x, y, z move distances absolutely rather than relative
-	float varLinearX = linearX * ScaleMult;
-	float varLinearY = linearY * ScaleMult;
-	float varLinearZ = linearZ * ScaleMult;
+	float varLinearX = linearX;
+	float varLinearY = linearY;
+	float varLinearZ = linearZ;
 	float varRotationalXnew = rotationalXnew;
 	float varRotationalYnew = rotationalYnew;
 	float varRotationalZnew = rotationalZnew;

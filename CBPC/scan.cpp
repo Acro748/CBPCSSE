@@ -814,9 +814,12 @@ EventResult TESEquipEventHandler::ReceiveEvent(TESEquipEvent* evn, EventDispatch
 
 		for (auto& t : obj.things)
 		{
-			if (t.second.IsBreastBone)
+			for (auto& tt : t.second)
 			{
-				t.second.skipArmorCheck = 0;
+				if (tt.second.IsBreastBone)
+				{
+					tt.second.skipArmorCheck = 0;
+				}
 			}
 		}
 	}		

@@ -68,23 +68,36 @@ bool SimObj::bind(Actor *actor, bool isMale)
 
 		for (int i = 0; i<affectedBones.size(); i++)
 		{
-			if (isMale && malePhysics == 0 /*&& !(malePhysicsOnlyForExtraRaces != 0 && std::find(extraRacesList.begin(), extraRacesList.end(), actorRace) != extraRacesList.end())*/)
+			BSFixedString firstcs;
+			bool isfirstbone = true;
+			std::unordered_map<const char*, Thing> thingmsg;
+			for (int j = 0; j < affectedBones.at(i).size(); j++)
 			{
-				if (std::find(femaleSpecificBones.begin(), femaleSpecificBones.end(), affectedBones.at(i)) != femaleSpecificBones.end() || ContainsNoCase(affectedBones.at(i), "breast") || ContainsNoCase(affectedBones.at(i), "thigh") || ContainsNoCase(affectedBones.at(i), "calf"))
+				if (isMale && malePhysics == 0 /*&& !(malePhysicsOnlyForExtraRaces != 0 && std::find(extraRacesList.begin(), extraRacesList.end(), actorRace) != extraRacesList.end())*/)
+				{
+					if (std::find(femaleSpecificBones.begin(), femaleSpecificBones.end(), affectedBones.at(i).at(j)) != femaleSpecificBones.end() || ContainsNoCase(affectedBones.at(i).at(j), "breast") || ContainsNoCase(affectedBones.at(i).at(j), "thigh") || ContainsNoCase(affectedBones.at(i).at(j), "calf"))
+					{
+						continue;
+					}
+				}
+				if (!CheckActorForConditions(actor, nodeConditionsMap[affectedBones.at(i).at(j)]))
 				{
 					continue;
 				}
+				BSFixedString cs = ReturnUsableString(affectedBones.at(i).at(j));
+				auto bone = loadedState->node->GetObjectByName(&cs.data);
+				if (bone)
+				{
+					thingmsg.emplace(cs.data, Thing(actor, bone, cs));
+					if (isfirstbone)
+					{
+						firstcs = cs;
+						isfirstbone = false;
+					}
+				}
 			}
-			if (!CheckActorForConditions(actor, nodeConditionsMap[affectedBones.at(i)]))
-			{
-				continue;
-			}
-			BSFixedString cs = ReturnUsableString(affectedBones.at(i));
-			auto bone = loadedState->node->GetObjectByName(&cs.data);
-			if (bone) 
-			{
-				things.emplace(cs.data, Thing(actor, bone, cs));
-			}
+			if (!isfirstbone)
+				things.emplace(firstcs.data, thingmsg);
 		}
 		updateConfig(actor);
 			
@@ -123,20 +136,23 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 
 		if (!isStopPhysics)
 		{
-			t.second.ActorCollisionsEnabled = CollisionsEnabled;
-			t.second.GroundCollisionEnabled = GroundCollisionEnabled;
-			if (strcmp(t.first, pelvis) == 0)
+			for (auto& tt : t.second)
 			{
-				t.second.updatePelvis(actor);
-			}
-			else
-			{
-				t.second.update(actor);
-				if (t.second.VirtualCollisionEnabled)
+				tt.second.ActorCollisionsEnabled = CollisionsEnabled;
+				tt.second.GroundCollisionEnabled = GroundCollisionEnabled;
+				if (strcmp(t.first, pelvis) == 0)
 				{
-					obj_sync_lock.lock();
-					NodeCollisionSync[t.first] = t.second.collisionSync;
-					obj_sync_lock.unlock();
+					tt.second.updatePelvis(actor);
+				}
+				else
+				{
+					tt.second.update(actor);
+					if (tt.second.VirtualCollisionEnabled)
+					{
+						obj_sync_lock.lock();
+						NodeCollisionSync[tt.first] = tt.second.collisionSync;
+						obj_sync_lock.unlock();
+					}
 				}
 			}
 		}
@@ -148,17 +164,19 @@ bool SimObj::updateConfig(Actor* actor) {
 	for (auto &t : things) {
 		//LOG("t.first:[%s]", t.first);
 
-		std::string &section = configMap[t.first];
-		//LOG("config section:[%s]", section.c_str());
+		for (auto& tt : t.second) {
+			std::string& section = configMap[tt.first];
+			//LOG("config section:[%s]", section.c_str());
 
-		SpecificNPCBounceConfig snbc;
-		if (GetSpecificNPCBounceConfigForActor(actor, snbc))
-		{
-			t.second.updateConfig(actor, snbc.config[section], snbc.config0weight[section]);
-		}
-		else
-		{
-			t.second.updateConfig(actor, config[section], config0weight[section]);
+			SpecificNPCBounceConfig snbc;
+			if (GetSpecificNPCBounceConfigForActor(actor, snbc))
+			{
+				tt.second.updateConfig(actor, snbc.config[section], snbc.config0weight[section]);
+			}
+			else
+			{
+				tt.second.updateConfig(actor, config[section], config0weight[section]);
+			}
 		}
 	}
 	return true;

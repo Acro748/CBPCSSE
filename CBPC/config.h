@@ -368,7 +368,7 @@ void printSpheresMessage(std::string message, std::vector<Sphere> spheres);
 
 std::vector<std::string> ConfigLineVectorToStringVector(std::vector<ConfigLine> linesList);
 
-extern std::vector<std::string> affectedBones;
+extern std::vector<std::vector<std::string>> affectedBones;
 
 bool GetSpecificNPCConfigForActor(Actor * actor, SpecificNPCConfig &snc);
 

@@ -31,7 +31,7 @@ std::vector<ConfigLine> AffectedNodesList; //Nodes that can be collided with
 
 std::vector<ConfigLine> ColliderNodesList; //Nodes that can collide nodes
 
-std::vector<std::string> affectedBones;
+std::vector<std::vector<std::string>> affectedBones;
 
 
 
@@ -446,9 +446,9 @@ void loadConfig() {
 		for (auto& it : configMap)
 		{
 			//100 weight
-			config[it.second]["stiffness"] = 0.5f;
+			config[it.second]["stiffness"] = 0.0f;
 			config[it.second]["stiffness2"] = 0.0f;
-			config[it.second]["damping"] = 0.2f;
+			config[it.second]["damping"] = 0.0f;
 			config[it.second]["maxoffset"] = 0.0f;
 			config[it.second]["Xmaxoffset"] = 5.0f;
 			config[it.second]["Xminoffset"] = -5.0f;
@@ -466,7 +466,7 @@ void loadConfig() {
 			config[it.second]["linearX"] = 0.0f;
 			config[it.second]["linearY"] = 0.0f;
 			config[it.second]["linearZ"] = 0.0f;
-			config[it.second]["rotationalX"] = 0.1f;
+			config[it.second]["rotationalX"] = 0.0f;
 			config[it.second]["rotationalY"] = 0.0f;
 			config[it.second]["rotationalZ"] = 0.0f;
 			config[it.second]["linearXrotationX"] = 0.0f;
@@ -508,9 +508,9 @@ void loadConfig() {
 			config[it.second]["collisionZminoffset"] = -100.0f;
 
 			//0 weight
-			config0weight[it.second]["stiffness"] = 0.5f;
+			config0weight[it.second]["stiffness"] = 0.0f;
 			config0weight[it.second]["stiffness2"] = 0.0f;
-			config0weight[it.second]["damping"] = 0.2f;
+			config0weight[it.second]["damping"] = 0.0f;
 			config0weight[it.second]["maxoffset"] = 0.0f;
 			config0weight[it.second]["Xmaxoffset"] = 5.0f;
 			config0weight[it.second]["Xminoffset"] = -5.0f;
@@ -528,7 +528,7 @@ void loadConfig() {
 			config0weight[it.second]["linearX"] = 0.0f;
 			config0weight[it.second]["linearY"] = 0.0f;
 			config0weight[it.second]["linearZ"] = 0.0f;
-			config0weight[it.second]["rotationalX"] = 0.1f;
+			config0weight[it.second]["rotationalX"] = 0.0f;
 			config0weight[it.second]["rotationalY"] = 0.0f;
 			config0weight[it.second]["rotationalZ"] = 0.0f;
 			config0weight[it.second]["linearXrotationX"] = 0.0f;
@@ -628,9 +628,9 @@ void loadConfig() {
 										for (auto& it : configMap)
 										{
 											//100 weight
-											newNPCBounceConfig.config[it.second]["stiffness"] = 0.5f;
+											newNPCBounceConfig.config[it.second]["stiffness"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["stiffness2"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["damping"] = 0.2f;
+											newNPCBounceConfig.config[it.second]["damping"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["maxoffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["Xmaxoffset"] = 5.0f;
 											newNPCBounceConfig.config[it.second]["Xminoffset"] = -5.0f;
@@ -648,7 +648,7 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["linearX"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearY"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearZ"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["rotationalX"] = 0.1f;
+											newNPCBounceConfig.config[it.second]["rotationalX"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["rotationalY"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["rotationalZ"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearXrotationX"] = 0.0f;
@@ -690,9 +690,9 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["collisionZminoffset"] = -100.0f;
 
 											//0 weight
-											newNPCBounceConfig.config0weight[it.second]["stiffness"] = 0.5f;
+											newNPCBounceConfig.config0weight[it.second]["stiffness"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["stiffness2"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["damping"] = 0.2f;
+											newNPCBounceConfig.config0weight[it.second]["damping"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["maxoffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["Xmaxoffset"] = 5.0f;
 											newNPCBounceConfig.config0weight[it.second]["Xminoffset"] = -5.0f;
@@ -710,7 +710,7 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["linearX"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearY"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearZ"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["rotationalX"] = 0.1f;
+											newNPCBounceConfig.config0weight[it.second]["rotationalX"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["rotationalY"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["rotationalZ"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearXrotationX"] = 0.0f;
@@ -1055,6 +1055,8 @@ void loadMasterConfig()
 		{
 			std::string line;
 			std::string currentSetting;
+			bool isChain = false;
+			std::vector<std::string> affectedBonesList;
 			while (std::getline(file, line))
 			{
 				//trim(line);
@@ -1086,22 +1088,49 @@ void loadMasterConfig()
 						}
 						else if (currentSetting == "[ConfigMap]")
 						{
-							std::string variableName;
-							std::string conditions;
-							std::string variableValue = GetConfigSettings2StringValues(line, variableName, conditions);
-							if (std::find(affectedBones.begin(), affectedBones.end(), variableName) == affectedBones.end())
+							if (line.substr(0, 1) == "<")
 							{
-								affectedBones.emplace_back(variableName);
+								isChain = true;
 							}
+							else if (line.substr(0, 1) == ">")
+							{
+								isChain = false;
+								affectedBones.emplace_back(affectedBonesList);
+								affectedBonesList.clear();
+							}
+							else
+							{
+								std::string variableName;
+								std::string conditions;
+								std::string variableValue = GetConfigSettings2StringValues(line, variableName, conditions);
+								bool isFound = false;
+								for (int i = 0; i < affectedBones.size(); i++)
+								{
+									if (std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), variableName) != affectedBones.at(i).end())
+									{
+										isFound = true;
+									}
+								}
 
-							if (variableValue != "")
-							{
-								configMap[variableName] = variableValue;
-								LOG("ConfigMap[%s] = %s = %s", variableName.c_str(), variableValue.c_str(), conditions.c_str());
-							}
-							if (conditions != "")
-							{
-								nodeConditionsMap[variableName] = ParseConditions(conditions);
+								if (!isFound)
+								{
+									affectedBonesList.emplace_back(variableName);
+									if (!isChain)
+									{
+										affectedBones.emplace_back(affectedBonesList);
+										affectedBonesList.clear();
+									}
+								}
+
+								if (variableValue != "")
+								{
+									configMap[variableName] = variableValue;
+									LOG("ConfigMap[%s] = %s = %s", variableName.c_str(), variableValue.c_str(), conditions.c_str());
+								}
+								if (conditions != "")
+								{
+									nodeConditionsMap[variableName] = ParseConditions(conditions);
+								}
 							}
 						}
 					}
@@ -1136,6 +1165,8 @@ void loadMasterConfig()
 				{
 					std::string line;
 					std::string currentSetting;
+					bool isChain = false;
+					std::vector<std::string> affectedBonesList;
 					while (std::getline(file, line))
 					{
 						//trim(line);
@@ -1164,22 +1195,49 @@ void loadMasterConfig()
 								}
 								else if (currentSetting == "[ConfigMap]")
 								{
-									std::string variableName;
-									std::string conditions;
-									std::string variableValue = GetConfigSettings2StringValues(line, variableName, conditions);
-									if (std::find(affectedBones.begin(), affectedBones.end(), variableName) == affectedBones.end())
+									if (line.substr(0, 1) == "<")
 									{
-										affectedBones.emplace_back(variableName);
+										isChain = true;
 									}
+									else if (line.substr(0, 1) == ">")
+									{
+										isChain = false;
+										affectedBones.emplace_back(affectedBonesList);
+										affectedBonesList.clear();
+									}
+									else
+									{
+										std::string variableName;
+										std::string conditions;
+										std::string variableValue = GetConfigSettings2StringValues(line, variableName, conditions);
+										bool isFound = false;
+										for (int i = 0; i < affectedBones.size(); i++)
+										{
+											if (std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), variableName) != affectedBones.at(i).end())
+											{
+												isFound = true;
+											}
+										}
 
-									if (variableValue != "")
-									{
-										configMap[variableName] = variableValue;
-										LOG("ConfigMap[%s] = %s = %s", variableName.c_str(), variableValue.c_str(), conditions.c_str());
-									}
-									if (conditions != "")
-									{
-										nodeConditionsMap[variableName] = ParseConditions(conditions);
+										if (!isFound)
+										{
+											affectedBonesList.emplace_back(variableName);
+											if (!isChain)
+											{
+												affectedBones.emplace_back(affectedBonesList);
+												affectedBonesList.clear();
+											}
+										}
+
+										if (variableValue != "")
+										{
+											configMap[variableName] = variableValue;
+											LOG("ConfigMap[%s] = %s = %s", variableName.c_str(), variableValue.c_str(), conditions.c_str());
+										}
+										if (conditions != "")
+										{
+											nodeConditionsMap[variableName] = ParseConditions(conditions);
+										}
 									}
 								}
 							}

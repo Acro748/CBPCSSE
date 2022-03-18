@@ -47,7 +47,7 @@ class SimObj {
 	UInt32 id = 0;
 	bool bound = false;
 public:
-	std::unordered_map<const char *, Thing> things;
+	std::unordered_map<const char *, std::unordered_map<const char*, Thing>> things;
 	std::unordered_map<std::string, Collision> actorColliders;
 	std::unordered_map<std::string, NiPoint3> NodeCollisionSync;
 
