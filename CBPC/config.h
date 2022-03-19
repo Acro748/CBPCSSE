@@ -79,6 +79,8 @@ extern std::vector<std::string> bellybulgenodesList;
 
 extern float vaginaOpeningLimit;
 extern float vaginaOpeningMultiplier;
+extern float anusOpeningLimit;
+extern float anusOpeningMultiplier;
 extern float bellyBulgeReturnTime;
 
 //extern std::vector<std::string> extraRacesList;

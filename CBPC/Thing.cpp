@@ -6,6 +6,7 @@ BSFixedString backPus("VaginaB1");
 BSFixedString frontPus("Clitoral1");
 BSFixedString belly("HDT Belly");
 BSFixedString pelvis("NPC Pelvis [Pelv]");
+//BSFixedString spine1("NPC Spine1 [Spn1]");
 BSFixedString highheel("NPC");
 
 //## thing_Refresh_node_lock
@@ -75,6 +76,8 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	{
 		thingCollisionSpheres = CreateThingCollisionSpheres(actor, pelvis.data);
 		thingCollisionCapsules = CreateThingCollisionCapsules(actor, pelvis.data);
+		//thingCollisionSpheres = CreateThingCollisionSpheres(actor, spine1.data);
+		//thingCollisionCapsules = CreateThingCollisionCapsules(actor, spine1.data);
 	}
 	else
 	{
@@ -710,9 +713,12 @@ void Thing::updatePelvis(Actor *actor)
 	thing_ReadNode_lock.lock();
 	NiAVObject* leftPusObj = loadedState->node->GetObjectByName(&leftPus.data);
 	NiAVObject* rightPusObj = loadedState->node->GetObjectByName(&rightPus.data);
+	NiAVObject* backPusObj = loadedState->node->GetObjectByName(&backPus.data);
+	NiAVObject* frontPusObj = loadedState->node->GetObjectByName(&frontPus.data);
+	NiAVObject* pelvisObj = loadedState->node->GetObjectByName(&pelvis.data);
 	thing_ReadNode_lock.unlock();
 
-	if (!leftPusObj || !rightPusObj)
+	if (!leftPusObj || !rightPusObj || !backPusObj || !frontPusObj || !pelvisObj)
 	{
 		return;
 	}
@@ -754,8 +760,40 @@ void Thing::updatePelvis(Actor *actor)
 			{
 				rightPussyDefaultPos = posMap->second;
 			}
+
+			auto backpair = std::make_pair(actor->baseForm->formID, backPus.data);
+			posMap = thingDefaultPosList.find(backpair);
+
+			if (posMap == thingDefaultPosList.end())
+			{
+				//Add it to the list
+				backPussyDefaultPos = backPusObj->m_localTransform.pos;
+				thingDefaultPosList[backpair] = backPussyDefaultPos;
+				LOG("Adding %s to default list for %08x -> %g %g %g", backPus.data, actor->baseForm->formID, backPussyDefaultPos.x, backPussyDefaultPos.y, backPussyDefaultPos.z);
+
+			}
+			else
+			{
+				backPussyDefaultPos = posMap->second;
+			}
+
+			auto frontpair = std::make_pair(actor->baseForm->formID, frontPus.data);
+			posMap = thingDefaultPosList.find(frontpair);
+
+			if (posMap == thingDefaultPosList.end())
+			{
+				//Add it to the list
+				frontPussyDefaultPos = frontPusObj->m_localTransform.pos;
+				thingDefaultPosList[frontpair] = frontPussyDefaultPos;
+				LOG("Adding %s to default list for %08x -> %g %g %g", frontPus.data, actor->baseForm->formID, frontPussyDefaultPos.x, frontPussyDefaultPos.y, frontPussyDefaultPos.z);
+
+			}
+			else
+			{
+				frontPussyDefaultPos = posMap->second;
+			}
 			thing_map_lock.unlock();
-			LOG_INFO("Left pussy default pos -> %g %g %g , Right pussy default pos ->  %g %g %g", leftPussyDefaultPos.x, leftPussyDefaultPos.y, leftPussyDefaultPos.z, rightPussyDefaultPos.x, rightPussyDefaultPos.y, rightPussyDefaultPos.z);
+			LOG_INFO("Left pussy default pos -> %g %g %g , Right pussy default pos ->  %g %g %g , Back pussy default pos ->  %g %g %g , Front pussy default pos ->  %g %g %g", leftPussyDefaultPos.x, leftPussyDefaultPos.y, leftPussyDefaultPos.z, rightPussyDefaultPos.x, rightPussyDefaultPos.y, rightPussyDefaultPos.z, backPussyDefaultPos.x, backPussyDefaultPos.y, backPussyDefaultPos.z, frontPussyDefaultPos.x, frontPussyDefaultPos.y, frontPussyDefaultPos.z);
 		}
 		
 		//There's nothing problem with editing, but if editing once then all node world positions are updated.
@@ -763,6 +801,8 @@ void Thing::updatePelvis(Actor *actor)
 		thing_SetNode_lock.lock();
 		leftPusObj->m_localTransform.pos = leftPussyDefaultPos;
 		rightPusObj->m_localTransform.pos = rightPussyDefaultPos;
+		backPusObj->m_localTransform.pos = backPussyDefaultPos;
+		frontPusObj->m_localTransform.pos = frontPussyDefaultPos;
 		thing_SetNode_lock.unlock();
 	}
 
@@ -776,14 +816,7 @@ void Thing::updatePelvis(Actor *actor)
 
 	NiMatrix33 pelvisRotation;
 	NiPoint3 pelvisPosition;
-	
-	thing_ReadNode_lock.lock();
-	NiAVObject* pelvisObj = loadedState->node->GetObjectByName(&pelvis.data);
-	thing_ReadNode_lock.unlock();
 
-	if (!pelvisObj)
-		return;
-	
 	pelvisRotation = pelvisObj->m_worldTransform.rot;
 	pelvisPosition = pelvisObj->m_worldTransform.pos;
 
@@ -843,6 +876,7 @@ void Thing::updatePelvis(Actor *actor)
 				InterlockedIncrement(&callCount);
 				partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
+				//now not that do reach max value just by get closer and just affected by the collider size
 				collisionDiff = partitions[id].partitionCollisions[i].CheckPelvisCollision(thingCollisionSpheres, thingCollisionCapsules);
 				collisionVector = collisionVector + collisionDiff;
 			}
@@ -853,22 +887,34 @@ void Thing::updatePelvis(Actor *actor)
 	
 	NiPoint3 leftVector = collisionVector;
 	NiPoint3 rightVector = collisionVector;
+	NiPoint3 backVector = collisionVector;
+	NiPoint3 frontVector = collisionVector;
 
 	float opening = distance(collisionVector, emptyPoint);
 
-	CalculateDiffVagina(leftVector, opening, true);
-	CalculateDiffVagina(rightVector, opening, false);
+	CalculateDiffVagina(leftVector, opening, true, true);
+	CalculateDiffVagina(rightVector, opening, true, false);
+	CalculateDiffVagina(backVector, opening, false, true);
+	CalculateDiffVagina(frontVector, opening, false, false);
 
 	NormalizeNiPoint(leftVector, thing_vaginaOpeningLimit*-1.0f, thing_vaginaOpeningLimit);
 	NormalizeNiPoint(rightVector, thing_vaginaOpeningLimit*-1.0f, thing_vaginaOpeningLimit);
+	backVector.y = clamp(backVector.y, thing_vaginaOpeningLimit*-0.5f, thing_vaginaOpeningLimit*0.5f);
+	backVector.z = clamp(backVector.z, thing_vaginaOpeningLimit*-0.165f, thing_vaginaOpeningLimit*0.165f);
+	frontVector.y = clamp(frontVector.y, thing_vaginaOpeningLimit*-0.125f, thing_vaginaOpeningLimit*0.125f);
+	frontVector.z = clamp(frontVector.z, thing_vaginaOpeningLimit*-0.25f, thing_vaginaOpeningLimit*0.25f);
 	
 	thing_SetNode_lock.lock();
 	leftPusObj->m_localTransform.pos = leftPussyDefaultPos + leftVector;
 	rightPusObj->m_localTransform.pos = rightPussyDefaultPos + rightVector;
+	backPusObj->m_localTransform.pos = backPussyDefaultPos + backVector;
+	frontPusObj->m_localTransform.pos = frontPussyDefaultPos + frontVector;
 	thing_SetNode_lock.unlock();
 
 	RefreshNode(leftPusObj);
 	RefreshNode(rightPusObj);
+	RefreshNode(backPusObj);
+	RefreshNode(frontPusObj);
 	/*QueryPerformanceCounter(&endingTime);
 	elapsedMicroseconds.QuadPart = endingTime.QuadPart - startingTime.QuadPart;
 	elapsedMicroseconds.QuadPart *= 1000000000LL;
@@ -876,6 +922,10 @@ void Thing::updatePelvis(Actor *actor)
 	LOG("Thing.updatePelvis() Update Time = %lld ns\n", elapsedMicroseconds.QuadPart);*/
 }
 
+// Is it possible to replace the bellybulge trigger condition with spine1 instead of pelvis?
+// Since the root node of belly node is spine1, so belly bulge is possible without opening vagina even during the anal sex
+// and also no need to define a separate bellybulgenodes
+// However all existing collision configs must be replaced for bellybulge...
 bool Thing::ApplyBellyBulge(Actor * actor)
 {
 	if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState || !(*g_thePlayer)->loadedState->node)
@@ -890,9 +940,10 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 
 	thing_ReadNode_lock.lock();
 	NiAVObject* bellyObj = actor->loadedState->node->GetObjectByName(&belly.data);
+	NiAVObject* pelvisObj = actor->loadedState->node->GetObjectByName(&pelvis.data);
 	thing_ReadNode_lock.unlock();
 
-	if (!bellyObj)
+	if (!bellyObj || !pelvisObj)
 		return false;
 
 	if(updateBellyFirstRun)
@@ -930,14 +981,6 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 		thing_map_lock.unlock();
 		LOG_INFO("Belly default pos -> %g %g %g", bellyDefaultPos.x, bellyDefaultPos.y, bellyDefaultPos.z);
 	}
-
-	thing_ReadNode_lock.lock();
-	NiAVObject* pelvisObj = actor->loadedState->node->GetObjectByName(&pelvis.data);
-	thing_ReadNode_lock.unlock();
-
-	if (!pelvisObj)
-		return false;
-
 
 	pelvisRotation = pelvisObj->m_worldTransform.rot;
 	pelvisPosition = pelvisObj->m_worldTransform.pos;
@@ -998,6 +1041,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 
 						partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
+						//now not that do reach max value just by get closer and just affected by the collider size
 						collisionDiff = partitions[id].partitionCollisions[i].CheckPelvisCollision(thingCollisionSpheres, thingCollisionCapsules);
 
 						if (!CompareNiPoints(collisionDiff, emptyPoint))
@@ -1683,17 +1727,31 @@ void Thing::update(Actor* actor) {
 	LOG("Thing.update() Update Time = %lld ns\n", elapsedMicroseconds.QuadPart);*/
 }
 
-void Thing::CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool left)
+void Thing::CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback)
 {
 	if (opening > 0)
 	{
-		if (left)
+		if (isleftandright)
 		{
-			collisionDiff = NiPoint3(thing_vaginaOpeningMultiplier*-1, 0, 0)*(opening / 3);
+			if (leftORback)
+			{
+				collisionDiff = NiPoint3(thing_vaginaOpeningMultiplier * -1, 0, 0) * (opening * 0.5f);
+			}
+			else
+			{
+				collisionDiff = NiPoint3(thing_vaginaOpeningMultiplier, 0, 0) * (opening * 0.5f);
+			}
 		}
 		else
 		{
-			collisionDiff = NiPoint3(thing_vaginaOpeningMultiplier, 0, 0)*(opening / 3);
+			if (leftORback)
+			{
+				collisionDiff = NiPoint3(0, thing_vaginaOpeningMultiplier * -0.75f, thing_vaginaOpeningMultiplier * 0.25f) * (opening * 0.5f);
+			}
+			else
+			{
+				collisionDiff = NiPoint3(0, thing_vaginaOpeningMultiplier * 0.125f, thing_vaginaOpeningMultiplier * -0.25f) * (opening * 0.5f);
+			}
 		}
 	}
 	else

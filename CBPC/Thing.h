@@ -272,7 +272,7 @@ public:
 	void update(Actor *actor);
 	void updatePelvis(Actor *actor);
 	bool ApplyBellyBulge(Actor * actor);
-	void CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool left);
+	void CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback);
 	void reset();
 
 	static float remap(float value, float start1, float stop1, float start2, float stop2) 
@@ -305,6 +305,8 @@ public:
 	bool updatePussyFirstRun = true;
 	NiPoint3 leftPussyDefaultPos;
 	NiPoint3 rightPussyDefaultPos;
+	NiPoint3 backPussyDefaultPos;
+	NiPoint3 frontPussyDefaultPos;
 
 	bool updateBellyFirstRun = true;
 	NiPoint3 bellyDefaultPos;
