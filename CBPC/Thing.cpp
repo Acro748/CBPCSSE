@@ -6,7 +6,7 @@ BSFixedString backPus("VaginaB1");
 BSFixedString frontPus("Clitoral1");
 BSFixedString belly("HDT Belly");
 BSFixedString pelvis("NPC Pelvis [Pelv]");
-//BSFixedString spine1("NPC Spine1 [Spn1]");
+//BSFixedString spine1("NPC Spine1 [Spn1]"); //suggest reading comments on the bellybullge function
 BSFixedString highheel("NPC");
 
 //## thing_Refresh_node_lock
@@ -76,7 +76,7 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	{
 		thingCollisionSpheres = CreateThingCollisionSpheres(actor, pelvis.data);
 		thingCollisionCapsules = CreateThingCollisionCapsules(actor, pelvis.data);
-		//thingCollisionSpheres = CreateThingCollisionSpheres(actor, spine1.data);
+		//thingCollisionSpheres = CreateThingCollisionSpheres(actor, spine1.data); //suggest reading comments on the bellybullge function
 		//thingCollisionCapsules = CreateThingCollisionCapsules(actor, spine1.data);
 	}
 	else
