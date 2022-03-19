@@ -287,6 +287,7 @@ bool compareConfigs(const SpecificNPCConfig& config1, const SpecificNPCConfig& c
 bool compareBounceConfigs(const SpecificNPCBounceConfig& config1, const SpecificNPCBounceConfig& config2);
 
 bool GetSpecificNPCBounceConfigForActor(Actor* actor, SpecificNPCBounceConfig& snbc);
+bool IsConfigActuallyAllocated(SpecificNPCBounceConfig snbc, std::string section); //If the config of that part is not set and just set to default, return false
 
 #ifdef RUNTIME_VR_VERSION_1_4_15
 extern std::vector<std::string> PlayerNodeLines;
@@ -368,6 +369,7 @@ void printSpheresMessage(std::string message, std::vector<Sphere> spheres);
 
 std::vector<std::string> ConfigLineVectorToStringVector(std::vector<ConfigLine> linesList);
 
+//The basic unit is parallel processing, but some physics chain nodes need sequential loading
 extern std::vector<std::vector<std::string>> affectedBones;
 
 bool GetSpecificNPCConfigForActor(Actor * actor, SpecificNPCConfig &snc);

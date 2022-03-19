@@ -1160,8 +1160,6 @@ void Thing::update(Actor* actor) {
 
 	float varGravityBias = gravityBias;
 
-	//The x, y, z axes expand according to the node scale
-	//so need to correct them in order to change the x, y, z move distances absolutely rather than relative
 	float varLinearX = linearX;
 	float varLinearY = linearY;
 	float varLinearZ = linearZ;

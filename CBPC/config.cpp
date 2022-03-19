@@ -31,6 +31,7 @@ std::vector<ConfigLine> AffectedNodesList; //Nodes that can be collided with
 
 std::vector<ConfigLine> ColliderNodesList; //Nodes that can collide nodes
 
+//The basic unit is parallel processing, but some physics chain nodes need sequential loading
 std::vector<std::vector<std::string>> affectedBones;
 
 
@@ -2575,6 +2576,26 @@ bool GetSpecificNPCBounceConfigForActor(Actor* actor, SpecificNPCBounceConfig& s
 	}
 
 	return false;
+}
+
+//If the config of that part is not set and just set to default, return false
+bool IsConfigActuallyAllocated(SpecificNPCBounceConfig snbc, std::string section)
+{
+	return (snbc.config[section]["stiffness"] >= 0.0001f) || (snbc.config0weight[section]["stiffness"] >= 0.0001f) //Doesn't set physics config?
+		|| (snbc.config[section]["stiffness2"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2"] >= 0.0001f)
+		|| (snbc.config[section]["damping"] >= 0.0001f) || (snbc.config0weight[section]["damping"] >= 0.0001f)
+		|| (snbc.config[section]["collisionXmaxoffset"] >= 100.0001f) || (snbc.config[section]["collisionXmaxoffset"] <= 99.9999f) //Doesn't set collision config?
+		|| (snbc.config0weight[section]["collisionXmaxoffset"] >= 100.0001f) || (snbc.config0weight[section]["collisionXmaxoffset"] <= 99.9999f)
+		|| (snbc.config[section]["collisionXminoffset"] <= -100.0001f) || (snbc.config[section]["collisionXminoffset"] >= -99.9999f)
+		|| (snbc.config0weight[section]["collisionXminoffset"] <= -100.0001f) || (snbc.config0weight[section]["collisionXminoffset"] >= -99.9999f)
+		|| (snbc.config[section]["collisionYmaxoffset"] >= 100.0001f) || (snbc.config[section]["collisionYmaxoffset"] <= 99.9999f)
+		|| (snbc.config0weight[section]["collisionYmaxoffset"] >= 100.0001f) || (snbc.config0weight[section]["collisionYmaxoffset"] <= 99.9999f)
+		|| (snbc.config[section]["collisionYminoffset"] <= -100.0001f) || (snbc.config[section]["collisionYminoffset"] >= -99.9999f)
+		|| (snbc.config0weight[section]["collisionYminoffset"] <= -100.0001f) || (snbc.config0weight[section]["collisionYminoffset"] >= -99.9999f)
+		|| (snbc.config[section]["collisionZmaxoffset"] >= 100.0001f) || (snbc.config[section]["collisionZmaxoffset"] <= 99.9999f)
+		|| (snbc.config0weight[section]["collisionZmaxoffset"] >= 100.0001f) || (snbc.config0weight[section]["collisionZmaxoffset"] <= 99.9999f)
+		|| (snbc.config[section]["collisionZminoffset"] <= -100.0001f) || (snbc.config[section]["collisionZminoffset"] >= -99.9999f)
+		|| (snbc.config0weight[section]["collisionZminoffset"] <= -100.0001f) || (snbc.config0weight[section]["collisionZminoffset"] >= -99.9999f);
 }
 
 bool CheckActorForConditions(Actor* actor, Conditions &conditions)

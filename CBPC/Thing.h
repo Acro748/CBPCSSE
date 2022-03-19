@@ -31,9 +31,9 @@ public:
 	bool IsRightBreastBone = false;
 	bool IsBellyBone = false;
 
-	float stiffness = 0.5f;
+	float stiffness = 0.0f;
 	float stiffness2 = 0.0f;
-	float damping = 0.2f;
+	float damping = 0.0f;
 	float maxOffset = 0.0f;
 	float XmaxOffset = 5.0f;
 	float XminOffset = -5.0f;
@@ -52,9 +52,9 @@ public:
 	float linearX = 0.0f;
 	float linearY = 0.0f;
 	float linearZ = 0.0f;
-	float rotationalXnew = 0.1f; //was originally rotational
-	float rotationalYnew = 0.1f;
-	float rotationalZnew = 0.1f;
+	float rotationalXnew = 0.0f; //was originally rotational
+	float rotationalYnew = 0.0f;
+	float rotationalZnew = 0.0f;
 	float linearXrotationX = 0.0f;
 	float linearXrotationY = 1.0f;
 	float linearXrotationZ = 0.0f;
@@ -102,9 +102,9 @@ public:
 	float collisionZminOffset = -100.0f;
 
 	//100 weight
-	float stiffness_100 = 0.5f;
+	float stiffness_100 = 0.0f;
 	float stiffness2_100 = 0.0f;
-	float damping_100 = 0.2f;
+	float damping_100 = 0.0f;
 	float maxOffset_100 = 0.0f;
 	float XmaxOffset_100 = 5.0f;
 	float XminOffset_100 = -5.0f;
@@ -123,9 +123,9 @@ public:
 	float linearX_100 = 0.0f;
 	float linearY_100 = 0.0f;
 	float linearZ_100 = 0.0f;
-	float rotationalXnew_100 = 0.1f; //was originally rotational
-	float rotationalYnew_100 = 0.1f;
-	float rotationalZnew_100 = 0.1f;
+	float rotationalXnew_100 = 0.0f; //was originally rotational
+	float rotationalYnew_100 = 0.0f;
+	float rotationalZnew_100 = 0.0f;
 	float linearXrotationX_100 = 0.0f;
 	float linearXrotationY_100 = 1.0f;
 	float linearXrotationZ_100 = 0.0f;
@@ -173,9 +173,9 @@ public:
 	float collisionZminOffset_100 = -100.0f;
 
 	//0 weight
-	float stiffness_0 = 0.5f;
+	float stiffness_0 = 0.0f;
 	float stiffness2_0 = 0.0f;
-	float damping_0 = 0.2f;
+	float damping_0 = 0.0f;
 	float maxOffset_0 = 0.0f; 
 	float XmaxOffset_0 = 5.0f;
 	float XminOffset_0 = -5.0f;
@@ -194,9 +194,9 @@ public:
 	float linearX_0 = 0.0f;
 	float linearY_0 = 0.0f;
 	float linearZ_0 = 0.0f;
-	float rotationalXnew_0 = 0.1f; //was originally rotational
-	float rotationalYnew_0 = 0.1f;
-	float rotationalZnew_0 = 0.1f;
+	float rotationalXnew_0 = 0.0f; //was originally rotational
+	float rotationalYnew_0 = 0.0f;
+	float rotationalZnew_0 = 0.0f;
 	float linearXrotationX_0 = 0.0f;
 	float linearXrotationY_0 = 1.0f;
 	float linearXrotationZ_0 = 0.0f;

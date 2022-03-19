@@ -136,7 +136,7 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 
 		if (!isStopPhysics)
 		{
-			for (auto& tt : t.second)
+			for (auto& tt : t.second) //The basic unit is parallel processing, but some physics chain nodes need sequential loading
 			{
 				tt.second.ActorCollisionsEnabled = CollisionsEnabled;
 				tt.second.GroundCollisionEnabled = GroundCollisionEnabled;
@@ -169,7 +169,8 @@ bool SimObj::updateConfig(Actor* actor) {
 			//LOG("config section:[%s]", section.c_str());
 
 			SpecificNPCBounceConfig snbc;
-			if (GetSpecificNPCBounceConfigForActor(actor, snbc))
+			//If the config of that part is not set and just set to default, run to no condition
+			if (GetSpecificNPCBounceConfigForActor(actor, snbc) && IsConfigActuallyAllocated(snbc, section))
 			{
 				tt.second.updateConfig(actor, snbc.config[section], snbc.config0weight[section]);
 			}

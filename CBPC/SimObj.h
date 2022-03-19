@@ -47,6 +47,7 @@ class SimObj {
 	UInt32 id = 0;
 	bool bound = false;
 public:
+	//The basic unit is parallel processing, but some physics chain nodes need sequential loading
 	std::unordered_map<const char *, std::unordered_map<const char*, Thing>> things;
 	std::unordered_map<std::string, Collision> actorColliders;
 	std::unordered_map<std::string, NiPoint3> NodeCollisionSync;
