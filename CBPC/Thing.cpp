@@ -2,6 +2,8 @@
 
 BSFixedString leftPus("NPC L Pussy02");
 BSFixedString rightPus("NPC R Pussy02");
+BSFixedString backPus("VaginaB1");
+BSFixedString frontPus("Clitoral1");
 BSFixedString belly("HDT Belly");
 BSFixedString pelvis("NPC Pelvis [Pelv]");
 BSFixedString highheel("NPC");
@@ -1635,10 +1637,14 @@ void Thing::update(Actor* actor) {
 
 		//LOG("After Maybe Collision Stuff End");
 	}
-	// The remaining problem is that when fps is unstable or don't get 60 or higher, if used collisionElastic then it becomes unstable in the colliding state
-	// to solve this, calculate physics without "collisionElastic" then use it to correct the result of calculation physics with "collisionElastic"
+	// The remaining problem is that when fps is unstable or don't get 60 or higher or located in some colliding position
+	// if used collisionElastic and the colliding continues (It's okay to that collision like hitting) then it becomes unstable in the colliding state
+	// However in the case of a chain physics nodes like 3BB breasts, this instability seems to be offset to a large extent so will get good results
+	// to perfect solve this, calculate physics without "collisionElastic" then use it to correct the result of calculation physics with "collisionElastic"
 	// but the solution is very heavy because it has to go through twice or more physics calculations in one frame
-	// so... if there is anything else to do, i suggest doing it instead of solve this
+	// so... i suggest that don't use collisionElastic as a standard and just only use some part like chain physics nodes
+	// and if there is anything else to do, i suggest doing it instead of solve this
+	// If it's very optimized later or there's margin for performance or planning to create a "high-end option", then we can consider adding it!
 
 	//Logging
 	if (logging != 0)

@@ -260,7 +260,7 @@ bool CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collisi
 
 	for (int j = 0; j < ColliderNodesListPtr->size(); j++)
 	{
-		if (GroundReferenceBoneName.compare(ColliderNodesListPtr->at(j).NodeName) == 0)
+		if (GroundReferenceBoneName.compare(ColliderNodesListPtr->at(j).NodeName) == 0) //detecting NPC Root [Root] node for ground collision
 		{
 			GroundCollisionEnabled = true;
 			continue;
