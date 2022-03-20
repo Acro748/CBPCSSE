@@ -1,0 +1,28 @@
+# START ExtraBreast
+
+# Gravity correction when the player is upside down (fixes magically floating breasts)
+ExtraBreast1L.gravityInvertedCorrection -4.0 -4.0
+ExtraBreast2L.gravityInvertedCorrection -5.5 -5.5
+ExtraBreast3L.gravityInvertedCorrection -0.6 -0.6
+ExtraBreast1R.gravityInvertedCorrection -4.0 -4.0
+ExtraBreast2R.gravityInvertedCorrection -5.5 -5.5
+ExtraBreast3R.gravityInvertedCorrection -0.6 -0.6
+
+# At which point the inverted gravity will start to affect gravity (0.25 to ignore small angles when walking/running for example)
+ExtraBreast1L.gravityInvertedCorrectionStart 0.2 0.2
+ExtraBreast2L.gravityInvertedCorrectionStart 0.2 0.2
+ExtraBreast3L.gravityInvertedCorrectionStart 0.2 0.2
+ExtraBreast1R.gravityInvertedCorrectionStart 0.2 0.2
+ExtraBreast2R.gravityInvertedCorrectionStart 0.2 0.2
+ExtraBreast3R.gravityInvertedCorrectionStart 0.2 0.2
+
+
+# At which point the inverted gravity will stop to affect gravity more
+ExtraBreast1L.gravityInvertedCorrectionEnd 0.99 0.99
+ExtraBreast2L.gravityInvertedCorrectionEnd 0.99 0.99
+ExtraBreast3L.gravityInvertedCorrectionEnd 0.99 0.99
+ExtraBreast1R.gravityInvertedCorrectionEnd 0.99 0.99
+ExtraBreast2R.gravityInvertedCorrectionEnd 0.99 0.99
+ExtraBreast3R.gravityInvertedCorrectionEnd 0.99 0.99
+
+#Tuning.rate 300

@@ -1,0 +1,188 @@
+# START ExtraBreast
+
+# Linear spring stiffness 004
+ExtraBreast1L.stiffness 0.03 0.03
+ExtraBreast2L.stiffness 0.03 0.03
+ExtraBreast3L.stiffness 0.046 0.046
+
+# Quadratic Spring stiffness 0001
+ExtraBreast1L.stiffness2 0.0325 0.0325
+ExtraBreast2L.stiffness2 0.0225 0.0225
+ExtraBreast3L.stiffness2 0.00375 0.00375
+
+# Velocity removed/tick 1.0 would be all velocity removed 012
+ExtraBreast1L.damping 0.046 0.046
+ExtraBreast2L.damping 0.033 0.033
+ExtraBreast3L.damping 0.099 0.099
+
+# Maximum number of units positio can diverge from target 64
+ExtraBreast1L.Xmaxoffset 2.3 2.3
+ExtraBreast1L.Xminoffset -2.3 -2.3
+ExtraBreast1L.Ymaxoffset 2.3 2.3
+ExtraBreast1L.Yminoffset -0.8 -0.8
+ExtraBreast1L.Zmaxoffset 2.3 2.3
+ExtraBreast1L.Zminoffset -2.3 -2.3
+ExtraBreast2L.Xmaxoffset 2.76 2.76
+ExtraBreast2L.Xminoffset -2.76 -2.76
+ExtraBreast2L.Ymaxoffset 2.76 2.76
+ExtraBreast2L.Yminoffset -0.8 -0.8
+ExtraBreast2L.Zmaxoffset 2.76 2.76
+ExtraBreast2L.Zminoffset -2.76 -2.76
+ExtraBreast3L.Xmaxoffset 2.53 2.53
+ExtraBreast3L.Xminoffset -2.53 -2.53
+ExtraBreast3L.Ymaxoffset 2.53 2.53
+ExtraBreast3L.Yminoffset -0.8 -0.8
+ExtraBreast3L.Zmaxoffset 2.53 2.53
+ExtraBreast3L.Zminoffset -2.53 -2.53
+
+# Time Quanta for the physics in ms 4 means that a 16ms frame would be broken down into 4 4ms steps
+ExtraBreast1L.timetick 2.5 2.5
+ExtraBreast2L.timetick 2.25 2.25
+ExtraBreast3L.timetick 2.0 2.0
+
+# Scale of the motion in X/Y/Z - Side, FrontnBack, UpnDown
+ExtraBreast1L.linearX 0.5508 0.5508
+ExtraBreast1L.linearY 0.21 0.21
+ExtraBreast1L.linearZ 0.5812 0.5812
+ExtraBreast2L.linearX 0.5508 0.5508
+ExtraBreast2L.linearY 0.21 0.21
+ExtraBreast2L.linearZ 0.9259 0.9259
+ExtraBreast3L.linearX 0.5508 0.5508
+ExtraBreast3L.linearY 0.21 0.21
+ExtraBreast3L.linearZ 0.5706 0.5706
+
+# Scale of the bones rotation around the X axis
+ExtraBreast1L.rotationalX 0.07825 0.07825
+ExtraBreast1L.rotationalY 0.1065 0.1065
+ExtraBreast1L.rotationalZ -0.0665 -0.0665
+ExtraBreast2L.rotationalX 0.07605 0.07605
+ExtraBreast2L.rotationalY 0.1021 0.1021
+ExtraBreast2L.rotationalZ -0.1021 -0.1021
+ExtraBreast3L.rotationalX 0.0739 0.0739
+ExtraBreast3L.rotationalY 0.1078 0.1078
+ExtraBreast3L.rotationalZ -0.0878 -0.0878
+
+ExtraBreast1L.timeStep 0.50 0.50
+ExtraBreast2L.timeStep 0.60 0.60
+ExtraBreast3L.timeStep 0.55 0.55
+
+
+ExtraBreast1L.linearZrotationY -0.2 -0.2
+ExtraBreast2L.linearZrotationY -0.2 -0.2
+ExtraBreast3L.linearZrotationY -0.2 -0.2
+
+ExtraBreast1L.linearXspreadforceZ 0.4 0.4
+ExtraBreast2L.linearXspreadforceZ 0.4 0.4
+ExtraBreast3L.linearXspreadforceZ 0.4 0.4
+ExtraBreast1L.linearYspreadforceX 1.0 1.0
+ExtraBreast2L.linearYspreadforceX 1.0 1.0
+ExtraBreast3L.linearYspreadforceX 1.0 1.0
+ExtraBreast1L.linearZspreadforceX 1.0 1.0
+ExtraBreast2L.linearZspreadforceX 1.0 1.0
+ExtraBreast3L.linearZspreadforceX 1.0 1.0
+ExtraBreast1L.collisionFriction 0.05 0.05
+ExtraBreast2L.collisionFriction 0.05 0.05
+ExtraBreast3L.collisionFriction 0.05 0.05
+
+ExtraBreast1L.collisionElastic 1.0 1.0
+ExtraBreast2L.collisionElastic 1.0 1.0
+ExtraBreast3L.collisionElastic 1.0 1.0
+
+
+# END
+
+# START ExtraBreast
+
+# Linear spring stiffness 004
+ExtraBreast1R.stiffness 0.03 0.03
+ExtraBreast2R.stiffness 0.03 0.03
+ExtraBreast3R.stiffness 0.046 0.046
+
+# Quadratic Spring stiffness 0001
+ExtraBreast1R.stiffness2 0.0325 0.0325
+ExtraBreast2R.stiffness2 0.0225 0.0225
+ExtraBreast3R.stiffness2 0.00375 0.00375
+
+# Velocity removed/tick 1.0 would be all velocity removed 012
+ExtraBreast1R.damping 0.046 0.046
+ExtraBreast2R.damping 0.033 0.033
+ExtraBreast3R.damping 0.099 0.099
+
+# Maximum number of units positio can diverge from target 64
+ExtraBreast1R.Xmaxoffset 2.3 2.3
+ExtraBreast1R.Xminoffset -2.3 -2.3
+ExtraBreast1R.Ymaxoffset 2.3 2.3
+ExtraBreast1R.Yminoffset -2.3 -2.3
+ExtraBreast1R.Zmaxoffset 2.3 2.3
+ExtraBreast1R.Zminoffset -2.3 -2.3
+ExtraBreast2R.Xmaxoffset 2.76 2.76
+ExtraBreast2R.Xminoffset -2.76 -2.76
+ExtraBreast2R.Ymaxoffset 2.76 2.76
+ExtraBreast2R.Yminoffset -2.76 -2.76
+ExtraBreast2R.Zmaxoffset 2.76 2.76
+ExtraBreast2R.Zminoffset -2.76 -2.76
+ExtraBreast3R.Xmaxoffset 2.53 2.53
+ExtraBreast3R.Xminoffset -2.53 -2.53
+ExtraBreast3R.Ymaxoffset 2.53 2.53
+ExtraBreast3R.Yminoffset -2.53 -2.53
+ExtraBreast3R.Zmaxoffset 2.53 2.53
+ExtraBreast3R.Zminoffset -2.53 -2.53
+
+# Time Quanta for the physics in ms 4 means that a 16ms frame would be broken down into 4 4ms steps
+ExtraBreast1R.timetick 2.5 2.5
+ExtraBreast2R.timetick 2.25 2.25
+ExtraBreast3R.timetick 2.0 2.0
+
+# Scale of the motion in X/Y/Z - Side, FrontnBack, UpnDown
+ExtraBreast1R.linearX 0.5508 0.5508
+ExtraBreast1R.linearY 0.21 0.21
+ExtraBreast1R.linearZ 0.5812 0.5812
+ExtraBreast2R.linearX 0.5508 0.5508
+ExtraBreast2R.linearY 0.21 0.21
+ExtraBreast2R.linearZ 0.9259 0.9259
+ExtraBreast3R.linearX 0.5508 0.5508
+ExtraBreast3R.linearY 0.21 0.21
+ExtraBreast3R.linearZ 0.5706 0.5706
+
+# Scale of the bones rotation around the X axis
+ExtraBreast1R.rotationalX 0.07825 0.07825
+ExtraBreast1R.rotationalY 0.1065 0.1065
+ExtraBreast1R.rotationalZ 0.0665 0.0665
+ExtraBreast2R.rotationalX 0.07605 0.07605
+ExtraBreast2R.rotationalY 0.1021 0.1021
+ExtraBreast2R.rotationalZ 0.1021 0.1021
+ExtraBreast3R.rotationalX 0.0739 0.0739
+ExtraBreast3R.rotationalY 0.1078 0.1078
+ExtraBreast3R.rotationalZ 0.0878 0.0878
+
+ExtraBreast1R.timeStep 0.50 0.50
+ExtraBreast2R.timeStep 0.60 0.60
+ExtraBreast3R.timeStep 0.55 0.55
+
+ExtraBreast1R.linearZrotationY 0.2 0.2
+ExtraBreast2R.linearZrotationY 0.2 0.2
+ExtraBreast3R.linearZrotationY 0.2 0.2
+
+ExtraBreast1R.linearXspreadforceZ -0.4 -0.4
+ExtraBreast2R.linearXspreadforceZ -0.4 -0.4
+ExtraBreast3R.linearXspreadforceZ -0.4 -0.4
+ExtraBreast1R.linearYspreadforceX -1.0 -1.0
+ExtraBreast2R.linearYspreadforceX -1.0 -1.0
+ExtraBreast3R.linearYspreadforceX -1.0 -1.0
+ExtraBreast1R.linearZspreadforceX -1.0 -1.0
+ExtraBreast2R.linearZspreadforceX -1.0 -1.0
+ExtraBreast3R.linearZspreadforceX -1.0 -1.0
+
+ExtraBreast1R.collisionFriction 0.05 0.05
+ExtraBreast2R.collisionFriction 0.05 0.05
+ExtraBreast3R.collisionFriction 0.05 0.05
+
+ExtraBreast1R.collisionElastic 1.0 1.0
+ExtraBreast2R.collisionElastic 1.0 1.0
+ExtraBreast3R.collisionElastic 1.0 1.0
+
+
+# END
+
+
+#Tuning.rate 300

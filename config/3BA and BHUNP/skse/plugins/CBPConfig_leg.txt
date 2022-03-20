@@ -1,0 +1,132 @@
+# START Leg
+
+# Linear spring stiffness 004
+LFrontThigh.stiffness 0.015 0.015
+LRearThigh.stiffness 0.015 0.015
+LRearCalf.stiffness 0.015 0.015
+
+# Quadratic Spring stiffness 0001
+LFrontThigh.stiffness2 0.0041 0.0041
+LRearThigh.stiffness2 0.0041 0.0041
+LRearCalf.stiffness2 0.0041 0.0041
+
+# Velocity removed/tick 1.0 would be all velocity removed 012
+LFrontThigh.damping 0.0215 0.0215
+LRearThigh.damping 0.0175 0.0175
+LRearCalf.damping 0.0215 0.0215
+
+# Maximum number of units positio can diverge from target 64
+LFrontThigh.maxoffset 3.0 3.0
+LRearThigh.maxoffset 3.0 3.0
+LRearCalf.maxoffset 3.0 3.0
+
+# Time Quanta for the physics in ms 4 means that a 16ms frame would be broken down into 4 4ms steps
+LFrontThigh.timetick 2.5 2.5
+LRearThigh.timetick 2.5 2.5
+LRearCalf.timetick 2.5 2.5
+
+# Scale of the motion in X/Y/Z - Side, FrontnBack, UpnDown
+LFrontThigh.linearX 1.575 1.575
+LFrontThigh.linearY 0.98 0.98
+LFrontThigh.linearZ 1.225 1.225
+LRearThigh.linearX 2.1 2.1
+LRearThigh.linearY 1.05 1.05
+LRearThigh.linearZ 1.155 1.155
+LRearCalf.linearX 0.56 0.56
+LRearCalf.linearY 0.56 0.56
+LRearCalf.linearZ 0.385 0.385
+
+# Scale of the bones rotation around the X axis
+LFrontThigh.rotationalX 0.07 0.07
+LFrontThigh.rotationalY 0.2 0.2
+LFrontThigh.rotationalZ -0.2 -0.2
+LRearThigh.rotationalX 0.1 0.1
+LRearThigh.rotationalY 0.3 0.3
+LRearThigh.rotationalZ -0.3 -0.3
+LRearCalf.rotationalX 0.1 0.1
+LRearCalf.rotationalY 0.3 0.3
+LRearCalf.rotationalZ -0.3 -0.3
+
+LFrontThigh.timeStep 0.9 0.9
+LRearThigh.timeStep 0.8 0.8
+LRearCalf.timeStep 0.9 0.9
+
+LRearThigh.collisionXmaxoffset 5.0 5.0
+LRearThigh.collisionXminoffset -5.0 -5.0
+LRearThigh.collisionYmaxoffset 1.0 1.0
+LRearThigh.collisionYminoffset -5.0 -5.0
+LRearThigh.collisionZmaxoffset 5.0 5.0
+LRearThigh.collisionZminoffset -5.0 -5.0
+
+LRearThigh.collisionElastic 0.0 0.0
+
+LRearThigh.collisionMultipler 1.0 1.0
+LRearThigh.collisionMultiplerRot 1.0 1.0
+
+#############Right#################
+
+# Linear spring stiffness 004
+RFrontThigh.stiffness 0.015 0.015
+RRearThigh.stiffness 0.015 0.015
+RRearCalf.stiffness 0.015 0.015
+
+# Quadratic Spring stiffness 0001
+RFrontThigh.stiffness2 0.0041 0.0041
+RRearThigh.stiffness2 0.0041 0.0041
+RRearCalf.stiffness2 0.0041 0.0041
+
+# Velocity removed/tick 1.0 would be all velocity removed 012
+RFrontThigh.damping 0.0215 0.0215
+RRearThigh.damping 0.0175 0.0175
+RRearCalf.damping 0.0215 0.0215
+
+# Maximum number of units positio can diverge from target 64
+RFrontThigh.maxoffset 3.0 3.0
+RRearThigh.maxoffset 3.0 3.0
+RRearCalf.maxoffset 3.0 3.0
+
+# Time Quanta for the physics in ms 4 means that a 16ms frame would be broken down into 4 4ms steps
+RFrontThigh.timetick 2.5 2.5
+RRearThigh.timetick 2.5 2.5
+RRearCalf.timetick 2.5 2.5
+
+# Scale of the motion in X/Y/Z - Side, FrontnBack, UpnDown
+RFrontThigh.linearX 1.575 1.575
+RFrontThigh.linearY 0.98 0.98
+RFrontThigh.linearZ 1.225 1.225
+RRearThigh.linearX 2.1 2.1
+RRearThigh.linearY 1.05 1.05
+RRearThigh.linearZ 1.155 1.155
+RRearCalf.linearX 0.56 0.56
+RRearCalf.linearY 0.56 0.56
+RRearCalf.linearZ 0.385 0.385
+
+# Scale of the bones rotation around the X axis
+RFrontThigh.rotationalX 0.07 0.07
+RFrontThigh.rotationalY 0.2 0.2
+RFrontThigh.rotationalZ 0.2 0.2
+RRearThigh.rotationalX 0.1 0.1
+RRearThigh.rotationalY 0.3 0.3
+RRearThigh.rotationalZ 0.3 0.3
+RRearCalf.rotationalX 0.1 0.1
+RRearCalf.rotationalY 0.3 0.3
+RRearCalf.rotationalZ 0.3 0.3
+
+RFrontThigh.timeStep 0.9 0.9
+RRearThigh.timeStep 0.8 0.8
+RRearCalf.timeStep 0.9 0.9
+
+RRearThigh.collisionXmaxoffset 5.0 5.0
+RRearThigh.collisionXminoffset -5.0 -5.0
+RRearThigh.collisionYmaxoffset 1.0 1.0
+RRearThigh.collisionYminoffset -5.0 -5.0
+RRearThigh.collisionZmaxoffset 5.0 5.0
+RRearThigh.collisionZminoffset -5.0 -5.0
+
+RRearThigh.collisionElastic 0.0 0.0
+
+RRearThigh.collisionMultipler 1.0 1.0
+RRearThigh.collisionMultiplerRot 1.0 1.0
+
+
+# END

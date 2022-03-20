@@ -1,0 +1,185 @@
+# This is the bounce config. You have to define the Aliases like Breast, Butt, Belly first in CBPCMasterConfig.txt file.
+#
+# You can create multiple CBPConfig*****.txt files for conditions.
+#
+# You just need to have Conditions = ... line at the top. Make sure you have at least one config file that has all the settings for your nodes that doesn't have Conditions, so that it becomes default.
+# A Bounce config file with conditions needs to have ALL of the settings set in the same file. You can't create multiple conditioned bounce config files for the same conditions.
+#
+# Condition functions supported: IsRaceFormId(espname|000000), IsRaceName(string), ActorName(string), ActorFormId(espname|000000), IsInFaction(espname|000000), IsPlayerTeammate(), IsFemale(), HasKeywordId(espname|000000), HasKeywordName(string), IsActorBase(espname|000000), IsUnique(), IsVoiceType(espname|000000), IsCombatStyle(espname|000000), IsClass(espname|000000)
+# For formids, you can either use with espname: (espname|000000) or for Skyrim.esm, without the esp name: (00000000)
+# You can use multiple functions with AND and OR logical operations. They are splitted with AND first and then OR like CK syntax
+# You can prefix the functions with the word NOT for negative conditions like NOT IsFemale()
+#
+##############################################################################
+
+# Linear spring stiffness, higher is more jiggly
+Breast.stiffness 0.05
+
+# Quadratic Spring stiffness, higher is more jiggly
+Breast.stiffness2 0.01
+
+# Velocity removed/tick 1.0 would be all velocity removed 
+Breast.damping 0.08
+
+# Maximum and Minimum number of units position can diverge from target
+Breast.Xmaxoffset 5
+Breast.Xminoffset -5
+Breast.Ymaxoffset 5
+Breast.Yminoffset -5
+Breast.Zmaxoffset 5
+Breast.Zminoffset -5
+
+# Time Quanta for the physics in ms 4 means that a 16ms frame would be broken down into 4 4ms steps
+# Acts like inertia. Higher values make it keep its original position longer while moving.
+Breast.timetick 15
+
+# Scale of the motion in X/Y/Z - Y is front to back, Z up and down and X side to side
+Breast.linearX 2.6
+Breast.linearY 0.3
+Breast.linearZ 1.4
+
+# Allows the force of dissipated by min/maxoffsets to be spread in different directions
+Breast.linearXspreadforceY 0.0
+Breast.linearXspreadforceZ 0.0
+Breast.linearYspreadforceX 0.0
+Breast.linearYspreadforceZ 0.0
+Breast.linearZspreadforceX 0.0
+Breast.linearZspreadforceY 0.0
+
+# Scale of the bones rotation around the X/Y/Z axis
+Breast.rotationalX 0.13
+Breast.rotationalY 0.0
+Breast.rotationalZ 0.0
+
+# Deliver the linear force to the wanted rotation
+Breast.linearXrotationX 0.0
+Breast.linearXrotationY 1.0
+Breast.linearXrotationZ 0.0
+Breast.linearYrotationX 0.0
+Breast.linearYrotationY 0.0
+Breast.linearYrotationZ 1.0
+Breast.linearZrotationX 1.0
+Breast.linearZrotationY 0.0
+Breast.linearZrotationZ 0.0
+
+# General physics speed. Increasing this makes all of the motion faster.
+Breast.timeStep 0.80
+
+
+# Physics deceleration by friction in collision
+Breast.collisionFriction 0.2
+
+# Down the sensitivity of collisions / It affects the actual colliding range
+Breast.collisionPenetration 0.0
+
+# Push strength by collisions / It's not affects the actual colliding range
+Breast.collisionMultipler 1.0
+
+# Rotation strength by collisions
+Breast.collisionMultiplerRot 1.0
+
+# Add bounce by collisions but sometimes jitter can occur / This is either 1(activate) or 0(inactivate)
+Breast.collisionElastic 0
+
+# Limit the extent to which pushed by collisions
+Breast.collisionXmaxOffset 100
+Breast.collisionXminOffset -100
+Breast.collisionYmaxOffset 100
+Breast.collisionYminOffset -100
+Breast.collisionZmaxOffset 100
+Breast.collisionZminOffset -100
+
+
+
+Butt.stiffness 0.03
+Butt.stiffness2 0.01
+Butt.damping 0.05
+Butt.Xmaxoffset 3
+Butt.Xminoffset -3
+Butt.Ymaxoffset 3
+Butt.Yminoffset -3
+Butt.Zmaxoffset 3
+Butt.Zminoffset -3
+Butt.timetick 15
+Butt.linearX 1.6
+Butt.linearY 1.0
+Butt.linearZ 0.7
+Butt.linearXspreadforceY 0.0
+Butt.linearXspreadforceZ 0.0
+Butt.linearYspreadforceX 0.0
+Butt.linearYspreadforceZ 0.0
+Butt.linearZspreadforceX 0.0
+Butt.linearZspreadforceY 0.0
+Butt.rotationalX 0.15
+Butt.rotationalY 0.0
+Butt.rotationalZ 0.0
+Butt.linearXrotationX 0.0
+Butt.linearXrotationY 1.0
+Butt.linearXrotationZ 0.0
+Butt.linearYrotationX 0.0
+Butt.linearYrotationY 0.0
+Butt.linearYrotationZ 1.0
+Butt.linearZrotationX 1.0
+Butt.linearZrotationY 0.0
+Butt.linearZrotationZ 0.0
+Butt.timeStep 0.80
+Butt.collisionFriction 0.2
+Butt.collisionPenetration 0.0
+Butt.collisionMultipler 1.0
+Butt.collisionMultiplerRot 1.0
+Butt.collisionElastic 0
+Butt.collisionXmaxOffset 100
+Butt.collisionXminOffset -100
+Butt.collisionYmaxOffset 100
+Butt.collisionYminOffset -100
+Butt.collisionZmaxOffset 100
+Butt.collisionZminOffset -100
+
+Belly.stiffness 0.01
+Belly.stiffness2 0.02
+Belly.damping 0.05
+Belly.maxoffset 3
+Belly.Xminoffset -3
+Belly.Ymaxoffset 3
+Belly.Yminoffset -3
+Belly.Zmaxoffset 3
+Belly.Zminoffset -3
+Belly.timetick 15
+Belly.linearX 1.6
+Belly.linearY 0.13
+Belly.linearZ 0.08
+Belly.linearXspreadforceY 0.0
+Belly.linearXspreadforceZ 0.0
+Belly.linearYspreadforceX 0.0
+Belly.linearYspreadforceZ 0.0
+Belly.linearZspreadforceX 0.0
+Belly.linearZspreadforceY 0.0
+Belly.rotationalX 0.03
+Belly.rotationalY 0.0
+Belly.rotationalZ 0.0
+Belly.linearXrotationX 0.0
+Belly.linearXrotationY 1.0
+Belly.linearXrotationZ 0.0
+Belly.linearYrotationX 0.0
+Belly.linearYrotationY 0.0
+Belly.linearYrotationZ 1.0
+Belly.linearZrotationX 1.0
+Belly.linearZrotationY 0.0
+Belly.linearZrotationZ 0.0
+Belly.timeStep 0.80
+Belly.collisionFriction 0.2
+Belly.collisionPenetration 0.0
+Belly.collisionMultipler 1.0
+Belly.collisionMultiplerRot 1.0
+Belly.collisionElastic 0
+Belly.collisionXmaxOffset 100
+Belly.collisionXminOffset -100
+Belly.collisionYmaxOffset 100
+Belly.collisionYminOffset -100
+Belly.collisionZmaxOffset 100
+Belly.collisionZminOffset -100
+
+
+# Setting this to 60 would make CBPConfig*** files to load every 60 frames, you can use this to adjust bounce configs without closing/opening the game.
+# 0 turns it off. Don't leave this turned on for normal play!
+Tuning.rate 0

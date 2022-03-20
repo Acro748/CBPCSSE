@@ -1,0 +1,27 @@
+[ConfigMap]                   
+NPC L Breast=LBreast=IsFemale()
+NPC R Breast=RBreast=IsFemale()
+NPC L Butt=LButt=IsFemale()
+NPC R Butt=RButt=IsFemale()
+NPC Belly=Belly=IsFemale()
+<
+L Breast01=ExtraBreast1L=IsFemale()
+L Breast02=ExtraBreast2L=IsFemale()
+L Breast03=ExtraBreast3L=IsFemale()
+>
+<
+R Breast01=ExtraBreast1R=IsFemale()
+R Breast02=ExtraBreast2R=IsFemale()
+R Breast03=ExtraBreast3R=IsFemale()
+>
+NPC L FrontThigh=LFrontThigh=IsFemale()
+NPC R FrontThigh=RFrontThigh=IsFemale()
+NPC L RearThigh=LRearThigh=IsFemale()
+NPC R RearThigh=RRearThigh=IsFemale()
+NPC L RearCalf [LrClf]=LRearCalf=IsFemale()
+NPC R RearCalf [RrClf]=RRearCalf=IsFemale()
+
+#VaginaB1=VaginaB=IsFemale()
+#Clitoral1=Clit=IsFemale()
+#NPC L Pussy02=LLabia=IsFemale()
+#NPC R Pussy02=RLabia=IsFemale()

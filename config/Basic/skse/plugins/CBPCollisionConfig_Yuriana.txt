@@ -1,0 +1,146 @@
+# This is a specific collision config file made for Yuriana(Buxom Wench). Copy this file for your specific collision config needs.
+
+##############################################################################
+# Conditions
+#
+# Condition functions supported: IsRaceFormId(espname|000000), IsRaceName(string), ActorName(string), ActorFormId(espname|000000), IsInFaction(espname|000000), IsPlayerTeammate(), IsFemale(), IsMale(), IsPlayer(), HasKeywordId(espname|000000), HasKeywordName(string), RaceHasKeywordId(espname|000000), RaceHasKeywordName(string), IsActorBase(espname|000000), IsUnique(), IsVoiceType(espname|000000), IsCombatStyle(espname|000000), IsClass(espname|000000)
+# For formids, you can either use with espname: (espname|000000) or for Skyrim.esm, without the esp name: (00000000)
+# You can use multiple functions with AND and OR logical operations. They are splitted with AND first and then OR like CK syntax
+# You can prefix the functions with the word NOT for negative conditions like NOT IsFemale()
+#
+# Priority value determines which conditions will be checked first.
+#
+##############################################################################
+
+[Options]
+Conditions=ActorName(Yuriana)
+Priority = 100
+
+##############################################################################
+# Extra Options
+##############################################################################
+[ExtraOptions]
+
+BellyBulge=1.0     #This is the multiplier for the new special belly bulge for vagina penetration. Higher values would cause a bigger lump on the belly. 0 would disable this special setting.
+
+BellyBulgeMax=4.0        #This is the horizontal max position of the belly bulge
+
+BellyBulgePosLowest=-8.0     #This is the vertical position of the belly bulge
+
+BellyBulgeReturnTime = 2.0   #This is the duration takes in seconds for belly bulge to return to its original position.
+
+BellyBulgeNodes=Genitals01   #These are the node names to match for belly bulge collision with pelvis node. You can add more than one separated with ","
+
+VaginaOpeningMultiplier=3.0  #This is the multiplier for vagina opening.
+
+VaginaOpeningLimit=5.0  #This is the limit for vagina opening.
+##############################################################################
+# Node Lists
+##############################################################################
+[AffectedNodes] #Define nodes here first, then set the collision spheres down. You can define excluded colliders in paranthesis: NodeName (ColliderName1, ColliderName2) -- @ means all self nodes: NodeName (@) -- @ in front of a node name means self node: NodeName (@ColliderName) -- NodeName (@ColliderName1, ColliderName2) meaning self ColliderName1 and all ColliderName2 are excluded.
+NPC L Breast
+NPC R Breast
+NPC L Butt
+NPC R Butt
+NPC Pelvis [Pelv]
+NPC Spine1 [Spn1]
+
+[ColliderNodes] #Define nodes here first, then set the collision spheres down
+NPC L UpperArm [LUar]
+NPC R UpperArm [RUar]
+NPC L Forearm [LLar]
+NPC R Forearm [RLar]
+NPC L Hand [LHnd]
+NPC R Hand [RHnd]
+NPC L Finger02 [LF02]
+NPC L Finger12 [LF12]
+NPC L Finger22 [LF22]
+NPC L Finger32 [LF32]
+NPC L Finger42 [LF42]
+NPC R Finger02 [RF02]
+NPC R Finger12 [RF12]
+NPC R Finger22 [RF22]
+NPC R Finger32 [RF32]
+NPC R Finger42 [RF42]
+NPC Genitals01 [Gen01]
+
+##############################################################################
+# Collision spheres
+#
+# Multiple lines are supported.
+# You can include 0 and 100 weight settings for npcs separating them with |
+# Format is: x0,y0,z0,radius0 | x100,y100,z100,radius100
+#
+##############################################################################
+# Affected Nodes
+
+[NPC L Breast]
+0.0,5.5,-5.0,3.2 | -1.0,9.0,-10.0,7.0
+
+[NPC R Breast]
+0.0,5.5,-5.0,3.2 | 1.0,9.0,-10.0,7.0
+
+[NPC L Butt]
+-2.5,1.0,-4.0,5.0 | -3.5,1.0,-4.0,7.0
+
+[NPC R Butt]
+2.5,1.0,-4.0,5.0 | 3.5,1.0,-4.0,7.0
+
+[NPC Pelvis [Pelv]] #For Female Genitals
+0.0,0.0,-2.0,3.0 | 0.0,0.0,-2.0,3.0
+
+[NPC Spine1 [Spn1]] #For Female Belly
+0.0,3.0,-5.0,6.0 | 0.0,3.0,-5.0,6.0
+
+##############################################################################
+# Collider Nodes
+
+[NPC L UpperArm [LUar]]
+-3.5,0.0,1,3.5 & -2,0.5,16,2.8 | -3.5,0.0,1,3.5 & -2,0.5,16,2.8
+[NPC R UpperArm [RUar]]
+3.5,0.0,1,3.5 & 2,0.5,16,2.8 | 3.5,0.0,1,3.5 & 2,0.5,16,2.8
+
+[NPC L Forearm [LLar]]
+-1,1.5,-1,2.8 & 0,0.75,11.5,2.25 | -1,1.5,-1,2.8 & 0,0.75,11.5,2.25
+[NPC R Forearm [RLar]]
+1,1.5,-1,2.8 & 0,0.75,11.5,2.25 | 1,1.5,-1,2.8 & 0,0.75,11.5,2.25
+
+[NPC L Hand [LHnd]]
+0,0,0,2.5 | 0,0,0,2.5
+
+[NPC R Hand [RHnd]]
+0,0,0,2.5 | 0,0,0,2.5
+
+[NPC L Finger02 [LF02]]
+0,0,0,2 | 0,0,0,2
+
+[NPC L Finger12 [LF12]]
+0,0,0,2 | 0,0,0,2
+
+[NPC L Finger22 [LF22]]
+0,0,0,2 | 0,0,0,2
+
+[NPC L Finger32 [LF32]]
+0,0,0,2 | 0,0,0,2
+
+[NPC L Finger42 [LF42]]
+0,0,0,2 | 0,0,0,2
+
+[NPC R Finger02 [RF02]]
+0,0,0,2 | 0,0,0,2
+
+[NPC R Finger12 [RF12]]
+0,0,0,2 | 0,0,0,2
+
+[NPC R Finger22 [RF22]]
+0,0,0,2 | 0,0,0,2
+
+[NPC R Finger32 [RF32]]
+0,0,0,2 | 0,0,0,2
+
+[NPC R Finger42 [RF42]]
+0,0,0,2 | 0,0,0,2
+
+[NPC Genitals01 [Gen01]]
+0,0,0,1.75 & 0,7.5,0,1.5 | 0,0,0,1.75 & 0,7.5,0,1.5
+

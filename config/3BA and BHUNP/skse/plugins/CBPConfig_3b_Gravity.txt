@@ -1,0 +1,23 @@
+# START ExtraBreast
+
+ExtraBreast1L.gravityBias 0.004 0.004
+ExtraBreast2L.gravityBias 0.003 0.004
+ExtraBreast3L.gravityBias 0.002 0.002
+
+ExtraBreast1L.gravityCorrection -0.4 -0.4
+ExtraBreast2L.gravityCorrection -0.3 -0.3
+ExtraBreast3L.gravityCorrection -0.2 -0.2
+
+# END
+
+# START ExtraBreast
+
+ExtraBreast1R.gravityBias 0.004 0.004
+ExtraBreast2R.gravityBias 0.003 0.003
+ExtraBreast3R.gravityBias 0.002 0.002
+
+ExtraBreast1R.gravityCorrection -0.4 -0.4
+ExtraBreast2R.gravityCorrection -0.3 -0.3
+ExtraBreast3R.gravityCorrection -0.2 -0.2
+
+#Tuning.rate 300

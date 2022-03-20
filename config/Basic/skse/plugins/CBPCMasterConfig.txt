@@ -1,0 +1,60 @@
+##############################################################################
+# Other Settings
+##############################################################################
+[Settings]
+
+TuningMode = 0       #Set this to 1 to enable tuning mode which will load the collision config files every 120 frames(Set it to 2 for every 240 frames etc.) to allow in game config modification
+
+MalePhysics=0        #You can set this to 1 to enable Male body physics. This is not for colliders, it's for Male body parts that needs bounce. When this is set to 0, female specific bones (breast,butt,belly,calf,thigh etc.) are disabled automatically for males without any need for conditions. You don't need to enable this for penis and scrotum stuff etc.
+
+NoJitterFixNodes = NPC Genitals01 [Gen01],NPC Genitals02 [Gen02],NPC Genitals03 [Gen03],NPC Genitals04 [Gen04],NPC Genitals05 [Gen05],NPC Genitals06 [Gen06],GenitalsLag01,GenitalsLag02,GenitalsLag03,GenitalsLag04,GenitalsLag05,GenitalsLag06,GenitalsScrotumLag  #Enter node names to not apply jitter fix. This is for compatibility reasons in case there is an issue.
+
+##############################################################################
+# Configuration Map for Bouncy Nodes
+#
+# You can add bounce to any node with this map and set the bounce configuration in a CBPConfig*****.txt file
+#
+# Affected nodes in CBPCollisionConfig files must be defined here first too.
+#
+# Syntax --> NodeName = BounceConfigAlias = Conditions
+#
+# Condition functions supported: IsRaceFormId(espname|000000), IsRaceName(string), ActorName(string), ActorFormId(espname|000000), IsInFaction(espname|000000), IsPlayerTeammate(), IsFemale(), HasKeywordId(espname|000000), HasKeywordName(string), RaceHasKeywordId(espname|000000), RaceHasKeywordName(string), IsActorBase(espname|000000), IsUnique(), IsVoiceType(espname|000000), IsCombatStyle(espname|000000), IsClass(espname|000000)
+# For formids, you can either use with espname: (espname|000000) or for Skyrim.esm, without the esp name: (00000000)
+# You can use multiple functions with AND and OR logical operations. They are splitted with AND first and then OR like CK syntax
+# You can prefix the functions with the word NOT for negative conditions like NOT IsFemale()
+#
+# Examples:
+# IsFemale() AND IsRaceName(Khajit)
+# IsFemale() AND IsRaceFormId(13745)
+# IsFemale() AND IsRaceFormId(13745) OR IsRaceFormId(13740)
+#
+##############################################################################
+# Configuration some nodes to be sequenced
+#
+# In the case of physics chain nodes like 3 breast bones and SOS penis and etc, jitter may occur due to parallel processing
+# 
+# You can use < and > to load those parts in order from top to bottom
+#
+# Examples:
+# <
+# L Breast01=ExtraBreast1L=IsFemale()
+# L Breast02=ExtraBreast2L=IsFemale()
+# L Breast03=ExtraBreast3L=IsFemale()
+# >
+# <
+# R Breast01=ExtraBreast1R=IsFemale()
+# R Breast02=ExtraBreast2R=IsFemale()
+# R Breast03=ExtraBreast3R=IsFemale()
+# >
+# 
+# then L Breast01 and R Breast01 will be loaded at the same time and when done that node then the node in next line of that node will be loaded
+# Don't try to put too many nodes between < and >, It will compromise the performance benefits of parallel processing
+# 
+##############################################################################
+[ConfigMap]                   #You can create multiple CBPCMasterConfig***.txt files to include more configmap lines.
+NPC L Breast=Breast=IsFemale()
+NPC R Breast=Breast=IsFemale()
+NPC L Butt=Butt=IsFemale()
+NPC R Butt=Butt=IsFemale()
+HDT Belly=Belly=IsFemale()
+NPC Pelvis [Pelv]

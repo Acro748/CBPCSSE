@@ -1,0 +1,66 @@
+# START Butt
+
+LButt.stiffness 0.015 0.015
+LButt.stiffness2 0.0041 0.0041
+LButt.damping 0.0175 0.0175
+LButt.Xmaxoffset 3.0 3.0
+LButt.Xminoffset -3.0 -3.0
+LButt.Ymaxoffset 3.0 3.0
+LButt.Yminoffset -3.0 -3.0
+LButt.Zmaxoffset 1.5 1.5
+LButt.Zminoffset -4.5 -4.5
+LButt.timetick 2.5 2.5
+LButt.linearX 1.225 1.225
+LButt.linearY 0.7 0.7
+LButt.linearZ 1.05 1.05
+LButt.rotationalX 0.15 0.15
+LButt.rotationalY 0.3 0.3
+LButt.rotationalZ -0.3 -0.3
+LButt.timeStep 0.9 0.9
+
+LButt.collisionXmaxoffset 5.0 5.0
+LButt.collisionXminoffset -5.0 -5.0
+LButt.collisionYmaxoffset 1.0 1.0
+LButt.collisionYminoffset -5.0 -5.0
+LButt.collisionZmaxoffset 5.0 5.0
+LButt.collisionZminoffset -5.0 -5.0
+
+LButt.collisionElastic 0.0 0.0
+
+LButt.collisionMultipler 1.0 1.0
+LButt.collisionMultiplerRot 1.0 1.0
+
+
+RButt.stiffness 0.015 0.015
+RButt.stiffness2 0.0041 0.0041
+RButt.damping 0.0175 0.0175
+RButt.Xmaxoffset 3.0 3.0
+RButt.Xminoffset -3.0 -3.0
+RButt.Ymaxoffset 3.0 3.0
+RButt.Yminoffset -3.0 -3.0
+RButt.Zmaxoffset 1.5 1.5
+RButt.Zminoffset -4.5 -4.5
+RButt.timetick 2.5 2.5
+RButt.linearX 1.225 1.225
+RButt.linearY 0.7 0.7
+RButt.linearZ 1.05 1.05
+RButt.rotationalX 0.15 0.15
+RButt.rotationalY 0.3 0.3
+RButt.rotationalZ 0.3 0.3
+RButt.timeStep 0.9 0.9
+
+RButt.collisionXmaxoffset 5.0 5.0
+RButt.collisionXminoffset -5.0 -5.0
+RButt.collisionYmaxoffset 1.0 1.0
+RButt.collisionYminoffset -5.0 -5.0
+RButt.collisionZmaxoffset 5.0 5.0
+RButt.collisionZminoffset -5.0 -5.0
+
+RButt.collisionElastic 0.0 0.0
+
+RButt.collisionMultipler 1.0 1.0
+RButt.collisionMultiplerRot 1.0 1.0
+
+# END
+
+#Tuning.rate 60

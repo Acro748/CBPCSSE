@@ -1,0 +1,119 @@
+##############################################################################
+# Extra Options
+##############################################################################
+[ExtraOptions]
+
+BellyBulge=3.0     #This is the multiplier for the new special belly bulge for vagina penetration. Higher values would cause a bigger lump on the belly. 0 would disable this special setting.
+
+BellyBulgeMax=20.0        #This is the horizontal max position of the belly bulge
+
+BellyBulgePosLowest=4.0     #This is the vertical position of the belly bulge
+
+BellyBulgeReturnTime=2.0   #This is the duration takes in seconds for belly bulge to return to its original position.
+
+BellyBulgeNodes=Genitals01,AnimObWWD 3,VLDick02,VLDick03,SkeeverD 02,SkeeverD 03,TentacleLeft06,TentacleLeft07,TentacleLeft08,LTentacleLeft06,LTentacleLeft07,LTentacleLeft08,RTentacleLeft06,RTentacleLeft07,RTentacleLeft08,TailStinger,TailStinger 2,SCD 2,SCD 3,NP 14,NPB 14,HS 3,HS 4,HS 5,GS 3,GS 4,GiantTongue 1,GiantTongue 2,GiantTongue 3,Lurker Egg 01,Lurker Egg 02,Lurker Egg 03,Lurker Egg 04,Lurker Egg 05,Lurker Egg 06,GD 3,COEgg 1,COEgg 2,COEgg 3,COEgg 4,COEgg 5,NPC IceGenital03,FD 3,DwarvenSpiderDildo01,DwarvenSpiderDildo02,DwarvenSpiderDildo03,DD 2,ElkD03,ElkD04,CO 3,CO 4,CO 5,Worm Base,CDPenis 2,BoarDick03,Boar_Tongue1,Boar_Tongue2,Boar_Tongue3,BearD 4,BearD 5,BearD 6,BearTongue 1,BearTongue 2,BearTongue 3,BearTongue 4,RD Base,RD 2,WWD 3,WWD 4,WWTongue 2,CO 3,COEgg 1,COEgg 2,COEgg 3,COEgg 4,COEgg 5,ElkD03,DwarvenSpiderDeldo03,NPC IcePenis01,WWTongue 2
+#These are the node names to match for belly bulge collision with pelvis node. You can add more than one separated with ","
+
+VaginaOpeningMultiplier=6  #This is the multiplier for vagina opening.
+
+VaginaOpeningLimit=20.0  #This is the limit for vagina opening.
+
+##############################################################################
+# Node Lists
+##############################################################################
+
+[PlayerNodes] #These are predefined, so adding wouldn't have any effect. But if you remove them, you won't get collision for that node.
+LeftWandNode
+RightWandNode
+
+[AffectedNodes] #Define nodes here first, then set the collision spheres down
+
+[ColliderNodes] #Define nodes here first, then set the collision spheres down
+NPC Head [Head]
+
+NPC L UpperArm [LUar]
+NPC R UpperArm [RUar]
+
+NPC L Forearm [LLar]
+NPC R Forearm [RLar]
+
+NPC L Hand [LHnd]
+NPC R Hand [RHnd]
+
+NPC L Finger22 [LF22]
+NPC R Finger22 [RF22]
+
+NPC Genitals01 [Gen01]
+#NPC Genitals02 [Gen02]
+
+NPC L Thigh [LThg]
+NPC R Thigh [RThg]
+
+NPC L Calf [LClf]
+NPC R Calf [RClf]
+
+##############################################################################
+# Collision spheres
+#
+# Multiple lines are supported.
+# You can include 0 and 100 weight settings for npcs separating them with |
+# Format is: x0,y0,z0,radius0 | x100,y100,z100,radius100
+#
+##############################################################################
+# Collision capsules
+#
+# Multiple lines are supported.
+# You can include 0 and 100 weight settings for npcs separating them with |
+# The two points of one capsule are combined with &
+# Format is: P1x0,P1y0,P1z0,P1Radius0  & P2x0,P2y0,P2z0,P2Radius0 | P1x100,P1y100,P1z100,P1Radius100 & P2x100,P2y100,P2z100,P2Radius100
+#
+##############################################################################
+# Affected Nodes
+
+##############################################################################
+# Collider Nodes
+
+[LeftWandNode]
+0,-6.0,-2.0,3.0
+
+[RightWandNode]
+0,-6.0,-2.0,3.0
+
+[NPC Head [Head]]
+0.0,3.0,2.0,7.0 | 0.0,3.0,2.0,7.0
+
+[NPC L UpperArm [LUar]]
+0.5,0.25,8,4 & 0.5,0.25,18,3.6 | 0.5,0.25,8,4 & 0.5,0.25,18,3.6
+[NPC R UpperArm [RUar]]
+-0.5,0.25,8,4 & -0.5,0.25,18,3.6 | -0.5,0.25,8,4 & -0.5,0.25,18,3.6
+
+[NPC L Forearm [LLar]]
+0.5,1.25,0.0,3.4 & 0.0,0.75,12.0,2.8 | 0.5,1.25,0.0,3.4 & 0.0,0.75,12.0,2.8
+[NPC R Forearm [RLar]]
+-0.5,1.25,0.0,3.4 & 0.0,0.75,12.0,2.8 | -0.5,1.25,0.0,3.4 & 0.0,0.75,12.0,2.8
+
+[NPC L Hand [LHnd]]
+-0.75,-1,5,4 | -0.75,-1,5,4
+[NPC R Hand [RHnd]]
+0.75,-1,5,4 | 0.75,-1,5,4
+
+[NPC L Finger22 [LF22]]
+-0.2,0.25,2,2 | -0.2,0.25,2,2
+[NPC R Finger22 [RF22]]
+0.2,0.25,2,2 | 0.2,0.25,2,2
+
+[NPC Genitals01 [Gen01]]
+0,0,0,1.75 & 0,7.5,0,1.5 | 0,0,0,1.75 & 0,7.5,0,1.5
+#0,0,0,3 | 0,0,0,3
+#[NPC Genitals02 [Gen02]]
+#0,-1.75,0,1.75 & 0,5.75,0,1.5 | 0,-1.75,0,1.75 & 0,5.75,0,1.5
+
+[NPC L Thigh [LThg]]
+1.5,-2,11,8 & -0.5,-0.25,30,4 | 1.5,-2,11,8 & -0.5,-0.25,30,4
+[NPC R Thigh [RThg]]
+-1.5,-2,11,8 & 0.5,-0.25,30,4 | -1.5,-2,11,8 & 0.5,-0.25,30,4
+
+[NPC L Calf [LClf]]
+-0.5,-1.25,0,4 & 0,-0.5,20,3 | -0.5,-1.25,0,4 & 0,-0.5,20,3
+[NPC R Calf [RClf]]
+0.5,-1.25,0,4 & 0,-0.5,20,3 | 0.5,-1.25,0,4 & 0,-0.5,20,3

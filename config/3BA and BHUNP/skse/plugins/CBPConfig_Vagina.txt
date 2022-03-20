@@ -1,0 +1,105 @@
+# START Vagina
+
+VaginaB.stiffness 0.02
+VaginaB.stiffness2 0.05
+VaginaB.damping 0.08
+VaginaB.maxoffset 1.0
+VaginaB.timetick 2.0
+VaginaB.linearX 2.0
+VaginaB.linearY 2.0
+VaginaB.linearZ 2.0
+VaginaB.rotationalX 0.01
+VaginaB.rotationalY 0.00
+VaginaB.rotationalZ 0.01
+VaginaB.timeStep 0.2
+
+VaginaB.collisionXmaxoffset 0.1
+VaginaB.collisionXminoffset -0.1
+VaginaB.collisionYmaxoffset 0.1
+VaginaB.collisionYminoffset -100
+VaginaB.collisionZmaxoffset 0.5
+VaginaB.collisionZminoffset -0.5
+VaginaB.collisionMultipler 4.0
+VaginaB.collisionFriction 0.7
+VaginaB.collisionElastic 0.0
+
+
+Clit.stiffness 0.02
+Clit.stiffness2 0.05
+Clit.damping 0.08
+Clit.maxoffset 1.0
+Clit.timetick 2.0
+Clit.linearX 2.0
+Clit.linearY 2.0
+Clit.linearZ 2.0
+Clit.rotationalX 0.01
+Clit.rotationalY 0.01
+Clit.rotationalZ 0.01
+Clit.timeStep 0.2
+
+Clit.collisionXmaxoffset 0.1
+Clit.collisionXminoffset -0.1
+Clit.collisionYmaxoffset 2.0
+Clit.collisionYminoffset -0.5
+Clit.collisionZmaxoffset 1.0
+Clit.collisionZminoffset -1.0
+Clit.collisionMultipler 3.5
+Clit.collisionFriction 0.7
+Clit.collisionElastic 0.0
+
+
+LLabia.stiffness 0.02
+LLabia.stiffness2 0.05
+LLabia.damping 0.08
+LLabia.maxoffset 1.0
+LLabia.timetick 2.0
+LLabia.linearX 2.0
+LLabia.linearY 2.0
+LLabia.linearZ 2.0
+LLabia.rotationalX 0.01
+LLabia.rotationalY 0.01
+LLabia.rotationalZ 0.01
+LLabia.timeStep 0.2
+
+LLabia.collisionXmaxoffset 0.1
+LLabia.collisionXminoffset -100
+LLabia.collisionYmaxoffset 0.5
+LLabia.collisionYminoffset -0.5
+LLabia.collisionZmaxoffset 0.5
+LLabia.collisionZminoffset -0.5
+LLabia.collisionMultipler 4.5
+LLabia.collisionMultiplerRot 0.0
+LLabia.collisionFriction 0.7
+LLabia.collisionElastic 0.0
+
+
+RLabia.stiffness 0.02
+RLabia.stiffness2 0.05
+RLabia.damping 0.08
+RLabia.maxoffset 1.0
+RLabia.timetick 2.0
+RLabia.linearX 2.0
+RLabia.linearY 2.0
+RLabia.linearZ 2.0
+RLabia.rotationalX 0.01
+RLabia.rotationalY 0.01
+RLabia.rotationalZ 0.01
+RLabia.timeStep 0.2
+
+RLabia.collisionXmaxoffset 100
+RLabia.collisionXminoffset -0.1
+RLabia.collisionYmaxoffset 0.5
+RLabia.collisionYminoffset -0.5
+RLabia.collisionZmaxoffset 0.5
+RLabia.collisionZminoffset -0.5
+RLabia.collisionMultipler 4.5
+RLabia.collisionMultiplerRot 0.0
+RLabia.collisionFriction 0.7
+RLabia.collisionElastic 0.0
+
+
+
+
+# END
+
+#Tuning.rate 300

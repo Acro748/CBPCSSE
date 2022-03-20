@@ -1,0 +1,35 @@
+# START NPCBelly
+
+NPCBelly.stiffness 0.020 0.020
+NPCBelly.stiffness2 0.0055 0.0055
+NPCBelly.damping 0.020 0.020
+NPCBelly.Xmaxoffset 3.0 3.0
+NPCBelly.Xminoffset -3.0 -3.0
+NPCBelly.Ymaxoffset 1.0 1.0
+NPCBelly.Yminoffset -1.0 -1.0
+NPCBelly.Zmaxoffset 3.0 3.0
+NPCBelly.Zminoffset -3.0 -3.0
+NPCBelly.timetick 2.0 2.0
+NPCBelly.linearX 1.4 1.4
+NPCBelly.linearY 0.7 0.7
+NPCBelly.linearZ 1.4 1.4
+NPCBelly.rotationalX 0.1 0.1
+NPCBelly.rotationalY 0.1 0.1
+NPCBelly.rotationalZ 0.1 0.1
+NPCBelly.timeStep 0.5 0.5
+
+NPCBelly.collisionFriction 0.0 0.0
+NPCBelly.collisionElastic 0.0 0.0
+
+NPCBelly.collisionMultipler 3.0 3.0
+
+NPCBelly.collisionXmaxoffset 0.5 0.5
+NPCBelly.collisionXminoffset -0.5 -0.5
+NPCBelly.collisionYmaxoffset 100 100
+NPCBelly.collisionYminoffset -0.5 -0.5
+NPCBelly.collisionZmaxoffset 1.0 1.0
+NPCBelly.collisionZminoffset -1.0 -1.0
+
+# END
+
+#Tuning.rate 60
