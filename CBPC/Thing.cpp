@@ -6,7 +6,7 @@ BSFixedString backPus("VaginaB1");
 BSFixedString frontPus("Clitoral1");
 BSFixedString belly("HDT Belly");
 BSFixedString pelvis("NPC Pelvis [Pelv]");
-//BSFixedString spine1("NPC Spine1 [Spn1]"); //suggest reading comments on the bellybullge function
+BSFixedString spine1("NPC Spine1 [Spn1]");
 BSFixedString highheel("NPC");
 
 //## thing_Refresh_node_lock
@@ -74,10 +74,10 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 
 	if (IsBellyBone)
 	{
-		thingCollisionSpheres = CreateThingCollisionSpheres(actor, pelvis.data);
-		thingCollisionCapsules = CreateThingCollisionCapsules(actor, pelvis.data);
-		//thingCollisionSpheres = CreateThingCollisionSpheres(actor, spine1.data); //suggest reading comments on the bellybullge function
-		//thingCollisionCapsules = CreateThingCollisionCapsules(actor, spine1.data);
+		//thingCollisionSpheres = CreateThingCollisionSpheres(actor, pelvis.data);
+		//thingCollisionCapsules = CreateThingCollisionCapsules(actor, pelvis.data);
+		thingCollisionSpheres = CreateThingCollisionSpheres(actor, spine1.data); //suggest reading comments on the bellybullge function
+		thingCollisionCapsules = CreateThingCollisionCapsules(actor, spine1.data);
 	}
 	else
 	{
@@ -472,14 +472,13 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearY_100 = centry["linearY"];
 	linearZ_100 = centry["linearZ"];
 
-	if (centry.find("rotational") != centry.end())
-		rotationalXnew_100 = centry["rotational"];
-	else
+	rotationalXnew_100 = centry["rotational"];
+	if (rotationalXnew_100 < 0.0001f)
 	{
 		rotationalXnew_100 = centry["rotationalX"];
-		rotationalYnew_100 = centry["rotationalY"];
-		rotationalZnew_100 = centry["rotationalZ"];
 	}
+	rotationalYnew_100 = centry["rotationalY"];
+	rotationalZnew_100 = centry["rotationalZ"];
 
 	linearXrotationX_100 = centry["linearXrotationX"];
 	linearXrotationY_100 = centry["linearXrotationY"];
@@ -581,13 +580,11 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearY_0 = centry0weight["linearY"];
 	linearZ_0 = centry0weight["linearZ"];
 
-	if (centry0weight.find("rotational") != centry0weight.end())
-		rotationalXnew_0 = centry0weight["rotational"];
-	else
+	rotationalXnew_0 = centry0weight["rotational"];
+	if (rotationalXnew_0 < 0.0001f)
 	{
 		rotationalXnew_0 = centry0weight["rotationalX"];
 	}
-		
 	rotationalYnew_0 = centry0weight["rotationalY"];
 	rotationalZnew_0 = centry0weight["rotationalZ"];
 
@@ -922,10 +919,6 @@ void Thing::updatePelvis(Actor *actor)
 	LOG("Thing.updatePelvis() Update Time = %lld ns\n", elapsedMicroseconds.QuadPart);*/
 }
 
-// Is it possible to replace the bellybulge trigger condition with spine1 instead of pelvis?
-// Since the root node of belly node is spine1, so belly bulge is possible without opening vagina even during the anal sex
-// and also no need to define a separate bellybulgenodes
-// However all existing collision configs must be replaced for bellybulge...
 bool Thing::ApplyBellyBulge(Actor * actor)
 {
 	if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState || !(*g_thePlayer)->loadedState->node)
@@ -935,15 +928,15 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 
 	NiPoint3 collisionVector = emptyPoint;
 	
-	NiMatrix33 pelvisRotation;
-	NiPoint3 pelvisPosition;
+	NiMatrix33 bulgenodeRotation;
+	NiPoint3 bulgenodePosition;
 
 	thing_ReadNode_lock.lock();
 	NiAVObject* bellyObj = actor->loadedState->node->GetObjectByName(&belly.data);
-	NiAVObject* pelvisObj = actor->loadedState->node->GetObjectByName(&pelvis.data);
+	NiAVObject* bulgeObj = actor->loadedState->node->GetObjectByName(&spine1.data);
 	thing_ReadNode_lock.unlock();
 
-	if (!bellyObj || !pelvisObj)
+	if (!bellyObj || !bulgeObj)
 		return false;
 
 	if(updateBellyFirstRun)
@@ -982,8 +975,8 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 		LOG_INFO("Belly default pos -> %g %g %g", bellyDefaultPos.x, bellyDefaultPos.y, bellyDefaultPos.z);
 	}
 
-	pelvisRotation = pelvisObj->m_worldTransform.rot;
-	pelvisPosition = pelvisObj->m_worldTransform.pos;
+	bulgenodeRotation = bulgeObj->m_worldTransform.rot;
+	bulgenodePosition = bulgeObj->m_worldTransform.pos;
 
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
@@ -992,7 +985,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 
 	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
-		thingCollisionSpheres[i].worldPos = pelvisPosition + (pelvisRotation* thingCollisionSpheres[i].offset100);
+		thingCollisionSpheres[i].worldPos = bulgenodePosition + (bulgenodeRotation* thingCollisionSpheres[i].offset100);
 		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
 		for (int m = 0; m<hashIdList.size(); m++)
 		{
@@ -1004,8 +997,8 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	}
 	for (int i = 0; i < thingCollisionCapsules.size(); i++)
 	{
-		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End1_offset100);
-		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End2_offset100);
+		thingCollisionCapsules[i].End1_worldPos = bulgenodePosition + (bulgenodeRotation* thingCollisionCapsules[i].End1_offset100);
+		thingCollisionCapsules[i].End2_worldPos = bulgenodePosition + (bulgenodeRotation* thingCollisionCapsules[i].End2_offset100);
 		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
 		for (int m = 0; m<hashIdList.size(); m++)
@@ -1035,8 +1028,8 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 				{
 					collisionDiff = emptyPoint;
 
-					if (partitions[id].partitionCollisions[i].colliderNodeName.find(thing_bellybulgelist[m]) != std::string::npos)
-					{
+	//				if (partitions[id].partitionCollisions[i].colliderNodeName.find(thing_bellybulgelist[m]) != std::string::npos)
+	//				{
 						InterlockedIncrement(&callCount);
 
 						partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
@@ -1048,7 +1041,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 						{
 							genitalPenetration = true;
 						}
-					}
+	//				}
 
 					collisionVector = collisionVector + collisionDiff;
 				}
@@ -1056,7 +1049,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 		}
 	}
 
-	const float opening = distance(collisionVector, emptyPoint);
+	const float opening = distance(collisionVector, emptyPoint) * 2.0;
 
 	if (opening > 0)
 	{
@@ -1065,38 +1058,29 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 			LOG_ERR("%f, %f, %f", collisionDiff.x, collisionDiff.y, collisionDiff.z);
 
 			//LOG("opening:%g", opening);
-			bellyBulgeCountDown = 1000;
+	//		bellyBulgeCountDown = 1000;
 			
 			float horPos = opening * thing_bellybulgemultiplier;
 			horPos = clamp(horPos, 0.0f, thing_bellybulgemax);
+			float lowPos = (thing_bellybulgeposlowest / thing_bellybulgemax) * horPos;
 
-			thing_SetNode_lock.lock();
-			bellyObj->m_localTransform.pos.y = bellyDefaultPos.y + horPos;
-			thing_SetNode_lock.unlock();
-
-			//float vertPos = opening * bellybulgeposmultiplier;
-			//vertPos = clamp(vertPos, bellybulgeposlowest, 0.0f);
-			LOG("belly bulge vert:%g horiz:%g", thing_bellybulgeposlowest, horPos);
 
 			if (lastMaxOffsetY < horPos)
 			{
 				lastMaxOffsetY = abs(horPos);
+				lastMaxOffsetZ = abs(lowPos);
 			}
-			if (lastMaxOffsetZ < thing_bellybulgeposlowest)
-			{
-				lastMaxOffsetZ = abs(thing_bellybulgeposlowest);
-			}
+
+			thing_SetNode_lock.lock();
+			bellyObj->m_localTransform.pos.y = bellyDefaultPos.y + horPos;
+			bellyObj->m_localTransform.pos.z = bellyDefaultPos.z + lowPos;
+			thing_SetNode_lock.unlock();
+
+			//float vertPos = opening * bellybulgeposmultiplier;
+			//vertPos = clamp(vertPos, bellybulgeposlowest, 0.0f);
+			LOG("belly bulge vert:%g horiz:%g", lowPos, horPos);
 			return true;
 		}
-	}
-	if(bellyBulgeCountDown > 0)
-	{
-		bellyBulgeCountDown--;
-
-		thing_SetNode_lock.lock();
-		bellyObj->m_localTransform.pos.z = bellyDefaultPos.z + thing_bellybulgeposlowest;
-		thing_SetNode_lock.unlock();
-
 	}
 	return false;
 }
@@ -1165,7 +1149,7 @@ void Thing::update(Actor* actor) {
 		obj = ni_cast(mostInterestingRoot->GetObjectByName(&boneName.data), NiNode);
 		thing_ReadNode_lock.unlock();
 
-	//	objRotation = mostInterestingRoot->GetAsNiNode()->m_worldTransform.rot;
+		//	objRotation = mostInterestingRoot->GetAsNiNode()->m_worldTransform.rot;
 	}
 	else
 	{
@@ -1709,12 +1693,12 @@ void Thing::update(Actor* actor) {
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol)) + target - NiPoint3(0, 0, varGravityCorrection);
 	else
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * ldiff) + target - NiPoint3(0, 0, varGravityCorrection);
-	
+
 	thing_SetNode_lock.lock();
 	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (ldiff.x * varLinearX) + maybeIdiffcol.x;
 	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (ldiff.y * varLinearY) + maybeIdiffcol.y;
 	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (ldiff.z * varLinearZ) + maybeIdiffcol.z;
-	obj->m_localTransform.rot = thingDefaultRot * newRot;	
+	obj->m_localTransform.rot = thingDefaultRot * newRot;
 	thing_SetNode_lock.unlock();
 
 	RefreshNode(obj);
