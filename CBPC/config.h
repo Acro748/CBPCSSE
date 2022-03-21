@@ -115,8 +115,8 @@ extern BGSKeyword* KeywordArmorLight;
 extern BGSKeyword* KeywordArmorHeavy;
 extern BGSKeyword* KeywordActorTypeNPC;
 
-extern BSFixedString KeywordNameAsNakadL;
-extern BSFixedString KeywordNameAsNakadR;
+extern BSFixedString KeywordNameAsNakedL;
+extern BSFixedString KeywordNameAsNakedR;
 extern BSFixedString KeywordNameAsClothingL;
 extern BSFixedString KeywordNameAsClothingR;
 extern BSFixedString KeywordNameAsLightL;
@@ -126,8 +126,8 @@ extern BSFixedString KeywordNameAsHeavyR;
 extern BSFixedString KeywordNameNoPushUpL;
 extern BSFixedString KeywordNameNoPushUpR;
 
-extern BGSKeyword* KeywordAsNakadL;
-extern BGSKeyword* KeywordAsNakadR;
+extern BGSKeyword* KeywordAsNakedL;
+extern BGSKeyword* KeywordAsNakedR;
 extern BGSKeyword* KeywordAsClothingL;
 extern BGSKeyword* KeywordAsClothingR;
 extern BGSKeyword* KeywordAsLightL;

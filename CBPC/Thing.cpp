@@ -1049,7 +1049,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 		}
 	}
 
-	const float opening = distance(collisionVector, emptyPoint) * 2.0;
+	const float opening = distance(collisionVector, emptyPoint) * 2.0f;
 
 	if (opening > 0)
 	{
@@ -1246,7 +1246,7 @@ void Thing::update(Actor* actor) {
 					{
 						if (IsLeftBreastBone)
 						{
-							if (armor->keyword.HasKeyword(KeywordAsNakadL))
+							if (armor->keyword.HasKeyword(KeywordAsNakedL))
 							{
 								isClothed = false;
 								isLightArmor = false;
@@ -1266,7 +1266,7 @@ void Thing::update(Actor* actor) {
 						}
 						else if (IsRightBreastBone)
 						{
-							if (armor->keyword.HasKeyword(KeywordAsNakadR))
+							if (armor->keyword.HasKeyword(KeywordAsNakedR))
 							{
 								isClothed = false;
 								isLightArmor = false;

@@ -1,34 +1,34 @@
-# START NPCBelly
+# START Belly
 
-NPCBelly.stiffness 0.020 0.020
-NPCBelly.stiffness2 0.0055 0.0055
-NPCBelly.damping 0.020 0.020
-NPCBelly.Xmaxoffset 3.0 3.0
-NPCBelly.Xminoffset -3.0 -3.0
-NPCBelly.Ymaxoffset 1.0 1.0
-NPCBelly.Yminoffset -1.0 -1.0
-NPCBelly.Zmaxoffset 3.0 3.0
-NPCBelly.Zminoffset -3.0 -3.0
-NPCBelly.timetick 2.0 2.0
-NPCBelly.linearX 1.4 1.4
-NPCBelly.linearY 0.7 0.7
-NPCBelly.linearZ 1.4 1.4
-NPCBelly.rotationalX 0.1 0.1
-NPCBelly.rotationalY 0.1 0.1
-NPCBelly.rotationalZ 0.1 0.1
-NPCBelly.timeStep 0.5 0.5
+Belly.stiffness 0.020 0.020
+Belly.stiffness2 0.0055 0.0055
+Belly.damping 0.020 0.020
+Belly.Xmaxoffset 3.0 3.0
+Belly.Xminoffset -3.0 -3.0
+Belly.Ymaxoffset 1.0 1.0
+Belly.Yminoffset -1.0 -1.0
+Belly.Zmaxoffset 3.0 3.0
+Belly.Zminoffset -3.0 -3.0
+Belly.timetick 2.0 2.0
+Belly.linearX 1.4 1.4
+Belly.linearY 0.7 0.7
+Belly.linearZ 1.4 1.4
+Belly.rotationalX 0.1 0.1
+Belly.rotationalY 0.1 0.1
+Belly.rotationalZ 0.1 0.1
+Belly.timeStep 0.5 0.5
 
-NPCBelly.collisionFriction 0.0 0.0
-NPCBelly.collisionElastic 0.0 0.0
+Belly.collisionFriction 0.0 0.0
+Belly.collisionElastic 0.0 0.0
 
-NPCBelly.collisionMultipler 3.0 3.0
+Belly.collisionMultipler 3.0 3.0
 
-NPCBelly.collisionXmaxoffset 0.5 0.5
-NPCBelly.collisionXminoffset -0.5 -0.5
-NPCBelly.collisionYmaxoffset 100 100
-NPCBelly.collisionYminoffset -0.5 -0.5
-NPCBelly.collisionZmaxoffset 1.0 1.0
-NPCBelly.collisionZminoffset -1.0 -1.0
+Belly.collisionXmaxoffset 0.5 0.5
+Belly.collisionXminoffset -0.5 -0.5
+Belly.collisionYmaxoffset 100 100
+Belly.collisionYminoffset -0.5 -0.5
+Belly.collisionZmaxoffset 1.0 1.0
+Belly.collisionZminoffset -1.0 -1.0
 
 # END
 

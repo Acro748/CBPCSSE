@@ -126,11 +126,11 @@ BGSKeyword* KeywordArmorClothing;
 UInt32 KeywordActorTypeNPCFormId = 0x0013794;
 BGSKeyword* KeywordActorTypeNPC;
 
-BSFixedString KeywordNameAsNakadL = "CBPCAsNakadL";
-BGSKeyword* KeywordAsNakadL;
+BSFixedString KeywordNameAsNakedL = "CBPCAsNakedL";
+BGSKeyword* KeywordAsNakedL;
 
-BSFixedString KeywordNameAsNakadR = "CBPCAsNakadR";
-BGSKeyword* KeywordAsNakadR;
+BSFixedString KeywordNameAsNakedR = "CBPCAsNakedR";
+BGSKeyword* KeywordAsNakedR;
 
 BSFixedString KeywordNameAsClothingL = "CBPCAsClothingL";
 BGSKeyword* KeywordAsClothingL;
@@ -972,13 +972,13 @@ void GameLoad()
 	if (keywordForm)
 		KeywordActorTypeNPC = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
 
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsNakadL);
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsNakedL);
 	if (keywordForm)
-		KeywordAsNakadL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+		KeywordAsNakedL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
 
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsNakadR);
+	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsNakedR);
 	if (keywordForm)
-		KeywordAsNakadR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+		KeywordAsNakedR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
 
 	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsClothingL);
 	if (keywordForm)
