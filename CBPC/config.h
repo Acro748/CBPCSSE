@@ -126,16 +126,16 @@ extern BSFixedString KeywordNameAsHeavyR;
 extern BSFixedString KeywordNameNoPushUpL;
 extern BSFixedString KeywordNameNoPushUpR;
 
-extern BGSKeyword* KeywordAsNakedL;
-extern BGSKeyword* KeywordAsNakedR;
-extern BGSKeyword* KeywordAsClothingL;
-extern BGSKeyword* KeywordAsClothingR;
-extern BGSKeyword* KeywordAsLightL;
-extern BGSKeyword* KeywordAsLightR;
-extern BGSKeyword* KeywordAsHeavyL;
-extern BGSKeyword* KeywordAsHeavyR;
-extern BGSKeyword* KeywordNoPushUpL;
-extern BGSKeyword* KeywordNoPushUpR;
+extern std::vector<BGSKeyword*> KeywordAsNakedL;
+extern std::vector<BGSKeyword*> KeywordAsNakedR;
+extern std::vector<BGSKeyword*> KeywordAsClothingL;
+extern std::vector<BGSKeyword*> KeywordAsClothingR;
+extern std::vector<BGSKeyword*> KeywordAsLightL;
+extern std::vector<BGSKeyword*> KeywordAsLightR;
+extern std::vector<BGSKeyword*> KeywordAsHeavyL;
+extern std::vector<BGSKeyword*> KeywordAsHeavyR;
+extern std::vector<BGSKeyword*> KeywordNoPushUpL;
+extern std::vector<BGSKeyword*> KeywordNoPushUpR;
 
 extern UInt32 VampireLordBeastRaceFormId;
 
@@ -290,6 +290,8 @@ bool compareBounceConfigs(const SpecificNPCBounceConfig& config1, const Specific
 
 bool GetSpecificNPCBounceConfigForActor(Actor* actor, SpecificNPCBounceConfig& snbc);
 bool IsConfigActuallyAllocated(SpecificNPCBounceConfig snbc, std::string section); //If the config of that part is not set and just set to default, return false
+
+std::vector<BGSKeyword*> GetKeywordListByString(BSFixedString keyword);
 
 #ifdef RUNTIME_VR_VERSION_1_4_15
 extern std::vector<std::string> PlayerNodeLines;

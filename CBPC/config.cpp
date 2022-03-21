@@ -1,6 +1,7 @@
 ﻿#include "config.h"
 #include <skse64/PapyrusActor.cpp>
 #include <skse64/PapyrusGame.cpp>
+#include <common/ICriticalSection.h>
 
 
 std::string versionStr = "1.4.ff";
@@ -127,34 +128,34 @@ UInt32 KeywordActorTypeNPCFormId = 0x0013794;
 BGSKeyword* KeywordActorTypeNPC;
 
 BSFixedString KeywordNameAsNakedL = "CBPCAsNakedL";
-BGSKeyword* KeywordAsNakedL;
+std::vector<BGSKeyword*> KeywordAsNakedL;
 
 BSFixedString KeywordNameAsNakedR = "CBPCAsNakedR";
-BGSKeyword* KeywordAsNakedR;
+std::vector<BGSKeyword*> KeywordAsNakedR;
 
 BSFixedString KeywordNameAsClothingL = "CBPCAsClothingL";
-BGSKeyword* KeywordAsClothingL;
+std::vector<BGSKeyword*> KeywordAsClothingL;
 
 BSFixedString KeywordNameAsClothingR = "CBPCAsClothingR";
-BGSKeyword* KeywordAsClothingR;
+std::vector<BGSKeyword*> KeywordAsClothingR;
 
 BSFixedString KeywordNameAsLightL = "CBPCAsLightL";
-BGSKeyword* KeywordAsLightL;
+std::vector<BGSKeyword*> KeywordAsLightL;
 
 BSFixedString KeywordNameAsLightR = "CBPCAsLightR";
-BGSKeyword* KeywordAsLightR;
+std::vector<BGSKeyword*> KeywordAsLightR;
 
 BSFixedString KeywordNameAsHeavyL = "CBPCAsHeavyL";
-BGSKeyword* KeywordAsHeavyL;
+std::vector<BGSKeyword*> KeywordAsHeavyL;
 
 BSFixedString KeywordNameAsHeavyR = "CBPCAsHeavyR";
-BGSKeyword* KeywordAsHeavyR;
+std::vector<BGSKeyword*> KeywordAsHeavyR;
 
 BSFixedString KeywordNameNoPushUpL = "CBPCNoPushUpL";
-BGSKeyword* KeywordNoPushUpL;
+std::vector<BGSKeyword*> KeywordNoPushUpL;
 
 BSFixedString KeywordNameNoPushUpR = "CBPCNoPushUpR";
-BGSKeyword* KeywordNoPushUpR;
+std::vector<BGSKeyword*> KeywordNoPushUpR;
 
 UInt32 VampireLordBeastRaceFormId = 0x0200283A;
 
@@ -947,6 +948,27 @@ UInt32 GetFullFormID(const ModInfo* modInfo, UInt32 formLower)
 	return (modInfo->modIndex << 24) | formLower;
 }
 
+// Find keywords by name
+std::vector<BGSKeyword*> GetKeywordListByString(BSFixedString keyword)
+{
+	std::vector<BGSKeyword*> pKeywordlist;
+
+	DataHandler* pDataHandler = DataHandler::GetSingleton();
+	tArray<BGSKeyword*>& keywords = pDataHandler->keywords;
+	for (UInt32 n = 0; n < keywords.count; n++) {
+		BGSKeyword* pKeyword = NULL;
+		keywords.GetNthItem(n, pKeyword);
+		if (pKeyword) {
+			if (strcmp(pKeyword->keyword.Get(), keyword.data) == 0)
+			{
+				pKeywordlist.emplace_back(pKeyword);
+			}
+		}
+	}
+
+	return pKeywordlist;
+}
+
 void GameLoad()
 {
 	dialogueMenuOpen.store(false);
@@ -971,46 +993,26 @@ void GameLoad()
 	keywordForm = LookupFormByID(KeywordActorTypeNPCFormId);
 	if (keywordForm)
 		KeywordActorTypeNPC = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+	
+	KeywordAsNakedL = GetKeywordListByString(KeywordNameAsNakedL);
 
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsNakedL);
-	if (keywordForm)
-		KeywordAsNakedL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+	KeywordAsNakedR = GetKeywordListByString(KeywordNameAsNakedR);
 
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsNakedR);
-	if (keywordForm)
-		KeywordAsNakedR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+	KeywordAsClothingL = GetKeywordListByString(KeywordNameAsClothingL);
 
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsClothingL);
-	if (keywordForm)
-		KeywordAsClothingL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+	KeywordAsClothingR = GetKeywordListByString(KeywordNameAsClothingR);
 
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsClothingR);
-	if (keywordForm)
-		KeywordAsClothingR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+	KeywordAsLightL = GetKeywordListByString(KeywordNameAsLightL);
+	
+	KeywordAsLightR = GetKeywordListByString(KeywordNameAsLightR);
 
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsLightL);
-	if (keywordForm)
-		KeywordAsLightL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+	KeywordAsHeavyL = GetKeywordListByString(KeywordNameAsHeavyL);
 
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsLightR);
-	if (keywordForm)
-		KeywordAsLightR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+	KeywordAsHeavyR = GetKeywordListByString(KeywordNameAsHeavyR);
 
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsHeavyL);
-	if (keywordForm)
-		KeywordAsHeavyL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+	KeywordNoPushUpL = GetKeywordListByString(KeywordNameNoPushUpL);
 
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameAsHeavyR);
-	if (keywordForm)
-		KeywordAsHeavyR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
-
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameNoPushUpL);
-	if (keywordForm)
-		KeywordNoPushUpL = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
-
-	keywordForm = papyrusKeyword::GetKeyword(nullptr, KeywordNameNoPushUpR);
-	if (keywordForm)
-		KeywordNoPushUpR = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+	KeywordNoPushUpR = GetKeywordListByString(KeywordNameNoPushUpR);
 
 
 	DataHandler* dataHandler = DataHandler::GetSingleton();
