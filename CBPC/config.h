@@ -126,17 +126,6 @@ extern BSFixedString KeywordNameAsHeavyR;
 extern BSFixedString KeywordNameNoPushUpL;
 extern BSFixedString KeywordNameNoPushUpR;
 
-extern std::vector<BGSKeyword*> KeywordAsNakedL;
-extern std::vector<BGSKeyword*> KeywordAsNakedR;
-extern std::vector<BGSKeyword*> KeywordAsClothingL;
-extern std::vector<BGSKeyword*> KeywordAsClothingR;
-extern std::vector<BGSKeyword*> KeywordAsLightL;
-extern std::vector<BGSKeyword*> KeywordAsLightR;
-extern std::vector<BGSKeyword*> KeywordAsHeavyL;
-extern std::vector<BGSKeyword*> KeywordAsHeavyR;
-extern std::vector<BGSKeyword*> KeywordNoPushUpL;
-extern std::vector<BGSKeyword*> KeywordNoPushUpR;
-
 extern UInt32 VampireLordBeastRaceFormId;
 
 

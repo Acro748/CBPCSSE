@@ -128,34 +128,15 @@ UInt32 KeywordActorTypeNPCFormId = 0x0013794;
 BGSKeyword* KeywordActorTypeNPC;
 
 BSFixedString KeywordNameAsNakedL = "CBPCAsNakedL";
-std::vector<BGSKeyword*> KeywordAsNakedL;
-
 BSFixedString KeywordNameAsNakedR = "CBPCAsNakedR";
-std::vector<BGSKeyword*> KeywordAsNakedR;
-
 BSFixedString KeywordNameAsClothingL = "CBPCAsClothingL";
-std::vector<BGSKeyword*> KeywordAsClothingL;
-
 BSFixedString KeywordNameAsClothingR = "CBPCAsClothingR";
-std::vector<BGSKeyword*> KeywordAsClothingR;
-
 BSFixedString KeywordNameAsLightL = "CBPCAsLightL";
-std::vector<BGSKeyword*> KeywordAsLightL;
-
 BSFixedString KeywordNameAsLightR = "CBPCAsLightR";
-std::vector<BGSKeyword*> KeywordAsLightR;
-
 BSFixedString KeywordNameAsHeavyL = "CBPCAsHeavyL";
-std::vector<BGSKeyword*> KeywordAsHeavyL;
-
 BSFixedString KeywordNameAsHeavyR = "CBPCAsHeavyR";
-std::vector<BGSKeyword*> KeywordAsHeavyR;
-
 BSFixedString KeywordNameNoPushUpL = "CBPCNoPushUpL";
-std::vector<BGSKeyword*> KeywordNoPushUpL;
-
 BSFixedString KeywordNameNoPushUpR = "CBPCNoPushUpR";
-std::vector<BGSKeyword*> KeywordNoPushUpR;
 
 UInt32 VampireLordBeastRaceFormId = 0x0200283A;
 
@@ -993,27 +974,6 @@ void GameLoad()
 	keywordForm = LookupFormByID(KeywordActorTypeNPCFormId);
 	if (keywordForm)
 		KeywordActorTypeNPC = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
-	
-	KeywordAsNakedL = GetKeywordListByString(KeywordNameAsNakedL);
-
-	KeywordAsNakedR = GetKeywordListByString(KeywordNameAsNakedR);
-
-	KeywordAsClothingL = GetKeywordListByString(KeywordNameAsClothingL);
-
-	KeywordAsClothingR = GetKeywordListByString(KeywordNameAsClothingR);
-
-	KeywordAsLightL = GetKeywordListByString(KeywordNameAsLightL);
-	
-	KeywordAsLightR = GetKeywordListByString(KeywordNameAsLightR);
-
-	KeywordAsHeavyL = GetKeywordListByString(KeywordNameAsHeavyL);
-
-	KeywordAsHeavyR = GetKeywordListByString(KeywordNameAsHeavyR);
-
-	KeywordNoPushUpL = GetKeywordListByString(KeywordNameNoPushUpL);
-
-	KeywordNoPushUpR = GetKeywordListByString(KeywordNameNoPushUpR);
-
 
 	DataHandler* dataHandler = DataHandler::GetSingleton();
 	if (dataHandler)

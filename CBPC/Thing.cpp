@@ -1244,132 +1244,87 @@ void Thing::update(Actor* actor) {
 					TESObjectARMO* armor = DYNAMIC_CAST(wornForm, TESForm, TESObjectARMO);
 					if (armor != nullptr)
 					{
-						bool isNaked = false;
-						if (IsLeftBreastBone)
+						bool IsAsNaked = false;
+						isHeavyArmor = false;
+						isLightArmor = false;
+						isClothed = false;
+						isNoPushUp = false;
+
+						auto keywords = armor->keyword.keywords;
+						if (keywords)
 						{
-							for (int i = 0; i < KeywordAsNakedL.size(); i++)
+							if (IsLeftBreastBone)
 							{
-								if (isNaked = armor->keyword.HasKeyword(KeywordAsNakedL.at(i)))
+								for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
 								{
-									isClothed = false;
-									isLightArmor = false;
-									isHeavyArmor = false;
-									break;
+									if (!keywords[index])
+										continue;
+
+									if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedL.data) == 0)
+									{
+										IsAsNaked = true;
+									}
+									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyL.data) == 0)
+									{
+										isHeavyArmor = true;
+									}
+									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightL.data) == 0)
+									{
+										isLightArmor = true;
+									}
+									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingL.data) == 0)
+									{
+										isClothed = true;
+									}
+									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpL.data) == 0)
+									{
+										isNoPushUp = true;
+									}
+								
 								}
 							}
-							
-							bool isDetectedAs = false;
-							if (!isNaked)
+							else if (IsRightBreastBone)
 							{
-								for (int i = 0; i < KeywordAsHeavyL.size(); i++)
+								for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
 								{
-									if (isHeavyArmor = (armor->keyword.HasKeyword(KeywordAsHeavyL.at(i))))
+									if (!keywords[index])
+										continue;
+
+									if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedR.data) == 0)
 									{
-										isDetectedAs = true;
-										break;
+										IsAsNaked = true;
+									}
+									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyR.data) == 0)
+									{
+										isHeavyArmor = true;
+									}
+									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightR.data) == 0)
+									{
+										isLightArmor = true;
+									}
+									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingR.data) == 0)
+									{
+										isClothed = true;
+									}
+									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpR.data) == 0)
+									{
+										isNoPushUp = true;
 									}
 								}
-
-								if (!isHeavyArmor)
-								{
-									for (int i = 0; i < KeywordAsLightL.size(); i++)
-									{
-										if (isLightArmor = (armor->keyword.HasKeyword(KeywordAsLightL.at(i))))
-										{
-											isDetectedAs = true;
-											break;
-										}
-									}
-								}
-
-								if (!isHeavyArmor && !isLightArmor)
-								{
-									for (int i = 0; i < KeywordAsClothingL.size(); i++)
-									{
-										if (isClothed = (armor->keyword.HasKeyword(KeywordAsClothingL.at(i))))
-										{
-											isDetectedAs = true;
-											break;
-										}
-									}
-								}
-
-								if (!isDetectedAs)
-								{
-									isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
-									isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
-									isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
-								}
-							}
-
-							for (int i = 0; i < KeywordNoPushUpL.size(); i++)
-							{
-								if (isNoPushUp = (armor->keyword.HasKeyword(KeywordNoPushUpL.at(i))))
-									break;
 							}
 						}
-						else if (IsRightBreastBone)
+
+						if (IsAsNaked)
 						{
-							for (int i = 0; i < KeywordAsNakedR.size(); i++)
-							{
-								if (isNaked = armor->keyword.HasKeyword(KeywordAsNakedR.at(i)))
-								{
-									isClothed = false;
-									isLightArmor = false;
-									isHeavyArmor = false;
-									break;
-								}
-							}
-
-							bool isDetectedAs = false;
-							if (!isNaked)
-							{
-								for (int i = 0; i < KeywordAsHeavyR.size(); i++)
-								{
-									if (isHeavyArmor = (armor->keyword.HasKeyword(KeywordAsHeavyR.at(i))))
-									{
-										isDetectedAs = true;
-										break;
-									}
-								}
-
-								if (!isHeavyArmor)
-								{
-									for (int i = 0; i < KeywordAsLightR.size(); i++)
-									{
-										if (isLightArmor = (armor->keyword.HasKeyword(KeywordAsLightR.at(i))))
-										{
-											isDetectedAs = true;
-											break;
-										}
-									}
-								}
-
-								if (!isHeavyArmor && !isLightArmor)
-								{
-									for (int i = 0; i < KeywordAsClothingR.size(); i++)
-									{
-										if (isClothed = (armor->keyword.HasKeyword(KeywordAsClothingR.at(i))))
-										{
-											isDetectedAs = true;
-											break;
-										}
-									}
-								}
-
-								if (!isDetectedAs)
-								{
-									isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
-									isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
-									isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
-								}
-							}
-
-							for (int i = 0; i < KeywordNoPushUpL.size(); i++)
-							{
-								if (isNoPushUp = (armor->keyword.HasKeyword(KeywordNoPushUpL.at(i))))
-									break;
-							}
+							isHeavyArmor = false;
+							isLightArmor = false;
+							isClothed = false;
+						}
+						else if (!isHeavyArmor && !isLightArmor && !isClothed)
+						{
+							isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
+							isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
+							isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
 						}
 					}
 					else
