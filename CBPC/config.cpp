@@ -929,27 +929,6 @@ UInt32 GetFullFormID(const ModInfo* modInfo, UInt32 formLower)
 	return (modInfo->modIndex << 24) | formLower;
 }
 
-// Find keywords by name
-std::vector<BGSKeyword*> GetKeywordListByString(BSFixedString keyword)
-{
-	std::vector<BGSKeyword*> pKeywordlist;
-
-	DataHandler* pDataHandler = DataHandler::GetSingleton();
-	tArray<BGSKeyword*>& keywords = pDataHandler->keywords;
-	for (UInt32 n = 0; n < keywords.count; n++) {
-		BGSKeyword* pKeyword = NULL;
-		keywords.GetNthItem(n, pKeyword);
-		if (pKeyword) {
-			if (strcmp(pKeyword->keyword.Get(), keyword.data) == 0)
-			{
-				pKeywordlist.emplace_back(pKeyword);
-			}
-		}
-	}
-
-	return pKeywordlist;
-}
-
 void GameLoad()
 {
 	dialogueMenuOpen.store(false);
