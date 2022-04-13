@@ -126,6 +126,7 @@ extern BSFixedString KeywordNameAsHeavyR;
 extern BSFixedString KeywordNameNoPushUpL;
 extern BSFixedString KeywordNameNoPushUpR;
 
+
 extern UInt32 VampireLordBeastRaceFormId;
 
 
@@ -280,6 +281,7 @@ bool compareBounceConfigs(const SpecificNPCBounceConfig& config1, const Specific
 bool GetSpecificNPCBounceConfigForActor(Actor* actor, SpecificNPCBounceConfig& snbc);
 bool IsConfigActuallyAllocated(SpecificNPCBounceConfig snbc, std::string section); //If the config of that part is not set and just set to default, return false
 
+std::vector<BGSKeyword*> GetKeywordListByString(BSFixedString keyword);
 #ifdef RUNTIME_VR_VERSION_1_4_15
 extern std::vector<std::string> PlayerNodeLines;
 extern std::vector<ConfigLine> PlayerNodesList;   //Player nodes that can collide nodes

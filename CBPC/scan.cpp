@@ -195,6 +195,8 @@ int frameCount = 0;
 
 bool inCreatureForm = false;
 
+float lastPlayerWeight = 50.0f;
+
 int skipFramesScanCount = 0;
 
 LARGE_INTEGER startingTime, endingTime, elapsedMicroseconds;
@@ -316,6 +318,7 @@ void updateActors()
 	NiPointer<TESObjectREFR> ToRefr = NULL;
 
 	bool creatureFormChange = false;
+	bool playerWeightChange = false;
 	if (skipFramesScanCount > 0) //We don't wanna do this every frame;
 	{
 		skipFramesScanCount--;		
@@ -326,6 +329,18 @@ void updateActors()
 
 		if ((*g_thePlayer) && ((Actor*)(*g_thePlayer))->race != nullptr)
 		{
+			auto actorRef = DYNAMIC_CAST(((Actor*)(*g_thePlayer)), Actor, TESObjectREFR);
+			if (actorRef)
+			{
+				float playerWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
+
+				if (fabsf(playerWeight - lastPlayerWeight) > 0.001f)
+				{
+					playerWeightChange = true;
+				}
+				lastPlayerWeight = playerWeight;
+			}
+
 			if (((Actor*)(*g_thePlayer))->race->formID == 0xCDD84 || ((Actor*)(*g_thePlayer))->race->formID == VampireLordBeastRaceFormId) //In beast form
 			{
 				if (inCreatureForm == false)
@@ -345,7 +360,7 @@ void updateActors()
 		}
 	}
 
-	if (cellChanged || raceSexMenuClosed.load() || creatureFormChange || MainMenuOpen.load())
+	if (cellChanged || raceSexMenuClosed.load() || creatureFormChange || playerWeightChange || MainMenuOpen.load())
 	{
 		raceSexMenuClosed.store(false);
 		MainMenuOpen.store(false);

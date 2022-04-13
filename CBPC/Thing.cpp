@@ -1055,7 +1055,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	{
 		if (thing_bellybulgemultiplier > 0 && genitalPenetration)
 		{
-			LOG_ERR("%f, %f, %f", collisionDiff.x, collisionDiff.y, collisionDiff.z);
+			LOG("Belly bulge %f, %f, %f", collisionDiff.x, collisionDiff.y, collisionDiff.z);
 
 			//LOG("opening:%g", opening);
 	//		bellyBulgeCountDown = 1000;
@@ -1249,53 +1249,50 @@ void Thing::update(Actor* actor) {
 						isLightArmor = false;
 						isClothed = false;
 						isNoPushUp = false;
-
 						auto keywords = armor->keyword.keywords;
 						if (keywords)
 						{
-							if (IsLeftBreastBone)
-							{
+						if (IsLeftBreastBone)
+						{
 								for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
-								{
+							{
 									if (!keywords[index])
 										continue;
-
 									if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedL.data) == 0)
-									{
+							{
 										IsAsNaked = true;
-									}
+								}
 									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyL.data) == 0)
 									{
 										isHeavyArmor = true;
 									}
 									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightL.data) == 0)
-									{
+										{
 										isLightArmor = true;
 									}
 									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingL.data) == 0)
-									{
+							{
 										isClothed = true;
 									}
 									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpL.data) == 0)
-									{
-										isNoPushUp = true;
-									}
-								
-								}
-							}
-							else if (IsRightBreastBone)
-							{
-								for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
 								{
+										isNoPushUp = true;
+								}
+
+							}
+						}
+						else if (IsRightBreastBone)
+						{
+								for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
+							{
 									if (!keywords[index])
 										continue;
-
 									if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedR.data) == 0)
-									{
+							{
 										IsAsNaked = true;
-									}
+								}
 									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyR.data) == 0)
-									{
+							{
 										isHeavyArmor = true;
 									}
 									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightR.data) == 0)
@@ -1303,28 +1300,29 @@ void Thing::update(Actor* actor) {
 										isLightArmor = true;
 									}
 									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingR.data) == 0)
-									{
+								{
 										isClothed = true;
 									}
 									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpR.data) == 0)
-									{
+										{
 										isNoPushUp = true;
+										}
 									}
 								}
-							}
 						}
 
 						if (IsAsNaked)
-						{
+							{
 							isHeavyArmor = false;
 							isLightArmor = false;
 							isClothed = false;
-						}
+										}
 						else if (!isHeavyArmor && !isLightArmor && !isClothed)
-						{
-							isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
-							isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
-							isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
+								{
+								isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
+								isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
+								isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
+
 						}
 					}
 					else

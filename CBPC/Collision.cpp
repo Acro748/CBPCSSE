@@ -45,10 +45,6 @@ void HandHapticFeedbackEffect(bool left)
 		for (int i = 0; i < hapticStrength; i++)
 		{
 			//ivrSystem->TriggerHapticPulse(controller, 0, hapticFrequency);
-			if (leftHandedMode == true)
-			{
-				left = !left;
-			}
 			LOG_INFO("Triggering haptic pulse for %g on %s...", (float)hapticFrequency, left ? "left hand":"right hand");
 			(*g_openVR)->TriggerHapticPulse(left ? BSVRInterface::kControllerHand_Left : BSVRInterface::kControllerHand_Right, (float)hapticFrequency / 3999.0f);
 		}

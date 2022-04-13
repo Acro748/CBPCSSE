@@ -158,6 +158,8 @@ UINT64 __cdecl Render(void *This, UINT64 arg)
 
 RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005BAB10); //For VR 1.4.15
 
+#elif RUNTIME_VERSION_1_6_353
+RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005DACE0); //For SSE 1.6.353 and up
 #elif RUNTIME_VERSION_1_6_342
 
 RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005DAE80); //For SSE 1.6.323 and up

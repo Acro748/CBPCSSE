@@ -4,8 +4,8 @@
 #include <common/ICriticalSection.h>
 
 
-std::string versionStr = "1.4.ff";
-UInt32 version = 0x0104ff;
+std::string versionStr = "1.5.0";
+UInt32 version = 0x010500;
 
 
 #pragma warning(disable : 4996)
@@ -128,14 +128,23 @@ UInt32 KeywordActorTypeNPCFormId = 0x0013794;
 BGSKeyword* KeywordActorTypeNPC;
 
 BSFixedString KeywordNameAsNakedL = "CBPCAsNakedL";
+
 BSFixedString KeywordNameAsNakedR = "CBPCAsNakedR";
+
 BSFixedString KeywordNameAsClothingL = "CBPCAsClothingL";
+
 BSFixedString KeywordNameAsClothingR = "CBPCAsClothingR";
+
 BSFixedString KeywordNameAsLightL = "CBPCAsLightL";
+
 BSFixedString KeywordNameAsLightR = "CBPCAsLightR";
+
 BSFixedString KeywordNameAsHeavyL = "CBPCAsHeavyL";
+
 BSFixedString KeywordNameAsHeavyR = "CBPCAsHeavyR";
+
 BSFixedString KeywordNameNoPushUpL = "CBPCNoPushUpL";
+
 BSFixedString KeywordNameNoPushUpR = "CBPCNoPushUpR";
 
 UInt32 VampireLordBeastRaceFormId = 0x0200283A;
@@ -953,6 +962,17 @@ void GameLoad()
 	keywordForm = LookupFormByID(KeywordActorTypeNPCFormId);
 	if (keywordForm)
 		KeywordActorTypeNPC = DYNAMIC_CAST(keywordForm, TESForm, BGSKeyword);
+
+
+
+
+
+
+
+
+
+
+
 
 	DataHandler* dataHandler = DataHandler::GetSingleton();
 	if (dataHandler)
@@ -2725,12 +2745,12 @@ BSFixedString GetVersion(StaticFunctionTag* base)
 
 BSFixedString GetVersionMinor(StaticFunctionTag* base)
 {
-	return BSFixedString("4");
+	return BSFixedString("5");
 }
 
 BSFixedString GetVersionBeta(StaticFunctionTag* base)
 {
-	return BSFixedString("16");
+	return BSFixedString("0");
 }
 
 std::string GetActorNodeString(Actor* actor, BSFixedString nodeName)
