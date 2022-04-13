@@ -339,5 +339,4 @@ public:
 
 	//FPS corrction
 	const float fps60Tick = 1.0f / 60.0f * (float)CLOCKS_PER_SEC;
-	float fpsCorrection = 1.0f;
 };

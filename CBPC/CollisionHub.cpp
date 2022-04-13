@@ -289,33 +289,44 @@ bool CheckPelvisArmor(Actor* actor)
 
 void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, std::unordered_map<std::string, NiPoint3> NodeCollisionSyncList)
 {
-	for (auto &collider : colliderList)
+	concurrency::parallel_for_each(colliderList.begin(), colliderList.end(), [&](auto& collider)
 	{
 		NiPoint3 VirtualOffset = emptyPoint;
-		
+
 		if (NodeCollisionSyncList.find(collider.second.colliderNodeName) != NodeCollisionSyncList.end())
 			VirtualOffset = NodeCollisionSyncList[collider.second.colliderNodeName];
 
+		float Nodescale = collider.second.CollisionObject->m_worldTransform.scale;
+
 		for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
 		{
+			collider.second.collisionSpheres[j].offset100 = collider.second.collisionSpheres[j].offset0 * Nodescale;
 			collider.second.collisionSpheres[j].worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionSpheres[j].offset100) + VirtualOffset;
+			collider.second.collisionSpheres[j].radius100 = collider.second.collisionSpheres[j].radius0 * Nodescale;
+			collider.second.collisionSpheres[j].radius100pwr2 = collider.second.collisionSpheres[j].radius100 * collider.second.collisionSpheres[j].radius100;
 		}
-		
+
 		for (int k = 0; k < collider.second.collisionCapsules.size(); k++)
 		{
+			collider.second.collisionCapsules[k].End1_offset100 = collider.second.collisionCapsules[k].End1_offset0 * Nodescale;
 			collider.second.collisionCapsules[k].End1_worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End1_offset100) + VirtualOffset;
+			collider.second.collisionCapsules[k].End1_radius100 = collider.second.collisionCapsules[k].End1_radius0 * Nodescale;
+			collider.second.collisionCapsules[k].End1_radius100pwr2 = collider.second.collisionCapsules[k].End1_radius100 * collider.second.collisionCapsules[k].End1_radius100;
+			collider.second.collisionCapsules[k].End2_offset100 = collider.second.collisionCapsules[k].End2_offset0 * Nodescale;
 			collider.second.collisionCapsules[k].End2_worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End2_offset100) + VirtualOffset;
+			collider.second.collisionCapsules[k].End2_radius100 = collider.second.collisionCapsules[k].End2_radius0 * Nodescale;
+			collider.second.collisionCapsules[k].End2_radius100pwr2 = collider.second.collisionCapsules[k].End2_radius100 * collider.second.collisionCapsules[k].End2_radius100;
 		}
-		
+
 		#ifdef RUNTIME_VR_VERSION_1_4_15
 		for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
 		{
-			collider.second.collisionTriangles[j].a = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot*collider.second.collisionTriangles[j].orga;
-			collider.second.collisionTriangles[j].b = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot*collider.second.collisionTriangles[j].orgb;
-			collider.second.collisionTriangles[j].c = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot*collider.second.collisionTriangles[j].orgc;
+			collider.second.collisionTriangles[j].a = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orga;
+			collider.second.collisionTriangles[j].b = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgb;
+			collider.second.collisionTriangles[j].c = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgc;
 		}
 		#endif
-	}
+	});
 }
 
 std::vector<int> GetHashIdsFromPos(NiPoint3 pos, float radius)

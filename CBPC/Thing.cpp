@@ -45,7 +45,6 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 			//NiAVObject* obj = actor->loadedState->node->GetObjectByName(&name.data);
 			if (obj)
 			{
-				nodeScale = obj->m_worldTransform.scale;
 				ownerActor = actor;
 				node = obj;
 			}
@@ -225,11 +224,11 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 			IgnoreAllSelfColliders = AffectedNodesListPtr->at(i).IgnoreAllSelfColliders;
 			for(int j=0; j<spheres.size(); j++)
 			{
-				spheres[j].offset100 = GetPointFromPercentage(spheres[j].offset0, spheres[j].offset100, actorWeight) * nodeScale;
+				spheres[j].offset0 = GetPointFromPercentage(spheres[j].offset0, spheres[j].offset100, actorWeight);
 
-				spheres[j].radius100 = GetPercentageValue(spheres[j].radius0, spheres[j].radius100, actorWeight) * nodeScale;
+				spheres[j].radius0 = GetPercentageValue(spheres[j].radius0, spheres[j].radius100, actorWeight);
 
-				spheres[j].radius100pwr2 = spheres[j].radius100 * spheres[j].radius100;
+				spheres[j].radius100pwr2 = spheres[j].radius0 * spheres[j].radius0;
 			}
 			break;
 		}
@@ -301,17 +300,17 @@ std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::stri
 			IgnoreAllSelfColliders = AffectedNodesListPtr->at(i).IgnoreAllSelfColliders;
 			for (int j = 0; j < capsules.size(); j++)
 			{
-				capsules[j].End1_offset100 = GetPointFromPercentage(capsules[j].End1_offset0, capsules[j].End1_offset100, actorWeight) * nodeScale;
+				capsules[j].End1_offset0 = GetPointFromPercentage(capsules[j].End1_offset0, capsules[j].End1_offset100, actorWeight);
 
-				capsules[j].End1_radius100 = GetPercentageValue(capsules[j].End1_radius0, capsules[j].End1_radius100, actorWeight) * nodeScale;
+				capsules[j].End1_radius0 = GetPercentageValue(capsules[j].End1_radius0, capsules[j].End1_radius100, actorWeight);
+
+				capsules[j].End1_radius100pwr2 = capsules[j].End1_radius0 * capsules[j].End1_radius0;
+
+				capsules[j].End2_offset0 = GetPointFromPercentage(capsules[j].End2_offset0, capsules[j].End2_offset100, actorWeight);
+
+				capsules[j].End2_radius0 = GetPercentageValue(capsules[j].End2_radius0, capsules[j].End2_radius100, actorWeight);
 				
-				capsules[j].End1_radius100pwr2 = capsules[j].End1_radius100 * capsules[j].End1_radius100;
-
-				capsules[j].End2_offset100 = GetPointFromPercentage(capsules[j].End2_offset0, capsules[j].End2_offset100, actorWeight) * nodeScale;
-
-				capsules[j].End2_radius100 = GetPercentageValue(capsules[j].End2_radius0, capsules[j].End2_radius100, actorWeight) * nodeScale;
-				
-				capsules[j].End2_radius100pwr2 = capsules[j].End2_radius100 * capsules[j].End2_radius100;
+				capsules[j].End2_radius100pwr2 = capsules[j].End2_radius0 * capsules[j].End2_radius0;
 			}
 			break;
 		}
@@ -791,6 +790,8 @@ void Thing::updatePelvis(Actor *actor)
 			}
 			thing_map_lock.unlock();
 			LOG_INFO("Left pussy default pos -> %g %g %g , Right pussy default pos ->  %g %g %g , Back pussy default pos ->  %g %g %g , Front pussy default pos ->  %g %g %g", leftPussyDefaultPos.x, leftPussyDefaultPos.y, leftPussyDefaultPos.z, rightPussyDefaultPos.x, rightPussyDefaultPos.y, rightPussyDefaultPos.z, backPussyDefaultPos.x, backPussyDefaultPos.y, backPussyDefaultPos.z, frontPussyDefaultPos.x, frontPussyDefaultPos.y, frontPussyDefaultPos.z);
+		
+		//	CollisionSetUp.IsTriggerCollision = true;
 		}
 		
 		//There's nothing problem with editing, but if editing once then all node world positions are updated.
@@ -813,16 +814,21 @@ void Thing::updatePelvis(Actor *actor)
 
 	NiMatrix33 pelvisRotation;
 	NiPoint3 pelvisPosition;
+	float pelvisScale;
 
 	pelvisRotation = pelvisObj->m_worldTransform.rot;
 	pelvisPosition = pelvisObj->m_worldTransform.pos;
+	pelvisScale = pelvisObj->m_worldTransform.scale;
 
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
 	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
-		thingCollisionSpheres[i].worldPos = pelvisPosition + (pelvisRotation*thingCollisionSpheres[i].offset100);
+		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * pelvisScale;
+		thingCollisionSpheres[i].worldPos = pelvisPosition + (pelvisRotation * thingCollisionSpheres[i].offset100);
+		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * pelvisScale;
+		thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
 		for (int m = 0; m<hashIdList.size(); m++)
 		{
@@ -834,8 +840,14 @@ void Thing::updatePelvis(Actor *actor)
 	}	
 	for (int i = 0; i < thingCollisionCapsules.size(); i++)
 	{
+		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * pelvisScale;
 		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End1_offset100);
+		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * pelvisScale;
+		thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
+		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * pelvisScale;
 		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End2_offset100);
+		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * pelvisScale;
+		thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
 		for (int m = 0; m<hashIdList.size(); m++)
@@ -874,20 +886,19 @@ void Thing::updatePelvis(Actor *actor)
 				partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
 				//now not that do reach max value just by get closer and just affected by the collider size
-				collisionDiff = partitions[id].partitionCollisions[i].CheckPelvisCollision(thingCollisionSpheres, thingCollisionCapsules);
-				collisionVector = collisionVector + collisionDiff;
+				partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules);
 			}
 		}
 	}
 
 	// Collision Stuff End
 	
-	NiPoint3 leftVector = collisionVector;
-	NiPoint3 rightVector = collisionVector;
-	NiPoint3 backVector = collisionVector;
-	NiPoint3 frontVector = collisionVector;
+	NiPoint3 leftVector = collisionDiff;
+	NiPoint3 rightVector = collisionDiff;
+	NiPoint3 backVector = collisionDiff;
+	NiPoint3 frontVector = collisionDiff;
 
-	float opening = distance(collisionVector, emptyPoint);
+	float opening = distance(collisionDiff, emptyPoint);
 
 	CalculateDiffVagina(leftVector, opening, true, true);
 	CalculateDiffVagina(rightVector, opening, true, false);
@@ -930,6 +941,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	
 	NiMatrix33 bulgenodeRotation;
 	NiPoint3 bulgenodePosition;
+	float bulgenodeScale;
 
 	thing_ReadNode_lock.lock();
 	NiAVObject* bellyObj = actor->loadedState->node->GetObjectByName(&belly.data);
@@ -973,10 +985,13 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 		}
 		thing_map_lock.unlock();
 		LOG_INFO("Belly default pos -> %g %g %g", bellyDefaultPos.x, bellyDefaultPos.y, bellyDefaultPos.z);
+
+	//	CollisionSetUp.IsTriggerCollision = true;
 	}
 
 	bulgenodeRotation = bulgeObj->m_worldTransform.rot;
 	bulgenodePosition = bulgeObj->m_worldTransform.pos;
+	bulgenodeScale = bulgeObj->m_worldTransform.scale;
 
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
@@ -985,7 +1000,10 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 
 	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
-		thingCollisionSpheres[i].worldPos = bulgenodePosition + (bulgenodeRotation* thingCollisionSpheres[i].offset100);
+		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * bulgenodeScale;
+		thingCollisionSpheres[i].worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionSpheres[i].offset100);
+		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * bulgenodeScale;
+		thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
 		for (int m = 0; m<hashIdList.size(); m++)
 		{
@@ -997,8 +1015,14 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	}
 	for (int i = 0; i < thingCollisionCapsules.size(); i++)
 	{
-		thingCollisionCapsules[i].End1_worldPos = bulgenodePosition + (bulgenodeRotation* thingCollisionCapsules[i].End1_offset100);
-		thingCollisionCapsules[i].End2_worldPos = bulgenodePosition + (bulgenodeRotation* thingCollisionCapsules[i].End2_offset100);
+		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * bulgenodeScale;
+		thingCollisionCapsules[i].End1_worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionCapsules[i].End1_offset100);
+		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * bulgenodeScale;
+		thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
+		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * bulgenodeScale;
+		thingCollisionCapsules[i].End2_worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionCapsules[i].End2_offset100);
+		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * bulgenodeScale;
+		thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
 		for (int m = 0; m<hashIdList.size(); m++)
@@ -1026,7 +1050,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 				
 				for (int m = 0; m < thing_bellybulgelist.size(); m++)
 				{
-					collisionDiff = emptyPoint;
+					bool isColliding = false;
 
 	//				if (partitions[id].partitionCollisions[i].colliderNodeName.find(thing_bellybulgelist[m]) != std::string::npos)
 	//				{
@@ -1035,21 +1059,20 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 						partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
 						//now not that do reach max value just by get closer and just affected by the collider size
-						collisionDiff = partitions[id].partitionCollisions[i].CheckPelvisCollision(thingCollisionSpheres, thingCollisionCapsules);
+						isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules);
 
-						if (!CompareNiPoints(collisionDiff, emptyPoint))
+						if (isColliding)
 						{
 							genitalPenetration = true;
 						}
 	//				}
 
-					collisionVector = collisionVector + collisionDiff;
 				}
 			}
 		}
 	}
 
-	const float opening = distance(collisionVector, emptyPoint) * 2.0f;
+	const float opening = distance(collisionDiff, emptyPoint) * 2.0f;
 
 	if (opening > 0)
 	{
@@ -1088,6 +1111,13 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 void Thing::update(Actor* actor) {
 
 	bool collisionsOn = true;
+
+	float Friction = 1.0f;
+	if (collisionOnLastFrame)
+	{
+		Friction = collisionFriction;
+	}
+
 	if (skipFramesCount > 0)
 	{
 		skipFramesCount--;
@@ -1115,10 +1145,12 @@ void Thing::update(Actor* actor) {
 
 	time = newTime;
 
+	float fpsCorrection = 1.0f;
+
 	if (fpsCorrectionEnabled)
 	{
 		if (deltaT > fps60Tick * 4) deltaT = fps60Tick * 4; //edited
-		if (deltaT < fps60Tick / 4) deltaT = fps60Tick / 4; //edited
+		if (deltaT < fps60Tick * 0.25) deltaT = fps60Tick * 0.25; //edited
 
 		fpsCorrection = ((float)deltaT / fps60Tick); //added
 	}
@@ -1181,6 +1213,8 @@ void Thing::update(Actor* actor) {
 
 	if (!obj->m_parent)
 		return;
+
+	nodeScale = obj->m_worldTransform.scale;
 
 	bool IsThereCollision = false;
 	bool maybeNot = false;
@@ -1375,12 +1409,12 @@ void Thing::update(Actor* actor) {
 		//Calculate the resulting gravity
 		varGravityCorrection = (gravityRatio * gravityCorrection) + ((1.0 - gravityRatio) * gravityInvertedCorrection);
 	}
-	//varGravityCorrection = varGravityCorrection * (fpsCorrectionEnabled ? fpsCorrection : 1.0f);
 
 	//Offset to move Center of Mass make rotaional motion more significant  
 	NiPoint3 diff = (target - oldWorldPos) * forceMultipler;
 
-	diff += NiPoint3(0, 0, varGravityCorrection);
+	//It is not recommended to use, When used, there is a high possibility that the movement will be adversely affected due to min/maxoffset
+	//diff += NiPoint3(0, 0, varGravityCorrection) * (fpsCorrectionEnabled ? fpsCorrection : 1.0f);
 
 	if (fabs(diff.x) > 100 || fabs(diff.y) > 100 || fabs(diff.z) > 100) //prevent shakes
 	{
@@ -1401,22 +1435,24 @@ void Thing::update(Actor* actor) {
 
 	// Compute the "Spring" Force
 	NiPoint3 diff2(diff.x * diff.x * sgn(diff.x), diff.y * diff.y * sgn(diff.y), diff.z * diff.z * sgn(diff.z));
-	NiPoint3 force = (diff * stiffness) + (diff2 * stiffness2) - (NiPoint3(0, 0, varGravityBias) / (fpsCorrectionEnabled ? fpsCorrection : 1.0f));
+	NiPoint3 force = (diff * stiffness) + (diff2 * stiffness2) - (NiPoint3(0, 0, varGravityBias) / fpsCorrection);
 	//showPos(diff);
 	//showPos(force);
 
 	do {
 		// Assume mass is 1, so Accelleration is Force, can vary mass by changinf force
 		//velocity = (velocity + (force * timeStep)) * (1 - (damping * timeStep));
-		velocity = (velocity + (force * timeStep)) - (velocity * (damping * timeStep)); //edited
+
+		velocity = velocity * Friction; //Fixes that when becomes unstable collisions during colliding at low or unstable FPS
+
+		velocity = (velocity + (force * timeStep)) - (velocity * (damping * timeStep));
 
 		posDelta += velocity * timeStep;
 
 		deltaT -= timeTick;
 	} while (deltaT >= timeTick);
 
-
-	newPos = newPos + posDelta * (fpsCorrectionEnabled ? fpsCorrection : 1.0f);
+	newPos = newPos + posDelta * fpsCorrection;
 
 	// clamp the difference to stop the breast severely lagging at low framerates
 	NiPoint3 newdiff = newPos - target;
@@ -1444,6 +1480,10 @@ void Thing::update(Actor* actor) {
 	ldiff.x = ldiff.x + ((beforeldiff.y * linearXspreadforceY) + (beforeldiff.z * linearXspreadforceZ));
 	ldiff.y = ldiff.y + ((beforeldiff.x * linearYspreadforceX) + (beforeldiff.z * linearYspreadforceZ));
 	ldiff.z = ldiff.z + ((beforeldiff.x * linearZspreadforceX) + (beforeldiff.y * linearZspreadforceY));
+
+	ldiff.x = clamp(ldiff.x, XminOffset, XmaxOffset);
+	ldiff.y = clamp(ldiff.y, YminOffset, YmaxOffset);
+	ldiff.z = clamp(ldiff.z, ZminOffset, ZmaxOffset);
 
 	//same the clamp(diff.z - varGravityCorrection, -maxOffset, maxOffset) + varGravityCorrection
 	//this is the reason for the endless shaking when unstable fps in v1.4.1x
@@ -1494,7 +1534,10 @@ void Thing::update(Actor* actor) {
 		thingIdList.clear();
 		for (int i = 0; i < thingCollisionSpheres.size(); i++)
 		{
+			thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * nodeScale;
 			thingCollisionSpheres[i].worldPos = maybePos + (objRotation * thingCollisionSpheres[i].offset100);
+			thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * nodeScale;
+			thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 			hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
 			for (int m = 0; m < hashIdList.size(); m++)
 			{
@@ -1506,9 +1549,15 @@ void Thing::update(Actor* actor) {
 		}
 		for (int i = 0; i < thingCollisionCapsules.size(); i++)
 		{
+			thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * nodeScale;
 			thingCollisionCapsules[i].End1_worldPos = maybePos + (objRotation * thingCollisionCapsules[i].End1_offset100);
+			thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * nodeScale;
+			thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
+			thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * nodeScale;
 			thingCollisionCapsules[i].End2_worldPos = maybePos + (objRotation * thingCollisionCapsules[i].End2_offset100);
-			hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
+			thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * nodeScale;
+			thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
+			hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End2_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 				, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
 			for (int m = 0; m < hashIdList.size(); m++)
 			{
@@ -1522,6 +1571,7 @@ void Thing::update(Actor* actor) {
 		//Prevent normal movement to cause collision (This prevents shakes)			
 		collisionVector = emptyPoint;
 		NiPoint3 lastcollisionVector = emptyPoint;
+
 		for (int j = 0; j < thingIdList.size(); j++)
 		{
 			int id = thingIdList[j];
@@ -1559,33 +1609,11 @@ void Thing::update(Actor* actor) {
 
 					partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
-					if (!CompareNiPoints(lastcollisionVector, collisionVector))
-					{
-						for (int l = 0; l < thingCollisionSpheres.size(); l++)
-						{
-							thingCollisionSpheres[l].worldPos = maybePos + (objRotation * thingCollisionSpheres[l].offset100) + collisionVector;
-						}
-
-						for (int m = 0; m < thingCollisionCapsules.size(); m++)
-						{
-							thingCollisionCapsules[m].End1_worldPos = maybePos + (objRotation * thingCollisionCapsules[m].End1_offset100) + collisionVector;
-							thingCollisionCapsules[m].End2_worldPos = maybePos + (objRotation * thingCollisionCapsules[m].End2_offset100) + collisionVector;
-						}
-					}
-					lastcollisionVector = collisionVector;
-
 					bool colliding = false;
-					collisionDiff = partitions[id].partitionCollisions[i].CheckCollision(colliding, thingCollisionSpheres, thingCollisionCapsules, false);
+					colliding = partitions[id].partitionCollisions[i].CheckCollision(collisionVector, thingCollisionSpheres, thingCollisionCapsules, false);
 					if (colliding)
 					{
-						velocity *= collisionFriction;
 						maybeNot = true;
-						collisionVector = collisionVector + (collisionDiff * collisionPenetration);
-						NiPoint3 IcollisionVector = invRot * collisionVector; //need to clamp on local position
-						IcollisionVector.x = clamp(IcollisionVector.x, collisionXminOffset, collisionXmaxOffset);
-						IcollisionVector.y = clamp(IcollisionVector.y, collisionYminOffset, collisionYmaxOffset);
-						IcollisionVector.z = clamp(IcollisionVector.z, collisionZminOffset, collisionZmaxOffset);
-						collisionVector = obj->m_parent->m_worldTransform.rot * IcollisionVector;
 					}
 
 					collisionCheckCount++;
@@ -1616,7 +1644,6 @@ void Thing::update(Actor* actor) {
 
 				for (int l = 0; l < thingCollisionSpheres.size(); l++)
 				{
-					thingCollisionSpheres[l].worldPos = maybePos + (objRotation * thingCollisionSpheres[l].offset100) + collisionVector;
 					if (thingCollisionSpheres[l].worldPos.z - thingCollisionSpheres[l].radius100 < bottomPos - bottomRadius)
 					{
 						bottomPos = thingCollisionSpheres[l].worldPos.z;
@@ -1626,9 +1653,6 @@ void Thing::update(Actor* actor) {
 
 				for (int m = 0; m < thingCollisionCapsules.size(); m++)
 				{
-					thingCollisionCapsules[m].End1_worldPos = maybePos + (objRotation * thingCollisionCapsules[m].End1_offset100) + collisionVector;
-					thingCollisionCapsules[m].End2_worldPos = maybePos + (objRotation * thingCollisionCapsules[m].End2_offset100) + collisionVector;
-
 					if (thingCollisionCapsules[m].End1_worldPos.z - thingCollisionCapsules[m].End1_radius100 < thingCollisionCapsules[m].End2_worldPos.z - thingCollisionCapsules[m].End2_radius100)
 					{
 						if (thingCollisionCapsules[m].End1_worldPos.z - thingCollisionCapsules[m].End1_radius100 < bottomPos - bottomRadius)
@@ -1657,63 +1681,69 @@ void Thing::update(Actor* actor) {
 					if (Scalar > bottomRadius)
 						Scalar = bottomRadius;
 
-					GroundCollisionVector = NiPoint3(0, 0, Scalar * collisionPenetration);
+					GroundCollisionVector = NiPoint3(0, 0, Scalar);
 				}
 			}
 		}
 
-		ldiffcol = invRot * collisionVector;
-		ldiffGcol = invRot * GroundCollisionVector;
+		if (maybeNot)
+		{
+			collisionOnLastFrame = maybeNot;
 
-		//Add more collision force for weak bone weights but virtually for maintain collision by node position
-		//For example, if a node has a bone weight value of about 0.1, that shape seems actually moves by 0.1 even if the node moves by 1
-		//However, simply applying the multipler then changes the actual node position,so that's making the collisions out of sync
-		//Therefore to make perfect collision
-		//it seems to be pushed out as much as colliding to the naked eye, but the actual position of the colliding node must be maintained original position
-		maybeIdiffcol = (ldiffcol + ldiffGcol) * collisionMultipler;
+			ldiffcol = invRot * (collisionVector * collisionPenetration);
+			ldiffGcol = invRot * (GroundCollisionVector * collisionPenetration);
 
-		//add collision vector buffer of one frame to some reduce jitter and add softness by collision
-		//be particularly useful for both nodes colliding that defined in both affected and collider nodes
-		auto maybeldiffcoltmp = maybeIdiffcol;
-		maybeIdiffcol = (maybeIdiffcol + collisionBuffer) * 0.5;
-		collisionBuffer = maybeldiffcoltmp;
+			//Add more collision force for weak bone weights but virtually for maintain collision by node position
+			//For example, if a node has a bone weight value of about 0.1, that shape seems actually moves by 0.1 even if the node moves by 1
+			//However, simply applying the multipler then changes the actual node position,so that's making the collisions out of sync
+			//Therefore to make perfect collision
+			//it seems to be pushed out as much as colliding to the naked eye, but the actual position of the colliding node must be maintained original position
+			maybeIdiffcol = (ldiffcol + ldiffGcol) * collisionMultipler;
 
-		//set to collision sync for the node that has both affected node and collider node
-		collisionSync = obj->m_parent->m_worldTransform.rot * (ldiffcol + ldiffGcol - maybeIdiffcol);
+			//add collision vector buffer of one frame to some reduce jitter and add softness by collision
+			//be particularly useful for both nodes colliding that defined in both affected and collider nodes
+			auto maybeldiffcoltmp = maybeIdiffcol;
+			maybeIdiffcol = (maybeIdiffcol + collisionBuffer) * 0.5;
+			collisionBuffer = maybeldiffcoltmp;
 
-		auto rcoldiffXnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalXnew;
-		auto rcoldiffYnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalYnew;
-		auto rcoldiffZnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalZnew;
+			//set to collision sync for the node that has both affected node and collider node
+			collisionSync = obj->m_parent->m_worldTransform.rot * (ldiffcol + ldiffGcol - maybeIdiffcol);
 
-		rcoldiffXnew.x *= linearXrotationX;
-		rcoldiffXnew.y *= linearYrotationX;
-		rcoldiffXnew.z *= linearZrotationX;
+			auto rcoldiffXnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalXnew;
+			auto rcoldiffYnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalYnew;
+			auto rcoldiffZnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalZnew;
 
-		rcoldiffYnew.x *= linearXrotationY;
-		rcoldiffYnew.y *= linearYrotationY;
-		rcoldiffYnew.z *= linearZrotationY;
+			rcoldiffXnew.x *= linearXrotationX;
+			rcoldiffXnew.y *= linearYrotationX;
+			rcoldiffXnew.z *= linearZrotationX;
 
-		rcoldiffZnew.x *= linearXrotationZ;
-		rcoldiffZnew.y *= linearYrotationZ;
-		rcoldiffZnew.z *= linearZrotationZ;
+			rcoldiffYnew.x *= linearXrotationY;
+			rcoldiffYnew.y *= linearYrotationY;
+			rcoldiffYnew.z *= linearZrotationY;
 
-		NiMatrix33 newcolRot;
-		newcolRot.SetEulerAngles(rcoldiffYnew.x + rcoldiffYnew.y + rcoldiffYnew.z, rcoldiffZnew.x + rcoldiffZnew.y + rcoldiffZnew.z, rcoldiffXnew.x + rcoldiffXnew.y + rcoldiffXnew.z);
+			rcoldiffZnew.x *= linearXrotationZ;
+			rcoldiffZnew.y *= linearYrotationZ;
+			rcoldiffZnew.z *= linearZrotationZ;
 
-		newRot = newRot * newcolRot;
+			NiMatrix33 newcolRot;
+			newcolRot.SetEulerAngles(rcoldiffYnew.x + rcoldiffYnew.y + rcoldiffYnew.z, rcoldiffZnew.x + rcoldiffZnew.y + rcoldiffZnew.z, rcoldiffXnew.x + rcoldiffXnew.y + rcoldiffXnew.z);
 
+			newRot = newRot * newcolRot;
+		}
+		else
+		{
+			collisionSync = emptyPoint;
+		}
 		///#### collision calculate done
 
 		//LOG("After Maybe Collision Stuff End");
 	}
-	// The remaining problem is that when fps is unstable or don't get 60 or higher or located in some colliding position
-	// if used collisionElastic and the colliding continues (It's okay to that collision like hitting) then it becomes unstable in the colliding state
-	// However in the case of a chain physics nodes like 3BB breasts, this instability seems to be offset to a large extent so will get good results
-	// to perfect solve this, calculate physics without "collisionElastic" then use it to correct the result of calculation physics with "collisionElastic"
-	// but the solution is very heavy because it has to go through twice or more physics calculations in one frame
-	// so... i suggest that don't use collisionElastic as a standard and just only use some part like chain physics nodes
-	// and if there is anything else to do, i suggest doing it instead of solve this
-	// If it's very optimized later or there's margin for performance or planning to create a "high-end option", then we can consider adding it!
+	//Now the collision accuracy is completely
+	//But can't easy to resolve the cause for the collisions to become unstable when low or unstable FPS if applied the "collisionElastic"
+	//Maybe the best answer is dividing one frame by the missing frame count then need to additional repeat calculations
+	//e.g) if fps is 30 then need to maintained 60 calculations like in 60 fps, therefore It guarantees 60 fps of calculation by performing calculations twice per frame
+	//But rather than this, maybe there's a better way to do it like way that actual results is not perfect but pefomance is better or way that tricks... like edit velocity...
+
 
 	//Logging
 	if (logging != 0)
@@ -1730,8 +1760,10 @@ void Thing::update(Actor* actor) {
 	//If put the result of collision into the next frame, the quality of collision and movement will improve
 	//but if that part is almost exclusively for collisions like vagina, it's better not to reflect the result of collision into physics
 	//### To be free from unstable FPS, have to remove the varGravityCorrection from the next frame
-	if (collisionElastic)
+	if (collisionElastic && maybeNot)
+	{
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol)) + target - NiPoint3(0, 0, varGravityCorrection);
+	}
 	else
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * ldiff) + target - NiPoint3(0, 0, varGravityCorrection);
 
