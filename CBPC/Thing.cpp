@@ -27,12 +27,7 @@ BSFixedString highheel("NPC");
 // but i think call [] for an object that already has a value is some thread safety even if parallel processing
 // so i think it would be okay to remove the lock if can put all the values in the beforehand at config.cpp
 
-//## thing_armorKeyword_lock
-// I didn't check it definitely if it's problem occur in parallel processing
-// but i just locked it because detecting armor keywords was a heavy process and it's processing sometimes
-// If necessary, we can make more optimizations or lock free later
-
-std::shared_mutex thing_Refresh_node_lock, thing_map_lock, thing_SetNode_lock, thing_ReadNode_lock, thing_config_lock;// , thing_armorKeyword_lock;
+std::shared_mutex thing_Refresh_node_lock, thing_map_lock, thing_SetNode_lock, thing_ReadNode_lock, thing_config_lock;
 
 Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	: boneName(name)
@@ -433,6 +428,15 @@ void Thing::updateConfigValues(Actor* actor)
 	collisionZmaxOffset = GetPercentageValue(collisionZmaxOffset_0, collisionZmaxOffset_100, actorWeight);
 	collisionZminOffset = GetPercentageValue(collisionZminOffset_0, collisionZminOffset_100, actorWeight);
 
+
+	CollisionConfig.IsElasticCollision = collisionElastic;
+
+	CollisionConfig.RotationalX = NiPoint3(linearXrotationX, linearYrotationX, linearZrotationX) * rotationalXnew;
+	CollisionConfig.RotationalY = NiPoint3(linearXrotationY, linearYrotationY, linearZrotationY) * rotationalYnew;
+	CollisionConfig.RotationalZ = NiPoint3(linearXrotationZ, linearYrotationZ, linearZrotationZ) * rotationalZnew;
+
+	CollisionConfig.CollisionMaxOffset = NiPoint3(collisionXmaxOffset, collisionYmaxOffset, collisionZmaxOffset);
+	CollisionConfig.CollisionMinOffset = NiPoint3(collisionXminOffset, collisionYminOffset, collisionZminOffset);
 }
 
 void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& centry0weight) {
@@ -491,7 +495,7 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 
 	if (centry.find("timeStep") != centry.end())
 		timeStep_100 = centry["timeStep"];
-	else 
+	else
 		timeStep_100 = 1.0f;
 
 	linearXspreadforceY_100 = centry["linearXspreadforceY"];
@@ -861,6 +865,11 @@ void Thing::updatePelvis(Actor *actor)
 
 
 	NiPoint3 collisionDiff = emptyPoint;
+
+	CollisionConfig.maybePos = pelvisPosition;
+	CollisionConfig.cnvRot = pelvisObj->m_parent->m_worldTransform.rot;
+	CollisionConfig.objRot = pelvisRotation;
+	CollisionConfig.invRot = pelvisObj->m_parent->m_worldTransform.rot.Transpose();
 		
 	for (int j = 0; j < thingIdList.size(); j++)
 	{
@@ -886,7 +895,7 @@ void Thing::updatePelvis(Actor *actor)
 				partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
 				//now not that do reach max value just by get closer and just affected by the collider size
-				partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules);
+				partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
 			}
 		}
 	}
@@ -1036,6 +1045,11 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 
 	NiPoint3 collisionDiff = emptyPoint;
 
+	CollisionConfig.maybePos = bulgenodePosition;
+	CollisionConfig.cnvRot = bulgeObj->m_parent->m_worldTransform.rot;
+	CollisionConfig.objRot = bulgenodeRotation;
+	CollisionConfig.invRot = bulgeObj->m_parent->m_worldTransform.rot.Transpose();
+
 	bool genitalPenetration = false;
 
 	for (int j = 0; j < thingIdList.size(); j++)
@@ -1059,7 +1073,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 						partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
 						//now not that do reach max value just by get closer and just affected by the collider size
-						isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules);
+						isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
 
 						if (isColliding)
 						{
@@ -1572,6 +1586,11 @@ void Thing::update(Actor* actor) {
 		collisionVector = emptyPoint;
 		NiPoint3 lastcollisionVector = emptyPoint;
 
+		CollisionConfig.maybePos = maybePos;
+		CollisionConfig.cnvRot = obj->m_parent->m_worldTransform.rot;
+		CollisionConfig.objRot = objRotation;
+		CollisionConfig.invRot = invRot;
+
 		for (int j = 0; j < thingIdList.size(); j++)
 		{
 			int id = thingIdList[j];
@@ -1610,7 +1629,7 @@ void Thing::update(Actor* actor) {
 					partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
 					bool colliding = false;
-					colliding = partitions[id].partitionCollisions[i].CheckCollision(collisionVector, thingCollisionSpheres, thingCollisionCapsules, false);
+					colliding = partitions[id].partitionCollisions[i].CheckCollision(collisionVector, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig, false);
 					if (colliding)
 					{
 						maybeNot = true;
@@ -1679,7 +1698,12 @@ void Thing::update(Actor* actor) {
 
 					//it can allow only force up to the radius for doesn't get crushed by the ground
 					if (Scalar > bottomRadius)
-						Scalar = bottomRadius;
+					{
+						if (Scalar < bottomRadius * 1.5f)
+							Scalar = bottomRadius;
+						else
+							Scalar = 0;
+					}
 
 					GroundCollisionVector = NiPoint3(0, 0, Scalar);
 				}
@@ -1765,7 +1789,9 @@ void Thing::update(Actor* actor) {
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol)) + target - NiPoint3(0, 0, varGravityCorrection);
 	}
 	else
+	{
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * ldiff) + target - NiPoint3(0, 0, varGravityCorrection);
+	}
 
 	thing_SetNode_lock.lock();
 	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (ldiff.x * varLinearX) + maybeIdiffcol.x;

@@ -321,6 +321,8 @@ public:
 	NiPoint3 collisionBuffer;
 	NiPoint3 collisionSync;
 
+	CollisionConfigs CollisionConfig;
+
 	float lastMaxOffsetY = 0.0f;
 	float lastMaxOffsetZ = 0.0f;
 	int bellyBulgeCountDown = 0;

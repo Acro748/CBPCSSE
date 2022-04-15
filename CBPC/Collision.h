@@ -14,6 +14,25 @@
 
 static NiPoint3 emptyPoint = NiPoint3(0, 0, 0);
 
+struct CollisionConfigs {
+	bool IsElasticCollision = false;
+
+	NiPoint3 maybePos = emptyPoint;
+	NiMatrix33 objRot;
+
+	NiMatrix33 cnvRot;
+	NiMatrix33 invRot;
+
+	NiPoint3 RotationalX = emptyPoint;
+	NiPoint3 RotationalY = emptyPoint;
+	NiPoint3 RotationalZ = emptyPoint;
+
+	NiPoint3 CollisionMaxOffset = NiPoint3(100.0f, 100.0f, 100.0f);
+	NiPoint3 CollisionMinOffset = NiPoint3(-100.0f, -100.0f, -100.0f);
+};
+
+void UpdateThingColliderPositions(NiPoint3& Collisiondif, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig);
+
 class Collision
 {
 
@@ -30,13 +49,11 @@ public:
 
 	NiPoint3 lastColliderPosition = emptyPoint;
 
-	void UpdateThingColliderPositions(NiPoint3 newCollisiondif, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules);
-		
-	bool IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule> &thingCollisionCapsules, std::vector<Capsule> &collisionCapsules, bool maybe);
+	bool IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Sphere> &collisionSpheres, std::vector<Capsule> &thingCollisionCapsules, std::vector<Capsule> &collisionCapsules, CollisionConfigs CollisionConfig, bool maybe);
 	
-	bool CheckCollision(NiPoint3 &collisionDiff, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, bool maybe);
+	bool CheckCollision(NiPoint3 &collisionDiff, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig, bool maybe);
 
-	bool CheckPelvisCollision(NiPoint3& collisionDiff, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules);
+	bool CheckPelvisCollision(NiPoint3& collisionDiff, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig);
 	std::vector<Sphere> collisionSpheres;
 	std::vector<Capsule> collisionCapsules;
 	

@@ -289,7 +289,7 @@ bool CheckPelvisArmor(Actor* actor)
 
 void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, std::unordered_map<std::string, NiPoint3> NodeCollisionSyncList)
 {
-	concurrency::parallel_for_each(colliderList.begin(), colliderList.end(), [&](auto& collider)
+	for (auto& collider : colliderList)
 	{
 		NiPoint3 VirtualOffset = emptyPoint;
 
@@ -326,7 +326,7 @@ void UpdateColliderPositions(std::unordered_map<std::string, Collision> &collide
 			collider.second.collisionTriangles[j].c = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgc;
 		}
 		#endif
-	});
+	}
 }
 
 std::vector<int> GetHashIdsFromPos(NiPoint3 pos, float radius)
