@@ -32,6 +32,7 @@ std::shared_mutex thing_Refresh_node_lock, thing_map_lock, thing_SetNode_lock, t
 Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	: boneName(name)
 	, velocity(NiPoint3(0, 0, 0))
+	, velocityRot(NiPoint3(0, 0, 0))
 {
 	if (actor)
 	{
@@ -59,6 +60,7 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	}
 
 	oldWorldPos = obj->m_worldTransform.pos;
+	oldWorldPosRot = obj->m_worldTransform.pos;
 	time = clock();
 
 	IsLeftBreastBone = ContainsNoCase(boneName.data, "L Breast");
@@ -350,9 +352,27 @@ void Thing::updateConfigValues(Actor* actor)
 
 	}
 
-	stiffness = GetPercentageValue(stiffness_0, stiffness_100, actorWeight);
-	stiffness2 = GetPercentageValue(stiffness2_0, stiffness2_100, actorWeight);
-	damping = GetPercentageValue(damping_0, damping_100, actorWeight);
+//	stiffness = GetPercentageValue(stiffness_0, stiffness_100, actorWeight);
+	stiffnessX = GetPercentageValue(stiffnessX_0, stiffnessX_100, actorWeight);
+	stiffnessY = GetPercentageValue(stiffnessY_0, stiffnessY_100, actorWeight);
+	stiffnessZ = GetPercentageValue(stiffnessZ_0, stiffnessZ_100, actorWeight);
+	stiffnessXRot = GetPercentageValue(stiffnessXRot_0, stiffnessXRot_100, actorWeight);
+	stiffnessYRot = GetPercentageValue(stiffnessYRot_0, stiffnessYRot_100, actorWeight);
+	stiffnessZRot = GetPercentageValue(stiffnessZRot_0, stiffnessZRot_100, actorWeight);
+//	stiffness2 = GetPercentageValue(stiffness2_0, stiffness2_100, actorWeight);
+	stiffness2X = GetPercentageValue(stiffness2X_0, stiffness2X_100, actorWeight);
+	stiffness2Y = GetPercentageValue(stiffness2Y_0, stiffness2Y_100, actorWeight);
+	stiffness2Z = GetPercentageValue(stiffness2Z_0, stiffness2Z_100, actorWeight);
+	stiffness2XRot = GetPercentageValue(stiffness2XRot_0, stiffness2XRot_100, actorWeight);
+	stiffness2YRot = GetPercentageValue(stiffness2YRot_0, stiffness2YRot_100, actorWeight);
+	stiffness2ZRot = GetPercentageValue(stiffness2ZRot_0, stiffness2ZRot_100, actorWeight);
+//	damping = GetPercentageValue(damping_0, damping_100, actorWeight);
+	dampingX = GetPercentageValue(dampingX_0, dampingX_100, actorWeight);
+	dampingY = GetPercentageValue(dampingY_0, dampingY_100, actorWeight);
+	dampingZ = GetPercentageValue(dampingZ_0, dampingZ_100, actorWeight);
+	dampingXRot = GetPercentageValue(dampingXRot_0, dampingXRot_100, actorWeight);
+	dampingYRot = GetPercentageValue(dampingYRot_0, dampingYRot_100, actorWeight);
+	dampingZRot = GetPercentageValue(dampingZRot_0, dampingZRot_100, actorWeight);
 
 	//maxOffset = GetPercentageValue(maxOffset_0, maxOffset_100, actorWeight);
 	XmaxOffset = GetPercentageValue(XmaxOffset_0, XmaxOffset_100, actorWeight);
@@ -361,6 +381,12 @@ void Thing::updateConfigValues(Actor* actor)
 	YminOffset = GetPercentageValue(YminOffset_0, YminOffset_100, actorWeight);
 	ZmaxOffset = GetPercentageValue(ZmaxOffset_0, ZmaxOffset_100, actorWeight);
 	ZminOffset = GetPercentageValue(ZminOffset_0, ZminOffset_100, actorWeight);
+	XmaxOffsetRot = GetPercentageValue(XmaxOffsetRot_0, XmaxOffsetRot_100, actorWeight);
+	XminOffsetRot = GetPercentageValue(XminOffsetRot_0, XminOffsetRot_100, actorWeight);
+	YmaxOffsetRot = GetPercentageValue(YmaxOffsetRot_0, YmaxOffsetRot_100, actorWeight);
+	YminOffsetRot = GetPercentageValue(YminOffsetRot_0, YminOffsetRot_100, actorWeight);
+	ZmaxOffsetRot = GetPercentageValue(ZmaxOffsetRot_0, ZmaxOffsetRot_100, actorWeight);
+	ZminOffsetRot = GetPercentageValue(ZminOffsetRot_0, ZminOffsetRot_100, actorWeight);
 	XdefaultOffset = GetPercentageValue(XdefaultOffset_0, XdefaultOffset_100, actorWeight);
 	YdefaultOffset = GetPercentageValue(YdefaultOffset_0, YdefaultOffset_100, actorWeight);
 	ZdefaultOffset = GetPercentageValue(ZdefaultOffset_0, ZdefaultOffset_100, actorWeight);
@@ -370,6 +396,7 @@ void Thing::updateConfigValues(Actor* actor)
 	varGravityCorrection = -1 * gravityCorrection;
 
 	timeTick = GetPercentageValue(timeTick_0, timeTick_100, actorWeight);
+	timeTickRot = GetPercentageValue(timeTickRot_0, timeTickRot_100, actorWeight);
 	linearX = GetPercentageValue(linearX_0, linearX_100, actorWeight);
 	linearY = GetPercentageValue(linearY_0, linearY_100, actorWeight);
 	linearZ = GetPercentageValue(linearZ_0, linearZ_100, actorWeight);
@@ -386,6 +413,7 @@ void Thing::updateConfigValues(Actor* actor)
 	linearZrotationY = GetPercentageValue(linearZrotationY_0, linearZrotationY_100, actorWeight);
 	linearZrotationZ = GetPercentageValue(linearZrotationZ_0, linearZrotationZ_100, actorWeight);
 	timeStep = GetPercentageValue(timeStep_0, timeStep_100, actorWeight);
+	timeStepRot = GetPercentageValue(timeStepRot_0, timeStepRot_100, actorWeight);
 
 	linearXspreadforceY = GetPercentageValue(linearXspreadforceY_0, linearXspreadforceY_100, actorWeight);
 	linearXspreadforceZ = GetPercentageValue(linearXspreadforceZ_0, linearXspreadforceZ_100, actorWeight);
@@ -393,6 +421,12 @@ void Thing::updateConfigValues(Actor* actor)
 	linearYspreadforceZ = GetPercentageValue(linearYspreadforceZ_0, linearYspreadforceZ_100, actorWeight);
 	linearZspreadforceX = GetPercentageValue(linearZspreadforceX_0, linearZspreadforceX_100, actorWeight);
 	linearZspreadforceY = GetPercentageValue(linearZspreadforceY_0, linearZspreadforceY_100, actorWeight);
+	linearXspreadforceYRot = GetPercentageValue(linearXspreadforceYRot_0, linearXspreadforceYRot_100, actorWeight);
+	linearXspreadforceZRot = GetPercentageValue(linearXspreadforceZRot_0, linearXspreadforceZRot_100, actorWeight);
+	linearYspreadforceXRot = GetPercentageValue(linearYspreadforceXRot_0, linearYspreadforceXRot_100, actorWeight);
+	linearYspreadforceZRot = GetPercentageValue(linearYspreadforceZRot_0, linearYspreadforceZRot_100, actorWeight);
+	linearZspreadforceXRot = GetPercentageValue(linearZspreadforceXRot_0, linearZspreadforceXRot_100, actorWeight);
+	linearZspreadforceYRot = GetPercentageValue(linearZspreadforceYRot_0, linearZspreadforceYRot_100, actorWeight);
 
 	forceMultipler = GetPercentageValue(forceMultipler_0, forceMultipler_100, actorWeight);
 
@@ -443,8 +477,62 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	//100 weight
 	thing_config_lock.lock();
 	stiffness_100 = centry["stiffness"];
+	stiffnessX_100 = centry["stiffnessX"];
+	stiffnessY_100 = centry["stiffnessY"];
+	stiffnessZ_100 = centry["stiffnessZ"];
+	if (stiffnessX_100 < 0.001f || stiffnessY_100 < 0.001f || stiffnessZ_100 < 0.001f)
+	{
+		stiffnessX_100 = stiffness_100;
+		stiffnessY_100 = stiffness_100;
+		stiffnessZ_100 = stiffness_100;
+	}
+	stiffnessXRot_100 = centry["stiffnessXRot"];
+	stiffnessYRot_100 = centry["stiffnessYRot"];
+	stiffnessZRot_100 = centry["stiffnessZRot"];
+	if (stiffnessXRot_100 < 0.001f || stiffnessYRot_100 < 0.001f || stiffnessZRot_100 < 0.001f)
+	{
+		stiffnessXRot_100 = stiffness_100;
+		stiffnessYRot_100 = stiffness_100;
+		stiffnessZRot_100 = stiffness_100;
+	}
 	stiffness2_100 = centry["stiffness2"];
+	stiffness2X_100 = centry["stiffness2X"];
+	stiffness2Y_100 = centry["stiffness2Y"];
+	stiffness2Z_100 = centry["stiffness2Z"];
+	if (stiffness2X_100 < 0.001f || stiffness2Y_100 < 0.001f || stiffness2Z_100 < 0.001f)
+	{
+		stiffness2X_100 = stiffness2_100;
+		stiffness2Y_100 = stiffness2_100;
+		stiffness2Z_100 = stiffness2_100;
+	}
+	stiffness2XRot_100 = centry["stiffness2XRot"];
+	stiffness2YRot_100 = centry["stiffness2YRot"];
+	stiffness2ZRot_100 = centry["stiffness2ZRot"];
+	if (stiffness2XRot_100 < 0.001f || stiffness2YRot_100 < 0.001f || stiffness2ZRot_100 < 0.001f)
+	{
+		stiffness2XRot_100 = stiffness2_100;
+		stiffness2YRot_100 = stiffness2_100;
+		stiffness2ZRot_100 = stiffness2_100;
+	}
 	damping_100 = centry["damping"];
+	dampingX_100 = centry["dampingX"];
+	dampingY_100 = centry["dampingY"];
+	dampingZ_100 = centry["dampingZ"];
+	if (dampingX_100 < 0.001f || dampingY_100 < 0.001f || dampingZ_100 < 0.001f)
+	{
+		dampingX_100 = damping_100;
+		dampingY_100 = damping_100;
+		dampingZ_100 = damping_100;
+	}
+	dampingXRot_100 = centry["dampingXRot"];
+	dampingYRot_100 = centry["dampingYRot"];
+	dampingZRot_100 = centry["dampingZRot"];
+	if (dampingXRot_100 < 0.001f || dampingYRot_100 < 0.001f || dampingZRot_100 < 0.001f)
+	{
+		dampingXRot_100 = damping_100;
+		dampingYRot_100 = damping_100;
+		dampingZRot_100 = damping_100;
+	}
 	maxOffset_100 = centry["maxoffset"];
 	if (maxOffset_100 >= 0.01f)
 	{
@@ -454,6 +542,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		YminOffset_100 = -maxOffset_100;
 		ZmaxOffset_100 = maxOffset_100;
 		ZminOffset_100 = -maxOffset_100;
+		XmaxOffsetRot_100 = maxOffset_100;
+		XminOffsetRot_100 = -maxOffset_100;
+		YmaxOffsetRot_100 = maxOffset_100;
+		YminOffsetRot_100 = -maxOffset_100;
+		ZmaxOffsetRot_100 = maxOffset_100;
+		ZminOffsetRot_100 = -maxOffset_100;
 	}
 	else
 	{
@@ -463,6 +557,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		YminOffset_100 = centry["Yminoffset"];
 		ZmaxOffset_100 = centry["Zmaxoffset"];
 		ZminOffset_100 = centry["Zminoffset"];
+		XmaxOffsetRot_100 = centry["XmaxoffsetRot"];
+		XminOffsetRot_100 = centry["XminoffsetRot"];
+		YmaxOffsetRot_100 = centry["YmaxoffsetRot"];
+		YminOffsetRot_100 = centry["YminoffsetRot"];
+		ZmaxOffsetRot_100 = centry["ZmaxoffsetRot"];
+		ZminOffsetRot_100 = centry["ZminoffsetRot"];
 	}
 	XdefaultOffset_100 = centry0weight["Xdefaultoffset_100"];
 	YdefaultOffset_100 = centry0weight["Ydefaultoffset_100"];
@@ -471,6 +571,10 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	timeTick_100 = centry["timetick"];
 	if (timeTick_100 <= 1)
 		timeTick_100 = 1;
+	timeTickRot_100 = centry["timetickRot"];
+	if (timeTickRot_100 < 0.001f)
+		timeTickRot_100 = timeTick_100;
+
 	linearX_100 = centry["linearX"];
 	linearY_100 = centry["linearY"];
 	linearZ_100 = centry["linearZ"];
@@ -495,8 +599,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 
 	if (centry.find("timeStep") != centry.end())
 		timeStep_100 = centry["timeStep"];
-	else
+	else 
 		timeStep_100 = 1.0f;
+	if (centry.find("timeStepRot") != centry.end())
+		timeStepRot_100 = centry["timeStepRot"];
+	else 
+		timeStepRot_100 = timeStep_100;
 
 	linearXspreadforceY_100 = centry["linearXspreadforceY"];
 	linearXspreadforceZ_100 = centry["linearXspreadforceZ"];
@@ -504,6 +612,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearYspreadforceZ_100 = centry["linearYspreadforceZ"];
 	linearZspreadforceX_100 = centry["linearZspreadforceX"];
 	linearZspreadforceY_100 = centry["linearZspreadforceY"];
+	linearXspreadforceYRot_100 = centry["linearXspreadforceYRot"];
+	linearXspreadforceZRot_100 = centry["linearXspreadforceZRot"];
+	linearYspreadforceXRot_100 = centry["linearYspreadforceXRot"];
+	linearYspreadforceZRot_100 = centry["linearYspreadforceZRot"];
+	linearZspreadforceXRot_100 = centry["linearZspreadforceXRot"];
+	linearZspreadforceYRot_100 = centry["linearZspreadforceYRot"];
 
 	forceMultipler_100 = centry["forceMultipler"];
 
@@ -551,8 +665,62 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 
 	//0 weight
 	stiffness_0 = centry0weight["stiffness"];
+	stiffnessX_0 = centry0weight["stiffnessX"];
+	stiffnessY_0 = centry0weight["stiffnessY"];
+	stiffnessZ_0 = centry0weight["stiffnessZ"];
+	if (stiffnessX_0 < 0.001f || stiffnessY_0 < 0.001f || stiffnessZ_0 < 0.001f)
+	{
+		stiffnessX_0 = stiffness_0;
+		stiffnessY_0 = stiffness_0;
+		stiffnessZ_0 = stiffness_0;
+	}
+	stiffnessXRot_0 = centry0weight["stiffnessXRot"];
+	stiffnessYRot_0 = centry0weight["stiffnessYRot"];
+	stiffnessZRot_0 = centry0weight["stiffnessZRot"];
+	if (stiffnessXRot_0 < 0.001f || stiffnessYRot_0 < 0.001f || stiffnessZRot_0 < 0.001f)
+	{
+		stiffnessXRot_0 = stiffness_0;
+		stiffnessYRot_0 = stiffness_0;
+		stiffnessZRot_0 = stiffness_0;
+	}
 	stiffness2_0 = centry0weight["stiffness2"];
+	stiffness2X_0 = centry0weight["stiffness2X"];
+	stiffness2Y_0 = centry0weight["stiffness2Y"];
+	stiffness2Z_0 = centry0weight["stiffness2Z"];
+	if (stiffness2X_0 < 0.001f || stiffness2Y_0 < 0.001f || stiffness2Z_0 < 0.001f)
+	{
+		stiffness2X_0 = stiffness2_0;
+		stiffness2Y_0 = stiffness2_0;
+		stiffness2Z_0 = stiffness2_0;
+	}
+	stiffness2XRot_0 = centry0weight["stiffness2XRot"];
+	stiffness2YRot_0 = centry0weight["stiffness2YRot"];
+	stiffness2ZRot_0 = centry0weight["stiffness2ZRot"];
+	if (stiffness2XRot_0 < 0.001f || stiffness2YRot_0 < 0.001f || stiffness2ZRot_0 < 0.001f)
+	{
+		stiffness2XRot_0 = stiffness2_0;
+		stiffness2YRot_0 = stiffness2_0;
+		stiffness2ZRot_0 = stiffness2_0;
+	}
 	damping_0 = centry0weight["damping"];
+	dampingX_0 = centry0weight["dampingX"];
+	dampingY_0 = centry0weight["dampingY"];
+	dampingZ_0 = centry0weight["dampingZ"];
+	if (dampingX_0 < 0.001f || dampingY_0 < 0.001f || dampingZ_0 < 0.001f)
+	{
+		dampingX_0 = damping_0;
+		dampingY_0 = damping_0;
+		dampingZ_0 = damping_0;
+	}
+	dampingXRot_0 = centry0weight["dampingXRot"];
+	dampingYRot_0 = centry0weight["dampingYRot"];
+	dampingZRot_0 = centry0weight["dampingZRot"];
+	if (dampingXRot_0 < 0.001f || dampingYRot_0 < 0.001f || dampingZRot_0 < 0.001f)
+	{
+		dampingXRot_0 = damping_0;
+		dampingYRot_0 = damping_0;
+		dampingZRot_0 = damping_0;
+	}
 	maxOffset_0 = centry0weight["maxoffset"];
 	if (maxOffset_0 >= 0.01f)
 	{
@@ -562,6 +730,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		YminOffset_0 = -maxOffset_0;
 		ZmaxOffset_0 = maxOffset_0;
 		ZminOffset_0 = -maxOffset_0;
+		XmaxOffsetRot_0 = maxOffset_0;
+		XminOffsetRot_0 = -maxOffset_0;
+		YmaxOffsetRot_0 = maxOffset_0;
+		YminOffsetRot_0 = -maxOffset_0;
+		ZmaxOffsetRot_0 = maxOffset_0;
+		ZminOffsetRot_0 = -maxOffset_0;
 	}
 	else
 	{
@@ -571,6 +745,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		YminOffset_0 = centry0weight["Yminoffset"];
 		ZmaxOffset_0 = centry0weight["Zmaxoffset"];
 		ZminOffset_0 = centry0weight["Zminoffset"];
+		XmaxOffsetRot_0 = centry0weight["XmaxoffsetRot"];
+		XminOffsetRot_0 = centry0weight["XminoffsetRot"];
+		YmaxOffsetRot_0 = centry0weight["YmaxoffsetRot"];
+		YminOffsetRot_0 = centry0weight["YminoffsetRot"];
+		ZmaxOffsetRot_0 = centry0weight["ZmaxoffsetRot"];
+		ZminOffsetRot_0 = centry0weight["ZminoffsetRot"];
 	}
 	XdefaultOffset_0 = centry0weight["Xdefaultoffset_0"];
 	YdefaultOffset_0 = centry0weight["Ydefaultoffset_0"];
@@ -579,6 +759,9 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	timeTick_0 = centry0weight["timetick"];
 	if (timeTick_0 <= 1)
 		timeTick_0 = 1;
+	timeTickRot_0 = centry0weight["timetickRot"];
+	if (timeTickRot_0 < 0.001f)
+		timeTickRot_0 = timeTick_0;
 	linearX_0 = centry0weight["linearX"];
 	linearY_0 = centry0weight["linearY"];
 	linearZ_0 = centry0weight["linearZ"];
@@ -605,6 +788,10 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		timeStep_0 = centry0weight["timeStep"];
 	else
 		timeStep_0 = 1.0f;
+	if (centry0weight.find("timeStepRot") != centry0weight.end())
+		timeStepRot_0 = centry0weight["timeStepRot"];
+	else
+		timeStepRot_0 = timeStep_0;
 
 	linearXspreadforceY_0 = centry0weight["linearXspreadforceY"];
 	linearXspreadforceZ_0 = centry0weight["linearXspreadforceZ"];
@@ -612,6 +799,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearYspreadforceZ_0 = centry0weight["linearYspreadforceZ"];
 	linearZspreadforceX_0 = centry0weight["linearZspreadforceX"];
 	linearZspreadforceY_0 = centry0weight["linearZspreadforceY"];
+	linearXspreadforceYRot_0 = centry0weight["linearXspreadforceYRot"];
+	linearXspreadforceZRot_0 = centry0weight["linearXspreadforceZRot"];
+	linearYspreadforceXRot_0 = centry0weight["linearYspreadforceXRot"];
+	linearYspreadforceZRot_0 = centry0weight["linearYspreadforceZRot"];
+	linearZspreadforceXRot_0 = centry0weight["linearZspreadforceXRot"];
+	linearZspreadforceYRot_0 = centry0weight["linearZspreadforceYRot"];
 
 	forceMultipler_0 = centry0weight["forceMultipler"];
 
@@ -1234,6 +1427,7 @@ void Thing::update(Actor* actor) {
 	bool maybeNot = false;
 	NiPoint3 collisionDiff = emptyPoint;
 	long originalDeltaT = deltaT;
+	long deltaTRot = deltaT;
 	NiPoint3 collisionVector = emptyPoint;
 
 	float varGravityBias = gravityBias;
@@ -1254,8 +1448,10 @@ void Thing::update(Actor* actor) {
 	std::vector<int> hashIdList;
 
 	NiPoint3 newPos = oldWorldPos;
+	NiPoint3 newPosRot = oldWorldPosRot;
 
 	NiPoint3 posDelta = emptyPoint;
+	NiPoint3 posDeltaRot = emptyPoint;
 
 	NiPoint3 target = obj->m_parent->m_worldTransform.pos;
 
@@ -1426,6 +1622,11 @@ void Thing::update(Actor* actor) {
 
 	//Offset to move Center of Mass make rotaional motion more significant  
 	NiPoint3 diff = (target - oldWorldPos) * forceMultipler;
+	NiPoint3 diffRot = (target - oldWorldPosRot) * forceMultipler;
+
+	// move the bones based on the supplied weightings
+	// Convert the world translations into local coordinates
+	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
 
 	//It is not recommended to use, When used, there is a high possibility that the movement will be adversely affected due to min/maxoffset
 	//diff += NiPoint3(0, 0, varGravityCorrection) * (fpsCorrectionEnabled ? fpsCorrection : 1.0f);
@@ -1439,17 +1640,36 @@ void Thing::update(Actor* actor) {
 		thing_SetNode_lock.unlock();
 
 		oldWorldPos = target;
+		oldWorldPosRot = target;
 		velocity = emptyPoint;
+		velocityRot = emptyPoint;
 		time = clock();
 		return;
 	}
 
 	float timeMultiplier = timeTick / (float)deltaT;
 	diff *= timeMultiplier;
+	diffRot *= timeMultiplier;
+
+	NiPoint3 forceGravityBias = invRot * (NiPoint3(0, 0, varGravityBias) / fpsCorrection);
+	
+	NiPoint3 ldiff;
+	NiPoint3 ldiffRot;
+	NiMatrix33 newRot;
 
 	// Compute the "Spring" Force
 	NiPoint3 diff2(diff.x * diff.x * sgn(diff.x), diff.y * diff.y * sgn(diff.y), diff.z * diff.z * sgn(diff.z));
-	NiPoint3 force = (diff * stiffness) + (diff2 * stiffness2) - (NiPoint3(0, 0, varGravityBias) / fpsCorrection);
+	diff = invRot * diff;
+	diff2 = invRot * diff2;
+
+	NiPoint3 force;
+	
+	force.x = (diff.x * stiffnessX) + (diff2.x * stiffness2X);
+	force.y = (diff.y * stiffnessY) + (diff2.y * stiffness2Y);
+	force.z = (diff.z * stiffnessZ) + (diff2.z * stiffness2Z);
+
+	force += forceGravityBias;
+
 	//showPos(diff);
 	//showPos(force);
 
@@ -1459,14 +1679,16 @@ void Thing::update(Actor* actor) {
 
 		velocity = velocity * Friction; //Fixes that when becomes unstable collisions during colliding at low or unstable FPS
 
-		velocity = (velocity + (force * timeStep)) - (velocity * (damping * timeStep));
+		velocity.x = (velocity.x + (force.x * timeStep)) - (velocity.x * (dampingX * timeStep));
+		velocity.y = (velocity.y + (force.y * timeStep)) - (velocity.y * (dampingY * timeStep));
+		velocity.z = (velocity.z + (force.z * timeStep)) - (velocity.z * (dampingZ * timeStep));
 
 		posDelta += velocity * timeStep;
 
 		deltaT -= timeTick;
 	} while (deltaT >= timeTick);
 
-	newPos = newPos + posDelta * fpsCorrection;
+	newPos = newPos + (obj->m_parent->m_worldTransform.rot * posDelta * fpsCorrection);
 
 	// clamp the difference to stop the breast severely lagging at low framerates
 	NiPoint3 newdiff = newPos - target;
@@ -1474,15 +1696,8 @@ void Thing::update(Actor* actor) {
 	varLinearX = varLinearX * forceAmplitude;
 	varLinearY = varLinearY * forceAmplitude;
 	varLinearZ = varLinearZ * forceAmplitude;
-	varRotationalXnew = varRotationalXnew * forceAmplitude;
-	varRotationalYnew = varRotationalYnew * forceAmplitude;
-	varRotationalZnew = varRotationalZnew * forceAmplitude;
 
-	// move the bones based on the supplied weightings
-	// Convert the world translations into local coordinates
-	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
-
-	auto ldiff = invRot * newdiff;
+	ldiff = invRot * newdiff;
 	auto beforeldiff = ldiff;
 
 	ldiff.x = clamp(ldiff.x, XminOffset, XmaxOffset);
@@ -1491,6 +1706,7 @@ void Thing::update(Actor* actor) {
 
 	//It can allows the force of dissipated by min/maxoffsets to be spread in different directions
 	beforeldiff = beforeldiff - ldiff;
+
 	ldiff.x = ldiff.x + ((beforeldiff.y * linearXspreadforceY) + (beforeldiff.z * linearXspreadforceZ));
 	ldiff.y = ldiff.y + ((beforeldiff.x * linearYspreadforceX) + (beforeldiff.z * linearYspreadforceZ));
 	ldiff.z = ldiff.z + ((beforeldiff.x * linearZspreadforceX) + (beforeldiff.y * linearZspreadforceY));
@@ -1503,9 +1719,64 @@ void Thing::update(Actor* actor) {
 	//this is the reason for the endless shaking when unstable fps in v1.4.1x
 	ldiff = invRot * ((obj->m_parent->m_worldTransform.rot * ldiff) + NiPoint3(0, 0, varGravityCorrection));
 
-	auto rdiffXnew = ldiff * varRotationalXnew;
-	auto rdiffYnew = ldiff * varRotationalYnew;
-	auto rdiffZnew = ldiff * varRotationalZnew;
+
+	NiPoint3 diff2Rot(diffRot.x* diffRot.x* sgn(diffRot.x), diffRot.y* diffRot.y* sgn(diffRot.y), diffRot.z* diffRot.z* sgn(diffRot.z));
+	diffRot = invRot * diffRot;
+	diff2Rot = invRot * diff2Rot;
+
+	NiPoint3 forceRot;
+
+	forceRot.x = (diffRot.x * stiffnessXRot) + (diff2Rot.x * stiffness2XRot);
+	forceRot.y = (diffRot.y * stiffnessYRot) + (diff2Rot.y * stiffness2YRot);
+	forceRot.z = (diffRot.z * stiffnessZRot) + (diff2Rot.z * stiffness2ZRot);
+
+	forceRot += forceGravityBias;
+
+	do {
+		// Assume mass is 1, so Accelleration is Force, can vary mass by changinf force
+		//velocity = (velocity + (force * timeStep)) * (1 - (damping * timeStep));
+
+		velocityRot = velocityRot * Friction; //Fixes that when becomes unstable collisions during colliding at low or unstable FPS
+
+		velocityRot.x = (velocityRot.x + (forceRot.x * timeStepRot)) - (velocityRot.x * (dampingXRot * timeStepRot));
+		velocityRot.y = (velocityRot.y + (forceRot.y * timeStepRot)) - (velocityRot.y * (dampingYRot * timeStepRot));
+		velocityRot.z = (velocityRot.z + (forceRot.z * timeStepRot)) - (velocityRot.z * (dampingZRot * timeStepRot));
+
+		posDeltaRot += velocityRot * timeStepRot;
+
+		deltaTRot -= timeTickRot;
+	} while (deltaTRot >= timeTickRot);
+
+	newPosRot = newPosRot + (obj->m_parent->m_worldTransform.rot * posDeltaRot * fpsCorrection);
+
+	NiPoint3 newdiffRot = newPosRot - target;
+
+	varRotationalXnew = varRotationalXnew * forceAmplitude;
+	varRotationalYnew = varRotationalYnew * forceAmplitude;
+	varRotationalZnew = varRotationalZnew * forceAmplitude;
+
+	ldiffRot = invRot * newdiffRot;
+	auto beforeldiffRot = ldiffRot;
+
+	ldiffRot.x = clamp(ldiffRot.x, XminOffsetRot, XmaxOffsetRot);
+	ldiffRot.y = clamp(ldiffRot.y, YminOffsetRot, YmaxOffsetRot);
+	ldiffRot.z = clamp(ldiffRot.z, ZminOffsetRot, ZmaxOffsetRot);
+
+	beforeldiffRot = beforeldiffRot - ldiffRot;
+
+	ldiffRot.x = ldiffRot.x + ((beforeldiffRot.y * linearXspreadforceYRot) + (beforeldiffRot.z * linearXspreadforceZRot));
+	ldiffRot.y = ldiffRot.y + ((beforeldiffRot.x * linearYspreadforceXRot) + (beforeldiffRot.z * linearYspreadforceZRot));
+	ldiffRot.z = ldiffRot.z + ((beforeldiffRot.x * linearZspreadforceXRot) + (beforeldiffRot.y * linearZspreadforceYRot));
+
+	ldiffRot.x = clamp(ldiffRot.x, XminOffsetRot, XmaxOffsetRot);
+	ldiffRot.y = clamp(ldiffRot.y, YminOffsetRot, YmaxOffsetRot);
+	ldiffRot.z = clamp(ldiffRot.z, ZminOffsetRot, ZmaxOffsetRot);
+
+	ldiffRot = invRot * ((obj->m_parent->m_worldTransform.rot * ldiffRot) + NiPoint3(0, 0, varGravityCorrection));
+
+	auto rdiffXnew = ldiffRot * varRotationalXnew;
+	auto rdiffYnew = ldiffRot * varRotationalYnew;
+	auto rdiffZnew = ldiffRot * varRotationalZnew;
 
 	rdiffXnew.x *= linearXrotationX;
 	rdiffXnew.y *= linearYrotationX;
@@ -1519,7 +1790,6 @@ void Thing::update(Actor* actor) {
 	rdiffZnew.y *= linearYrotationZ;
 	rdiffZnew.z *= linearZrotationZ;
 
-	NiMatrix33 newRot;
 	newRot.SetEulerAngles(rdiffYnew.x + rdiffYnew.y + rdiffYnew.z, rdiffZnew.x + rdiffZnew.y + rdiffZnew.z, rdiffXnew.x + rdiffXnew.y + rdiffXnew.z);
 
 	///#### physics calculate done
@@ -1787,10 +2057,12 @@ void Thing::update(Actor* actor) {
 	if (collisionElastic && maybeNot)
 	{
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol)) + target - NiPoint3(0, 0, varGravityCorrection);
+		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * (ldiffRot + ldiffcol)) + target - NiPoint3(0, 0, varGravityCorrection);
 	}
 	else
 	{
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * ldiff) + target - NiPoint3(0, 0, varGravityCorrection);
+		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * ldiffRot) + target - NiPoint3(0, 0, varGravityCorrection);
 	}
 
 	thing_SetNode_lock.lock();

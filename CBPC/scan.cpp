@@ -203,7 +203,7 @@ LARGE_INTEGER startingTime, endingTime, elapsedMicroseconds;
 LARGE_INTEGER frequency;
 
 
-bool debugtimelog = false;
+bool debugtimelog = true;
 bool firsttimeloginit = true;
 LARGE_INTEGER totaltime;
 int debugtimelog_framecount = 1;

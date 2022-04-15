@@ -6,6 +6,8 @@
 #include <fstream>
 
 #include <shared_mutex>
+#include <concurrent_vector.h>
+#include <concurrent_unordered_map.h>
 
 #include "skse64/NiGeometry.h"
 #include "skse64\GameReferences.h"
