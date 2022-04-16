@@ -259,6 +259,8 @@ bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<s
 		ColliderNodesListPtr = &ColliderNodesList;
 	}
 
+	std::shared_mutex CH_read_lock;
+
 	concurrency::parallel_for (size_t(0), ColliderNodesListPtr->size(), [&](size_t j)
 	{
 		if (GroundReferenceBoneName.compare(ColliderNodesListPtr->at(j).NodeName) == 0) //detecting NPC Root [Root] node for ground collision
@@ -268,7 +270,9 @@ bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<s
 		else
 		{
 			BSFixedString fs = ReturnUsableString(ColliderNodesListPtr->at(j).NodeName);
+			CH_read_lock.lock();
 			NiAVObject* node = mostInterestingRoot->GetObjectByName(&fs.data);
+			CH_read_lock.unlock();
 			if (node)
 			{
 				Collision newCol = Collision::Collision(node, ColliderNodesListPtr->at(j).CollisionSpheres, ColliderNodesListPtr->at(j).CollisionCapsules, npcWeight);

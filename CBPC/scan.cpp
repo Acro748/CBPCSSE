@@ -203,7 +203,7 @@ LARGE_INTEGER startingTime, endingTime, elapsedMicroseconds;
 LARGE_INTEGER frequency;
 
 
-bool debugtimelog = true;
+bool debugtimelog = false;
 bool firsttimeloginit = true;
 LARGE_INTEGER totaltime;
 int debugtimelog_framecount = 1;
@@ -234,7 +234,18 @@ int totalcallcount = 0;
 /// 
 /// #Before improved parallel processing and split various parameters into linear and rotation and x, y, z axis / commit @ec81446 version
 /// 
-/// 
+/// Collider Check Call Count : 380.26 - Average Update Time in 1000 frame = 1561098 ns
+/// Collider Check Call Count : 411.90 - Average Update Time in 1000 frame = 1485466 ns
+/// Collider Check Call Count : 339.33 - Average Update Time in 1000 frame = 1412256 ns
+/// Collider Check Call Count : 301.92 - Average Update Time in 1000 frame = 1354423 ns
+/// Collider Check Call Count : 285.34 - Average Update Time in 1000 frame = 1289628 ns
+/// Collider Check Call Count : 363.90 - Average Update Time in 1000 frame = 1278498 ns
+/// Collider Check Call Count : 322.97 - Average Update Time in 1000 frame = 1333380 ns
+/// Collider Check Call Count : 322.50 - Average Update Time in 1000 frame = 1232475 ns
+/// Collider Check Call Count : 282.30 - Average Update Time in 1000 frame = 1329061 ns
+/// Collider Check Call Count : 318.72 - Average Update Time in 1000 frame = 1381797 ns
+/// Collider Check Call Count : 324.52 - Average Update Time in 1000 frame = 1378233 ns
+/// Collider Check Call Count : 294.08 - Average Update Time in 1000 frame = 1362536 ns
 /// 
 /// 
 /// #After improved parallel processing and split various parameters into linear and rotation and x, y, z axis
@@ -251,7 +262,6 @@ int totalcallcount = 0;
 /// Collider Check Call Count : 331.41 - Average Update Time in 1000 frame = 1059610 ns
 /// Collider Check Call Count : 293.70 - Average Update Time in 1000 frame = 1084620 ns
 ///	Collider Check Call Count : 276.10 - Average Update Time in 1000 frame = 1110042 ns
-/// 
 /// 
 
 void updateActors() 

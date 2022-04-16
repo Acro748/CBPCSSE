@@ -447,7 +447,7 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	stiffnessX_100 = centry["stiffnessX"];
 	stiffnessY_100 = centry["stiffnessY"];
 	stiffnessZ_100 = centry["stiffnessZ"];
-	if (stiffnessX_100 < 0.001f && stiffnessY_100 < 0.001f && stiffnessZ_100 < 0.001f)
+	if (stiffness_100 >= 0.001f && stiffnessX_100 < 0.001f && stiffnessY_100 < 0.001f && stiffnessZ_100 < 0.001f)
 	{
 		stiffnessX_100 = stiffness_100;
 		stiffnessY_100 = stiffness_100;
@@ -456,17 +456,17 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	stiffnessXRot_100 = centry["stiffnessXRot"];
 	stiffnessYRot_100 = centry["stiffnessYRot"];
 	stiffnessZRot_100 = centry["stiffnessZRot"];
-	if (stiffnessXRot_100 < 0.001f && stiffnessYRot_100 < 0.001f && stiffnessZRot_100 < 0.001f)
+	if (stiffness_100 >= 0.001f && stiffnessXRot_100 < 0.001f && stiffnessYRot_100 < 0.001f && stiffnessZRot_100 < 0.001f)
 	{
-		stiffnessXRot_100 = stiffnessX_100;
-		stiffnessYRot_100 = stiffnessY_100;
-		stiffnessZRot_100 = stiffnessZ_100;
+		stiffnessXRot_100 = stiffness_100;
+		stiffnessYRot_100 = stiffness_100;
+		stiffnessZRot_100 = stiffness_100;
 	}
 	stiffness2_100 = centry["stiffness2"];
 	stiffness2X_100 = centry["stiffness2X"];
 	stiffness2Y_100 = centry["stiffness2Y"];
 	stiffness2Z_100 = centry["stiffness2Z"];
-	if (stiffness2X_100 < 0.001f && stiffness2Y_100 < 0.001f && stiffness2Z_100 < 0.001f)
+	if (stiffness2_100 >= 0.001f && stiffness2X_100 < 0.001f && stiffness2Y_100 < 0.001f && stiffness2Z_100 < 0.001f)
 	{
 		stiffness2X_100 = stiffness2_100;
 		stiffness2Y_100 = stiffness2_100;
@@ -475,17 +475,17 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	stiffness2XRot_100 = centry["stiffness2XRot"];
 	stiffness2YRot_100 = centry["stiffness2YRot"];
 	stiffness2ZRot_100 = centry["stiffness2ZRot"];
-	if (stiffness2XRot_100 < 0.001f && stiffness2YRot_100 < 0.001f && stiffness2ZRot_100 < 0.001f)
+	if (stiffness2_100 >= 0.001f && stiffness2XRot_100 < 0.001f && stiffness2YRot_100 < 0.001f && stiffness2ZRot_100 < 0.001f)
 	{
-		stiffness2XRot_100 = stiffness2X_100;
-		stiffness2YRot_100 = stiffness2Y_100;
-		stiffness2ZRot_100 = stiffness2Z_100;
+		stiffness2XRot_100 = stiffness2_100;
+		stiffness2YRot_100 = stiffness2_100;
+		stiffness2ZRot_100 = stiffness2_100;
 	}
 	damping_100 = centry["damping"];
 	dampingX_100 = centry["dampingX"];
 	dampingY_100 = centry["dampingY"];
 	dampingZ_100 = centry["dampingZ"];
-	if (dampingX_100 < 0.001f && dampingY_100 < 0.001f && dampingZ_100 < 0.001f)
+	if (damping_100 >= 0.001f && dampingX_100 < 0.001f && dampingY_100 < 0.001f && dampingZ_100 < 0.001f)
 	{
 		dampingX_100 = damping_100;
 		dampingY_100 = damping_100;
@@ -643,7 +643,7 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	stiffnessX_0 = centry0weight["stiffnessX"];
 	stiffnessY_0 = centry0weight["stiffnessY"];
 	stiffnessZ_0 = centry0weight["stiffnessZ"];
-	if (stiffnessX_0 < 0.001f && stiffnessY_0 < 0.001f && stiffnessZ_0 < 0.001f)
+	if (stiffness_0 >= 0.001f && stiffnessX_0 < 0.001f && stiffnessY_0 < 0.001f && stiffnessZ_0 < 0.001f)
 	{
 		stiffnessX_0 = stiffness_0;
 		stiffnessY_0 = stiffness_0;
@@ -652,17 +652,17 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	stiffnessXRot_0 = centry0weight["stiffnessXRot"];
 	stiffnessYRot_0 = centry0weight["stiffnessYRot"];
 	stiffnessZRot_0 = centry0weight["stiffnessZRot"];
-	if (stiffnessXRot_0 < 0.001f && stiffnessYRot_0 < 0.001f && stiffnessZRot_0 < 0.001f)
+	if (stiffness_0 >= 0.001f && stiffnessXRot_0 < 0.001f && stiffnessYRot_0 < 0.001f && stiffnessZRot_0 < 0.001f)
 	{
-		stiffnessXRot_0 = stiffnessX_0;
-		stiffnessYRot_0 = stiffnessY_0;
-		stiffnessZRot_0 = stiffnessZ_0;
+		stiffnessXRot_0 = stiffness_0;
+		stiffnessYRot_0 = stiffness_0;
+		stiffnessZRot_0 = stiffness_0;
 	}
 	stiffness2_0 = centry0weight["stiffness2"];
 	stiffness2X_0 = centry0weight["stiffness2X"];
 	stiffness2Y_0 = centry0weight["stiffness2Y"];
 	stiffness2Z_0 = centry0weight["stiffness2Z"];
-	if (stiffness2X_0 < 0.001f && stiffness2Y_0 < 0.001f && stiffness2Z_0 < 0.001f)
+	if (stiffness2_0 >= 0.001f && stiffness2X_0 < 0.001f && stiffness2Y_0 < 0.001f && stiffness2Z_0 < 0.001f)
 	{
 		stiffness2X_0 = stiffness2_0;
 		stiffness2Y_0 = stiffness2_0;
@@ -671,17 +671,17 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	stiffness2XRot_0 = centry0weight["stiffness2XRot"];
 	stiffness2YRot_0 = centry0weight["stiffness2YRot"];
 	stiffness2ZRot_0 = centry0weight["stiffness2ZRot"];
-	if (stiffness2XRot_0 < 0.001f && stiffness2YRot_0 < 0.001f && stiffness2ZRot_0 < 0.001f)
+	if (stiffness2_0 >= 0.001f && stiffness2XRot_0 < 0.001f && stiffness2YRot_0 < 0.001f && stiffness2ZRot_0 < 0.001f)
 	{
-		stiffness2XRot_0 = stiffness2X_0;
-		stiffness2YRot_0 = stiffness2Y_0;
-		stiffness2ZRot_0 = stiffness2Z_0;
+		stiffness2XRot_0 = stiffness2_0;
+		stiffness2YRot_0 = stiffness2_0;
+		stiffness2ZRot_0 = stiffness2_0;
 	}
 	damping_0 = centry0weight["damping"];
 	dampingX_0 = centry0weight["dampingX"];
 	dampingY_0 = centry0weight["dampingY"];
 	dampingZ_0 = centry0weight["dampingZ"];
-	if (dampingX_0 < 0.001f && dampingY_0 < 0.001f && dampingZ_0 < 0.001f)
+	if (damping_0 >= 0.001f && dampingX_0 < 0.001f && dampingY_0 < 0.001f && dampingZ_0 < 0.001f)
 	{
 		dampingX_0 = damping_0;
 		dampingY_0 = damping_0;
@@ -690,11 +690,11 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	dampingXRot_0 = centry0weight["dampingXRot"];
 	dampingYRot_0 = centry0weight["dampingYRot"];
 	dampingZRot_0 = centry0weight["dampingZRot"];
-	if (dampingXRot_0 < 0.001f && dampingYRot_0 < 0.001f && dampingZRot_0 < 0.001f)
+	if (damping_0 >= 0.001f && dampingXRot_0 < 0.001f && dampingYRot_0 < 0.001f && dampingZRot_0 < 0.001f)
 	{
-		dampingXRot_0 = dampingX_0;
-		dampingYRot_0 = dampingY_0;
-		dampingZRot_0 = dampingZ_0;
+		dampingXRot_0 = damping_0;
+		dampingYRot_0 = damping_0;
+		dampingZRot_0 = damping_0;
 	}
 	maxOffset_0 = centry0weight["maxoffset"];
 	if (maxOffset_0 >= 0.01f)
