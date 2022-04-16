@@ -14,7 +14,7 @@
 extern const char *leftPussy;
 extern const char *rightPussy;
 
-extern std::shared_mutex thing_Refresh_node_lock, thing_map_lock, thing_SetNode_lock, thing_ReadNode_lock, thing_config_lock, thing_armorKeyword_lock;
+extern std::shared_mutex thing_map_lock;
 
 class Thing {
 	BSFixedString boneName;
@@ -54,7 +54,7 @@ public:
 	float dampingXRot = 0.0f;
 	float dampingYRot = 0.0f;
 	float dampingZRot = 0.0f;
-	float maxOffset = 0.0f;
+	//float maxOffset = 0.0f;
 	float XmaxOffset = 5.0f;
 	float XminOffset = -5.0f;
 	float YmaxOffset = 5.0f;
@@ -367,9 +367,9 @@ public:
 	void updateConfig(Actor* actor, configEntry_t &centry, configEntry_t& centry0weight);
 	void dump();
 	
-	void update(Actor *actor);
-	void updatePelvis(Actor *actor);
-	bool ApplyBellyBulge(Actor * actor);
+	void update(Actor *actor, std::shared_mutex &thing_SetNode_lock, std::shared_mutex &thing_ReadNode_lock, std::shared_mutex &thing_Refresh_node_lock);
+	void updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_Refresh_node_lock);
+	bool ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_ReadNode_lock);
 	void CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback);
 	void reset();
 
@@ -416,8 +416,8 @@ public:
 	float nodeScale = 1.0f;
 
 	//Extra variables
-	NiPoint3 collisionBuffer;
-	NiPoint3 collisionSync;
+	NiPoint3 collisionBuffer = emptyPoint;
+	NiPoint3 collisionSync = emptyPoint;
 
 	CollisionConfigs CollisionConfig;
 

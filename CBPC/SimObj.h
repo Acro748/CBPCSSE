@@ -41,16 +41,14 @@
 
 #define NINODE_CHILDREN(ninode) ((NiTArray <NiAVObject *> *) ((char*)(&(ninode->m_children))))
 
-extern std::shared_mutex obj_bind_lock, obj_sync_lock;
-
 class SimObj {
 	UInt32 id = 0;
 	bool bound = false;
 public:
 	//The basic unit is parallel processing, but some physics chain nodes need sequential loading
-	std::unordered_map<const char *, std::unordered_map<const char*, Thing>> things;
-	std::unordered_map<std::string, Collision> actorColliders;
-	std::unordered_map<std::string, NiPoint3> NodeCollisionSync;
+	concurrency::concurrent_unordered_map<const char *, std::unordered_map<const char*, Thing>> things;
+	concurrency::concurrent_unordered_map<std::string, Collision> actorColliders;
+	concurrency::concurrent_unordered_map<std::string, NiPoint3> NodeCollisionSync;
 
 	Actor* ownerActor;
 	float actorDistSqr;

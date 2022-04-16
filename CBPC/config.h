@@ -35,10 +35,10 @@
 #include "skse64/openvr_1_0_12.h"
 #endif
 
-typedef std::unordered_map<std::string, float> configEntry_t;
-typedef std::unordered_map<std::string, configEntry_t> config_t;
+typedef concurrency::concurrent_unordered_map<std::string, float> configEntry_t;
+typedef concurrency::concurrent_unordered_map<std::string, configEntry_t> config_t;
 
-extern std::unordered_map<std::string, std::string> configMap;
+extern concurrency::concurrent_unordered_map<std::string, std::string> configMap;
 
 extern int configReloadCount;
 extern config_t config;
@@ -47,7 +47,7 @@ extern config_t config0weight;
 extern int collisionSkipFrames;
 extern int collisionSkipFramesPelvis;
 
-extern std::unordered_map<std::string, bool> ActorNodeStoppedPhysicsMap;
+extern concurrency::concurrent_unordered_map<std::string, bool> ActorNodeStoppedPhysicsMap;
 
 
 //typedef std::unordered_map<std::string, bool> nodeCollisionMap;

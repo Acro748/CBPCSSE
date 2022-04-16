@@ -30,17 +30,6 @@ std::vector<std::string> femaleSpecificBones = { leftBreastName, rightBreastName
 //	{ leftButtName, "Butt" },{ rightButtName, "Butt" },
 //	{ bellyName, "Belly" },{ scrotumName, "Scrotum" } };
 
-//## obj_bind_lock
-// Although I didn't look closely
-// it's used unordered_map [] so that's not thread safety
-// and I felt like needed to lock a lot of things on the parts where the collider attach part
-// but it work once per actor, so I just locked entirety
-// If necessary, we can make more optimizations later
-
-//## obj_sync_lock
-// unordered_map [] and new write value is not thread safety, so locked it
-
-std::shared_mutex obj_bind_lock, obj_sync_lock;
 
 SimObj::SimObj(Actor *actor)
 	: things(){
@@ -55,7 +44,6 @@ SimObj::~SimObj() {
 bool SimObj::bind(Actor *actor, bool isMale)
 {
 	//logger.error("bind\n");
-	std::lock_guard<std::shared_mutex> obj_bind_guard(obj_bind_lock);
 
 	auto loadedState = actor->loadedState;
 	if (loadedState && loadedState->node) 
@@ -66,7 +54,9 @@ bool SimObj::bind(Actor *actor, bool isMale)
 		actorColliders.clear();
 		const std::string actorRace = actor->race->fullName.GetName();
 
-		for (int i = 0; i<affectedBones.size(); i++)
+		std::shared_mutex obj_read_lock;
+
+		concurrency::parallel_for(size_t(0), affectedBones.size(), [&](size_t i)
 		{
 			BSFixedString firstcs;
 			bool isfirstbone = true;
@@ -85,10 +75,12 @@ bool SimObj::bind(Actor *actor, bool isMale)
 					continue;
 				}
 				BSFixedString cs = ReturnUsableString(affectedBones.at(i).at(j));
+				obj_read_lock.lock();
 				auto bone = loadedState->node->GetObjectByName(&cs.data);
+				obj_read_lock.unlock();
 				if (bone)
 				{
-					thingmsg.emplace(cs.data, Thing(actor, bone, cs));
+					thingmsg.insert(std::make_pair(cs.data, Thing(actor, bone, cs)));
 					if (isfirstbone)
 					{
 						firstcs = cs;
@@ -97,11 +89,11 @@ bool SimObj::bind(Actor *actor, bool isMale)
 				}
 			}
 			if (!isfirstbone)
-				things.emplace(firstcs.data, thingmsg);
-		}
-		updateConfig(actor);
-			
+				things.insert(std::make_pair(firstcs.data, thingmsg));
+		});
 		GroundCollisionEnabled = CreateActorColliders(actor, actorColliders);
+
+		updateConfig(actor);
 
 		#ifdef RUNTIME_VR_VERSION_1_4_15
 		if (actor->formID == 0x14)
@@ -128,30 +120,39 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 	if (!bound)
 		return;
 	//logger.error("update\n");
+
+//## thing_Refresh_node_lock
+// editing the node update time seems to affect the entire node tree even if without editing entire node tree
+
+//## thing_SetNode_lock
+// There's nothing problem with editing, but if editing once then all node world positions are updated.
+// so it seems that a high probability of overloading if it is processed by parallel processing.
+
+//## thing_ReadNode_lock
+// It seems that a read error occurs when the GetObjectByName() function is called simultaneously
+
+	std::shared_mutex thing_Refresh_node_lock, thing_SetNode_lock, thing_ReadNode_lock;
+
 	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
 	{
 		bool isStopPhysics = false;
 		if (ActorNodeStoppedPhysicsMap.find(GetActorNodeString(actor, t.first)) != ActorNodeStoppedPhysicsMap.end())
 			isStopPhysics = ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)];
 
-		if (!isStopPhysics)
-		{
+		if (!isStopPhysics){
 			for (auto& tt : t.second) //The basic unit is parallel processing, but some physics chain nodes need sequential loading
 			{
 				tt.second.ActorCollisionsEnabled = CollisionsEnabled;
-				tt.second.GroundCollisionEnabled = GroundCollisionEnabled;
 				if (strcmp(t.first, pelvis) == 0)
 				{
-					tt.second.updatePelvis(actor);
+					tt.second.updatePelvis(actor, thing_Refresh_node_lock, thing_SetNode_lock, thing_ReadNode_lock);
 				}
 				else
 				{
-					tt.second.update(actor);
+					tt.second.update(actor, thing_Refresh_node_lock, thing_SetNode_lock, thing_ReadNode_lock);
 					if (tt.second.VirtualCollisionEnabled)
 					{
-						obj_sync_lock.lock();
 						NodeCollisionSync[tt.first] = tt.second.collisionSync;
-						obj_sync_lock.unlock();
 					}
 				}
 			}
@@ -161,7 +162,7 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 }
 
 bool SimObj::updateConfig(Actor* actor) {
-	for (auto &t : things) {
+	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t) {
 		//LOG("t.first:[%s]", t.first);
 
 		for (auto& tt : t.second) {
@@ -178,8 +179,10 @@ bool SimObj::updateConfig(Actor* actor) {
 			{
 				tt.second.updateConfig(actor, config[section], config0weight[section]);
 			}
+
+			tt.second.GroundCollisionEnabled = GroundCollisionEnabled;
 		}
-	}
+	});
 	return true;
 }
 

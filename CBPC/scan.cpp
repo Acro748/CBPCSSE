@@ -8,7 +8,7 @@
 
 extern SKSETaskInterface *g_task;
 
-std::unordered_map<UInt32, SimObj> actors;
+concurrency::concurrent_unordered_map<UInt32, SimObj> actors;
 
 std::vector<UInt32> notExteriorWorlds = { 0x69857, 0x1EE62, 0x20DCB, 0x1FAE2, 0x34240, 0x50015, 0x2C965, 0x29AB7, 0x4F838, 0x3A9D6, 0x243DE, 0xC97EB, 0xC350D, 0x1CDD3, 0x1CDD9, 0x21EDB, 0x1E49D, 0x2B101, 0x2A9D8, 0x20BFE };
 
@@ -404,8 +404,10 @@ void updateActors()
 
 			NiPoint3 relativeActorPos;
 
-			for (UInt32 i = 0; i < processMan->actorsHigh.count+1; i++)
+			concurrency::parallel_for(UInt32(0), processMan->actorsHigh.count + 1, [&](UInt32 i)
 			{
+				bool isValid = true;
+
 				if (i < processMan->actorsHigh.count)
 				{
 #ifdef RUNTIME_VR_VERSION_1_4_15
@@ -445,12 +447,12 @@ void updateActors()
 								}
 							}
 							else */if (actor->race->data.raceFlags & TESRace::kRace_Child)
-								continue;
+								isValid = false;
 
 							LOG("actorRace: %s", actorRace.c_str());
 						}
 
-						if (actor->loadedState->node)
+						if (actor->loadedState->node && isValid)
 						{
 							relativeActorPos = actor->loadedState->node->m_worldTransform.pos - (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
 
@@ -459,34 +461,34 @@ void updateActors()
 							if ((actor->flags1 & Actor::kFlags_IsPlayerTeammate) != Actor::kFlags_IsPlayerTeammate)
 							{
 								if (actorDistSqr > actorBounceDistance)
-									continue;
+									isValid = false;
 
 								if (!ActorIsInAngle(actor, originalHeading, cameraPosition))
 								{
-									continue;
+									isValid = false;
 								}
 							}
 
-							if (actors.find(actor->formID) == actors.end()) //If actor isn't in the actors list
+							if (actors.find(actor->formID) == actors.end() && isValid) //If actor isn't in the actors list
 							{
 								//logger.info("Tracking Actor with form ID %08x in cell %ld\n", actor->formID, actor->parentCell);
 								if (IsActorValid(actor))
 								{
 									auto obj = SimObj(actor);
 									obj.actorDistSqr = actorDistSqr;
-									actors.emplace(actor->formID, obj);
-									actorEntries.emplace_back(ActorEntry{ actor->formID, actor, IsActorMale(actor) ? 1 : 0, actorDistSqr, actorDistSqr <= actorDistance });
+									actors.insert(std::make_pair(actor->formID, obj));
+									actorEntries.push_back(ActorEntry{ actor->formID, actor, IsActorMale(actor) ? 1 : 0, actorDistSqr, actorDistSqr <= actorDistance });
 								}
 							}
-							else if (IsActorValid(actor))
+							else if (IsActorValid(actor) && isValid)
 							{
 								actors[actor->formID].actorDistSqr = actorDistSqr;
-								actorEntries.emplace_back(ActorEntry{ actor->formID, actor, IsActorMale(actor) ? 1 : 0, actorDistSqr, actorDistSqr <= actorDistance });
+								actorEntries.push_back(ActorEntry{ actor->formID, actor, IsActorMale(actor) ? 1 : 0, actorDistSqr, actorDistSqr <= actorDistance });
 							}
 						}
 					}
 				}
-			}
+			});
 		}
 	}
 
@@ -522,107 +524,105 @@ void updateActors()
 	partitions.clear();
 
 	LOG("Starting collider hashing");
-	std::vector<int> ids;
-
-	std::vector<int> hashIdList;
 
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
 	int colliderSphereCount = 0;
 	int colliderCapsuleCount = 0;
 
-	for (int u = 0; u < actorEntries.size(); u++)
+	concurrency::parallel_for(size_t(0), actorEntries.size(), [&](size_t u)
 	{
-		if (actorEntries[u].collisionsEnabled == false)
-			continue;
-
-		auto objIt = actors.find(actorEntries[u].id);
-		if (objIt != actors.end())
-		{				
-			UpdateColliderPositions(objIt->second.actorColliders, objIt->second.NodeCollisionSync);
-
-			for (auto &collider : objIt->second.actorColliders)
+		if (actorEntries[u].collisionsEnabled == true)
+		{
+			auto objIt = actors.find(actorEntries[u].id);
+			if (objIt != actors.end())
 			{
-				ids.clear();
-				for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
-				{
-					hashIdList = GetHashIdsFromPos(collider.second.collisionSpheres[j].worldPos - playerPos, collider.second.collisionSpheres[j].radius100);
+				UpdateColliderPositions(objIt->second.actorColliders, objIt->second.NodeCollisionSync);
 
-					for (int m = 0; m < hashIdList.size(); m++)
-					{
-						if (std::find(ids.begin(), ids.end(), hashIdList[m]) == ids.end())
-						{
-							//LOG_INFO("ids.emplace_back(%d)", hashIdList[m]);
-							ids.emplace_back(hashIdList[m]);
-							partitions[hashIdList[m]].partitionCollisions.emplace_back(collider.second);
-						}
-					}
-					colliderSphereCount++;
-				}
-				for (int j = 0; j < collider.second.collisionCapsules.size(); j++)
+				concurrency::parallel_for_each(objIt->second.actorColliders.begin(), objIt->second.actorColliders.end(), [&](const auto& collider)
 				{
-					hashIdList = GetHashIdsFromPos((collider.second.collisionCapsules[j].End1_worldPos + collider.second.collisionCapsules[j].End2_worldPos) * 0.5f - playerPos
-						, (collider.second.collisionCapsules[j].End1_radius100 + collider.second.collisionCapsules[j].End2_radius100) * 0.5f);
-					for (int m = 0; m < hashIdList.size(); m++)
+					std::vector<int> ids;
+					std::vector<int> hashIdList;
+					for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
 					{
-						if (std::find(ids.begin(), ids.end(), hashIdList[m]) == ids.end())
-						{
-							//LOG_INFO("ids.emplace_back(%d)", hashIdList[m]);
-							ids.emplace_back(hashIdList[m]);
-							partitions[hashIdList[m]].partitionCollisions.emplace_back(collider.second);
-						}
-					}
-					colliderCapsuleCount++;
-				}
-				#ifdef RUNTIME_VR_VERSION_1_4_15
-				for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
-				{
-					for (int k = 0; k < 101; k = k + 20)
-					{
-						NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].a, collider.second.collisionTriangles[j].b, k);
+						hashIdList = GetHashIdsFromPos(collider.second.collisionSpheres[j].worldPos - playerPos, collider.second.collisionSpheres[j].radius100);
 
-						int id = GetHashIdFromPos(pos - playerPos);
-						if (id != -1)
+						for (int m = 0; m < hashIdList.size(); m++)
 						{
-							if (std::find(ids.begin(), ids.end(), id) == ids.end())
+							if (std::find(ids.begin(), ids.end(), hashIdList[m]) == ids.end())
 							{
-								ids.emplace_back(id);
-								partitions[id].partitionCollisions.emplace_back(collider.second);
+								//LOG_INFO("ids.emplace_back(%d)", hashIdList[m]);
+								ids.emplace_back(hashIdList[m]);
+								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
+							}
+						}
+						colliderSphereCount++;
+					}
+					for (int j = 0; j < collider.second.collisionCapsules.size(); j++)
+					{
+						hashIdList = GetHashIdsFromPos((collider.second.collisionCapsules[j].End1_worldPos + collider.second.collisionCapsules[j].End2_worldPos) * 0.5f - playerPos
+							, (collider.second.collisionCapsules[j].End1_radius100 + collider.second.collisionCapsules[j].End2_radius100) * 0.5f);
+						for (int m = 0; m < hashIdList.size(); m++)
+						{
+							if (std::find(ids.begin(), ids.end(), hashIdList[m]) == ids.end())
+							{
+								//LOG_INFO("ids.emplace_back(%d)", hashIdList[m]);
+								ids.emplace_back(hashIdList[m]);
+								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
+							}
+						}
+						colliderCapsuleCount++;
+					}
+#ifdef RUNTIME_VR_VERSION_1_4_15
+					for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
+					{
+						for (int k = 0; k < 101; k = k + 20)
+						{
+							NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].a, collider.second.collisionTriangles[j].b, k);
+
+							int id = GetHashIdFromPos(pos - playerPos);
+							if (id != -1)
+							{
+								if (std::find(ids.begin(), ids.end(), id) == ids.end())
+								{
+									ids.emplace_back(id);
+									partitions[id].partitionCollisions.emplace_back(collider.second);
+								}
+							}
+						}
+						for (int k = 0; k < 101; k = k + 20)
+						{
+							NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].a, collider.second.collisionTriangles[j].c, k);
+
+							int id = GetHashIdFromPos(pos - playerPos);
+							if (id != -1)
+							{
+								if (std::find(ids.begin(), ids.end(), id) == ids.end())
+								{
+									ids.emplace_back(id);
+									partitions[id].partitionCollisions.emplace_back(collider.second);
+								}
+							}
+						}
+						for (int k = 0; k < 101; k = k + 20)
+						{
+							NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].b, collider.second.collisionTriangles[j].c, k);
+
+							int id = GetHashIdFromPos(pos - playerPos);
+							if (id != -1)
+							{
+								if (std::find(ids.begin(), ids.end(), id) == ids.end())
+								{
+									ids.emplace_back(id);
+									partitions[id].partitionCollisions.emplace_back(collider.second);
+								}
 							}
 						}
 					}
-					for (int k = 0; k < 101; k = k + 20)
-					{
-						NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].a, collider.second.collisionTriangles[j].c, k);
-
-						int id = GetHashIdFromPos(pos - playerPos);
-						if (id != -1)
-						{
-							if (std::find(ids.begin(), ids.end(), id) == ids.end())
-							{
-								ids.emplace_back(id);
-								partitions[id].partitionCollisions.emplace_back(collider.second);
-							}
-						}
-					}
-					for (int k = 0; k < 101; k = k + 20)
-					{
-						NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].b, collider.second.collisionTriangles[j].c, k);
-
-						int id = GetHashIdFromPos(pos - playerPos);
-						if (id != -1)
-						{
-							if (std::find(ids.begin(), ids.end(), id) == ids.end())
-							{
-								ids.emplace_back(id);
-								partitions[id].partitionCollisions.emplace_back(collider.second);
-							}
-						}
-					}
-				}
-				#endif
+#endif
+				});
 			}
 		}
-	}
+	});
 	LOG("Collider sphere count = %d", colliderSphereCount);
 	LOG("Collider capsule count = %d", colliderCapsuleCount);
 

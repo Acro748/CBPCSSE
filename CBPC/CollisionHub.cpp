@@ -202,7 +202,7 @@ void UpdatePlayerColliders(std::unordered_map<std::string, Collision> &actorColl
 }
 #endif
 
-bool CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collision> &actorCollidersList)
+bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<std::string, Collision> &actorCollidersList)
 {
 	bool GroundCollisionEnabled = false;
 	NiNode* mostInterestingRoot;
@@ -258,26 +258,27 @@ bool CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collisi
 		ColliderNodesListPtr = &ColliderNodesList;
 	}
 
-	for (int j = 0; j < ColliderNodesListPtr->size(); j++)
+	concurrency::parallel_for (size_t(0), ColliderNodesListPtr->size(), [&](size_t j)
 	{
 		if (GroundReferenceBoneName.compare(ColliderNodesListPtr->at(j).NodeName) == 0) //detecting NPC Root [Root] node for ground collision
 		{
 			GroundCollisionEnabled = true;
-			continue;
 		}
-
-		BSFixedString fs = ReturnUsableString(ColliderNodesListPtr->at(j).NodeName);
-		NiAVObject* node = mostInterestingRoot->GetObjectByName(&fs.data);
-
-		if (node)
+		else
 		{
-			Collision newCol = Collision::Collision(node, ColliderNodesListPtr->at(j).CollisionSpheres, ColliderNodesListPtr->at(j).CollisionCapsules, npcWeight);
-			newCol.colliderActor = actor;
-			newCol.colliderNodeName = fs.data;
+			BSFixedString fs = ReturnUsableString(ColliderNodesListPtr->at(j).NodeName);
+			NiAVObject* node = mostInterestingRoot->GetObjectByName(&fs.data);
 
-			actorCollidersList.emplace(ColliderNodesListPtr->at(j).NodeName, newCol);
+			if (node)
+			{
+				Collision newCol = Collision::Collision(node, ColliderNodesListPtr->at(j).CollisionSpheres, ColliderNodesListPtr->at(j).CollisionCapsules, npcWeight);
+				newCol.colliderActor = actor;
+				newCol.colliderNodeName = fs.data;
+
+				actorCollidersList.insert(std::make_pair(ColliderNodesListPtr->at(j).NodeName, newCol));
+			}
 		}
-	}
+	});
 	return GroundCollisionEnabled;
 }
 
@@ -287,9 +288,9 @@ bool CheckPelvisArmor(Actor* actor)
 	return papyrusActor::GetWornForm(actor, 49) != NULL && papyrusActor::GetWornForm(actor, 52) != NULL && papyrusActor::GetWornForm(actor, 53) != NULL && papyrusActor::GetWornForm(actor, 54) != NULL && papyrusActor::GetWornForm(actor, 56) != NULL && papyrusActor::GetWornForm(actor, 58) != NULL;
 }
 
-void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, std::unordered_map<std::string, NiPoint3> NodeCollisionSyncList)
+void UpdateColliderPositions(concurrency::concurrent_unordered_map<std::string, Collision> &colliderList, concurrency::concurrent_unordered_map<std::string, NiPoint3> NodeCollisionSyncList)
 {
-	for (auto& collider : colliderList)
+	concurrency::parallel_for_each(colliderList.begin(), colliderList.end(), [&](auto& collider)
 	{
 		NiPoint3 VirtualOffset = emptyPoint;
 
@@ -326,7 +327,7 @@ void UpdateColliderPositions(std::unordered_map<std::string, Collision> &collide
 			collider.second.collisionTriangles[j].c = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgc;
 		}
 		#endif
-	}
+	});
 }
 
 std::vector<int> GetHashIdsFromPos(NiPoint3 pos, float radius)

@@ -4,7 +4,7 @@
 #include <common/ICriticalSection.h>
 
 
-std::string versionStr = "1.5.0";
+std::string versionStr = "1.5.x";
 UInt32 version = 0x010500;
 
 
@@ -44,7 +44,7 @@ std::vector<SpecificNPCConfig> specificNPCConfigList;
 std::vector<SpecificNPCBounceConfig> specificNPCBounceConfigList;
 
 
-std::unordered_map<std::string, bool> ActorNodeStoppedPhysicsMap;
+concurrency::concurrent_unordered_map<std::string, bool> ActorNodeStoppedPhysicsMap;
 
 //std::unordered_map<Actor*, nodeCollisionMap> LeftBreastCollisionMap;
 //std::unordered_map<Actor*, nodeCollisionMap> RightBreastCollisionMap;
@@ -100,7 +100,7 @@ std::atomic<bool> MainMenuOpen = false;
 std::atomic<bool> consoleConfigReload = false;
 std::atomic<bool> consoleCollisionReload = false;
 
-std::unordered_map<std::string, std::string> configMap;
+concurrency::concurrent_unordered_map<std::string, std::string> configMap;
 std::unordered_map<std::string, Conditions> nodeConditionsMap;
 config_t config;
 config_t config0weight;
@@ -466,12 +466,12 @@ void loadConfig() {
 			config[it.second]["Yminoffset"] = -5.0f;
 			config[it.second]["Zmaxoffset"] = 5.0f;
 			config[it.second]["Zminoffset"] = -5.0f;
-			config[it.second]["XmaxoffsetRot"] = 5.0f;
-			config[it.second]["XminoffsetRot"] = -5.0f;
-			config[it.second]["YmaxoffsetRot"] = 5.0f;
-			config[it.second]["YminoffsetRot"] = -5.0f;
-			config[it.second]["ZmaxoffsetRot"] = 5.0f;
-			config[it.second]["ZminoffsetRot"] = -5.0f;
+			config[it.second]["XmaxoffsetRot"] = 0.0f;
+			config[it.second]["XminoffsetRot"] = 0.0f;
+			config[it.second]["YmaxoffsetRot"] = 0.0f;
+			config[it.second]["YminoffsetRot"] = 0.0f;
+			config[it.second]["ZmaxoffsetRot"] = 0.0f;
+			config[it.second]["ZminoffsetRot"] = 0.0f;
 			config[it.second]["Xdefaultoffset"] = 0.0f;
 			config[it.second]["Ydefaultoffset"] = 0.0f;
 			config[it.second]["Zdefaultoffset"] = 0.0f;
@@ -560,12 +560,12 @@ void loadConfig() {
 			config0weight[it.second]["Yminoffset"] = -5.0f;
 			config0weight[it.second]["Zmaxoffset"] = 5.0f;
 			config0weight[it.second]["Zminoffset"] = -5.0f;
-			config0weight[it.second]["XmaxoffsetRot"] = 5.0f;
-			config0weight[it.second]["XminoffsetRot"] = -5.0f;
-			config0weight[it.second]["YmaxoffsetRot"] = 5.0f;
-			config0weight[it.second]["YminoffsetRot"] = -5.0f;
-			config0weight[it.second]["ZmaxoffsetRot"] = 5.0f;
-			config0weight[it.second]["ZminoffsetRot"] = -5.0f;
+			config0weight[it.second]["XmaxoffsetRot"] = 0.0f;
+			config0weight[it.second]["XminoffsetRot"] = 0.0f;
+			config0weight[it.second]["YmaxoffsetRot"] = 0.0f;
+			config0weight[it.second]["YminoffsetRot"] = 0.0f;
+			config0weight[it.second]["ZmaxoffsetRot"] = 0.0f;
+			config0weight[it.second]["ZminoffsetRot"] = 0.0f;
 			config0weight[it.second]["Xdefaultoffset"] = 0.0f;
 			config0weight[it.second]["Ydefaultoffset"] = 0.0f;
 			config0weight[it.second]["Zdefaultoffset"] = 0.0f;
@@ -712,12 +712,12 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["Yminoffset"] = -5.0f;
 											newNPCBounceConfig.config[it.second]["Zmaxoffset"] = 5.0f;
 											newNPCBounceConfig.config[it.second]["Zminoffset"] = -5.0f;
-											newNPCBounceConfig.config[it.second]["XmaxoffsetRot"] = 5.0f;
-											newNPCBounceConfig.config[it.second]["XminoffsetRot"] = -5.0f;
-											newNPCBounceConfig.config[it.second]["YmaxoffsetRot"] = 5.0f;
-											newNPCBounceConfig.config[it.second]["YminoffsetRot"] = -5.0f;
-											newNPCBounceConfig.config[it.second]["ZmaxoffsetRot"] = 5.0f;
-											newNPCBounceConfig.config[it.second]["ZminoffsetRot"] = -5.0f;
+											newNPCBounceConfig.config[it.second]["XmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["XminoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["YmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["YminoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["ZmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["ZminoffsetRot"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["Xdefaultoffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["Ydefaultoffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["Zdefaultoffset"] = 0.0f;
@@ -806,12 +806,12 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["Yminoffset"] = -5.0f;
 											newNPCBounceConfig.config0weight[it.second]["Zmaxoffset"] = 5.0f;
 											newNPCBounceConfig.config0weight[it.second]["Zminoffset"] = -5.0f;
-											newNPCBounceConfig.config0weight[it.second]["XmaxoffsetRot"] = 5.0f;
-											newNPCBounceConfig.config0weight[it.second]["XminoffsetRot"] = -5.0f;
-											newNPCBounceConfig.config0weight[it.second]["YmaxoffsetRot"] = 5.0f;
-											newNPCBounceConfig.config0weight[it.second]["YminoffsetRot"] = -5.0f;
-											newNPCBounceConfig.config0weight[it.second]["ZmaxoffsetRot"] = 5.0f;
-											newNPCBounceConfig.config0weight[it.second]["ZminoffsetRot"] = -5.0f;
+											newNPCBounceConfig.config0weight[it.second]["XmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["XminoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["YmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["YminoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["ZmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["ZminoffsetRot"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["Xdefaultoffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["Ydefaultoffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["Zdefaultoffset"] = 0.0f;
@@ -2673,6 +2673,9 @@ bool IsConfigActuallyAllocated(SpecificNPCBounceConfig snbc, std::string section
 	return (snbc.config[section]["stiffness"] >= 0.0001f) || (snbc.config0weight[section]["stiffness"] >= 0.0001f) //Doesn't set physics config?
 		|| (snbc.config[section]["stiffness2"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2"] >= 0.0001f)
 		|| (snbc.config[section]["damping"] >= 0.0001f) || (snbc.config0weight[section]["damping"] >= 0.0001f)
+		|| (snbc.config[section]["stiffnessRot"] >= 0.0001f) || (snbc.config0weight[section]["stiffnessRot"] >= 0.0001f)
+		|| (snbc.config[section]["stiffness2Rot"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2Rot"] >= 0.0001f)
+		|| (snbc.config[section]["dampingRot"] >= 0.0001f) || (snbc.config0weight[section]["dampingRot"] >= 0.0001f)
 		|| (snbc.config[section]["collisionXmaxoffset"] >= 100.0001f) || (snbc.config[section]["collisionXmaxoffset"] <= 99.9999f) //Doesn't set collision config?
 		|| (snbc.config0weight[section]["collisionXmaxoffset"] >= 100.0001f) || (snbc.config0weight[section]["collisionXmaxoffset"] <= 99.9999f)
 		|| (snbc.config[section]["collisionXminoffset"] <= -100.0001f) || (snbc.config[section]["collisionXminoffset"] >= -99.9999f)
@@ -2684,7 +2687,19 @@ bool IsConfigActuallyAllocated(SpecificNPCBounceConfig snbc, std::string section
 		|| (snbc.config[section]["collisionZmaxoffset"] >= 100.0001f) || (snbc.config[section]["collisionZmaxoffset"] <= 99.9999f)
 		|| (snbc.config0weight[section]["collisionZmaxoffset"] >= 100.0001f) || (snbc.config0weight[section]["collisionZmaxoffset"] <= 99.9999f)
 		|| (snbc.config[section]["collisionZminoffset"] <= -100.0001f) || (snbc.config[section]["collisionZminoffset"] >= -99.9999f)
-		|| (snbc.config0weight[section]["collisionZminoffset"] <= -100.0001f) || (snbc.config0weight[section]["collisionZminoffset"] >= -99.9999f);
+		|| (snbc.config0weight[section]["collisionZminoffset"] <= -100.0001f) || (snbc.config0weight[section]["collisionZminoffset"] >= -99.9999f)
+		|| (snbc.config[section]["collisionXmaxoffsetRot"] >= 100.0001f) || (snbc.config[section]["collisionXmaxoffsetRot"] <= 99.9999f)
+		|| (snbc.config0weight[section]["collisionXmaxoffsetRot"] >= 100.0001f) || (snbc.config0weight[section]["collisionXmaxoffsetRot"] <= 99.9999f)
+		|| (snbc.config[section]["collisionXminoffsetRot"] <= -100.0001f) || (snbc.config[section]["collisionXminoffsetRot"] >= -99.9999f)
+		|| (snbc.config0weight[section]["collisionXminoffsetRot"] <= -100.0001f) || (snbc.config0weight[section]["collisionXminoffsetRot"] >= -99.9999f)
+		|| (snbc.config[section]["collisionYmaxoffsetRot"] >= 100.0001f) || (snbc.config[section]["collisionYmaxoffsetRot"] <= 99.9999f)
+		|| (snbc.config0weight[section]["collisionYmaxoffsetRot"] >= 100.0001f) || (snbc.config0weight[section]["collisionYmaxoffsetRot"] <= 99.9999f)
+		|| (snbc.config[section]["collisionYminoffsetRot"] <= -100.0001f) || (snbc.config[section]["collisionYminoffsetRot"] >= -99.9999f)
+		|| (snbc.config0weight[section]["collisionYminoffsetRot"] <= -100.0001f) || (snbc.config0weight[section]["collisionYminoffsetRot"] >= -99.9999f)
+		|| (snbc.config[section]["collisionZmaxoffsetRot"] >= 100.0001f) || (snbc.config[section]["collisionZmaxoffsetRot"] <= 99.9999f)
+		|| (snbc.config0weight[section]["collisionZmaxoffsetRot"] >= 100.0001f) || (snbc.config0weight[section]["collisionZmaxoffsetRot"] <= 99.9999f)
+		|| (snbc.config[section]["collisionZminoffsetRot"] <= -100.0001f) || (snbc.config[section]["collisionZminoffsetRot"] >= -99.9999f)
+		|| (snbc.config0weight[section]["collisionZminoffsetRot"] <= -100.0001f) || (snbc.config0weight[section]["collisionZminoffsetRot"] >= -99.9999f);
 }
 
 bool CheckActorForConditions(Actor* actor, Conditions &conditions)

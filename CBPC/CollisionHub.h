@@ -12,17 +12,17 @@ void UpdatePlayerColliders(std::unordered_map<std::string, Collision> &actorColl
 
 extern long callCount;
 
-bool CreateActorColliders(Actor * actor, std::unordered_map<std::string, Collision> &actorCollidersList);
+bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<std::string, Collision> &actorCollidersList);
 
-void UpdateColliderPositions(std::unordered_map<std::string, Collision> &colliderList, std::unordered_map<std::string, NiPoint3> NodeCollisionSyncList);
+void UpdateColliderPositions(concurrency::concurrent_unordered_map<std::string, Collision> &colliderList, concurrency::concurrent_unordered_map<std::string, NiPoint3> NodeCollisionSyncList);
 
 
 struct Partition
 {
-	std::vector<Collision> partitionCollisions;
+	concurrency::concurrent_vector<Collision> partitionCollisions;
 };
 
-typedef std::unordered_map<int, Partition> PartitionMap;
+typedef concurrency::concurrent_unordered_map<int, Partition> PartitionMap;
 
 extern PartitionMap partitions;
 
