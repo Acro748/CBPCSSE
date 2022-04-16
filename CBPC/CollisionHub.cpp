@@ -231,6 +231,7 @@ bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<s
 #ifdef RUNTIME_VR_VERSION_1_4_15
 	}
 #endif
+
 	auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
 	float npcWeight = 50.0f;
 	if (actorRef)
@@ -238,7 +239,7 @@ bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<s
 		npcWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
 	}
 
-	std::vector<ConfigLine>* ColliderNodesListPtr;
+	concurrency::concurrent_vector<ConfigLine>* ColliderNodesListPtr;
 
 	SpecificNPCConfig snc;
 
@@ -268,7 +269,6 @@ bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<s
 		{
 			BSFixedString fs = ReturnUsableString(ColliderNodesListPtr->at(j).NodeName);
 			NiAVObject* node = mostInterestingRoot->GetObjectByName(&fs.data);
-
 			if (node)
 			{
 				Collision newCol = Collision::Collision(node, ColliderNodesListPtr->at(j).CollisionSpheres, ColliderNodesListPtr->at(j).CollisionCapsules, npcWeight);

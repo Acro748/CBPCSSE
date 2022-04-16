@@ -28,9 +28,9 @@ std::vector<std::string> ColliderNodeLines;
 
 
 
-std::vector<ConfigLine> AffectedNodesList; //Nodes that can be collided with
+concurrency::concurrent_vector<ConfigLine> AffectedNodesList; //Nodes that can be collided with
 
-std::vector<ConfigLine> ColliderNodesList; //Nodes that can collide nodes
+concurrency::concurrent_vector<ConfigLine> ColliderNodesList; //Nodes that can collide nodes
 
 //The basic unit is parallel processing, but some physics chain nodes need sequential loading
 std::vector<std::vector<std::string>> affectedBones;
@@ -1444,7 +1444,7 @@ void loadCollisionConfig()
 										}
 									}
 								}
-								AffectedNodesList.emplace_back(newConfigLine);
+								AffectedNodesList.push_back(newConfigLine);
 							}
 						}
 						else if (currentSetting == "[ColliderNodes]")
@@ -1452,7 +1452,7 @@ void loadCollisionConfig()
 							ColliderNodeLines.emplace_back(line);
 							ConfigLine newConfigLine;
 							newConfigLine.NodeName = line;
-							ColliderNodesList.emplace_back(newConfigLine);
+							ColliderNodesList.push_back(newConfigLine);
 						}
 						#ifdef RUNTIME_VR_VERSION_1_4_15
 						else if (currentSetting == "[PlayerNodes]")
@@ -1747,7 +1747,7 @@ void loadExtraCollisionConfig()
 												}
 											}
 										}
-										newNPCConfig.AffectedNodesList.emplace_back(newConfigLine);
+										newNPCConfig.AffectedNodesList.push_back(newConfigLine);
 									}
 								}
 								else if (currentSetting == "[ColliderNodes]")
@@ -1755,7 +1755,7 @@ void loadExtraCollisionConfig()
 									newNPCConfig.ColliderNodeLines.emplace_back(line);
 									ConfigLine newConfigLine;
 									newConfigLine.NodeName = line;
-									newNPCConfig.ColliderNodesList.emplace_back(newConfigLine);
+									newNPCConfig.ColliderNodesList.push_back(newConfigLine);
 								}
 								else
 								{
@@ -2671,11 +2671,26 @@ bool GetSpecificNPCBounceConfigForActor(Actor* actor, SpecificNPCBounceConfig& s
 bool IsConfigActuallyAllocated(SpecificNPCBounceConfig snbc, std::string section)
 {
 	return (snbc.config[section]["stiffness"] >= 0.0001f) || (snbc.config0weight[section]["stiffness"] >= 0.0001f) //Doesn't set physics config?
+		|| (snbc.config[section]["stiffnessX"] >= 0.0001f) || (snbc.config0weight[section]["stiffnessX"] >= 0.0001f)
+		|| (snbc.config[section]["stiffnessY"] >= 0.0001f) || (snbc.config0weight[section]["stiffnessY"] >= 0.0001f)
+		|| (snbc.config[section]["stiffnessZ"] >= 0.0001f) || (snbc.config0weight[section]["stiffnessZ"] >= 0.0001f)
+		|| (snbc.config[section]["stiffnessXRot"] >= 0.0001f) || (snbc.config0weight[section]["stiffnessXRot"] >= 0.0001f)
+		|| (snbc.config[section]["stiffnessYRot"] >= 0.0001f) || (snbc.config0weight[section]["stiffnessYRot"] >= 0.0001f)
+		|| (snbc.config[section]["stiffnessZRot"] >= 0.0001f) || (snbc.config0weight[section]["stiffnessZRot"] >= 0.0001f)
 		|| (snbc.config[section]["stiffness2"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2"] >= 0.0001f)
+		|| (snbc.config[section]["stiffness2X"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2X"] >= 0.0001f)
+		|| (snbc.config[section]["stiffness2Y"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2Y"] >= 0.0001f)
+		|| (snbc.config[section]["stiffness2Z"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2Z"] >= 0.0001f)
+		|| (snbc.config[section]["stiffness2XRot"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2XRot"] >= 0.0001f)
+		|| (snbc.config[section]["stiffness2YRot"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2YRot"] >= 0.0001f)
+		|| (snbc.config[section]["stiffness2ZRot"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2ZRot"] >= 0.0001f)
 		|| (snbc.config[section]["damping"] >= 0.0001f) || (snbc.config0weight[section]["damping"] >= 0.0001f)
-		|| (snbc.config[section]["stiffnessRot"] >= 0.0001f) || (snbc.config0weight[section]["stiffnessRot"] >= 0.0001f)
-		|| (snbc.config[section]["stiffness2Rot"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2Rot"] >= 0.0001f)
-		|| (snbc.config[section]["dampingRot"] >= 0.0001f) || (snbc.config0weight[section]["dampingRot"] >= 0.0001f)
+		|| (snbc.config[section]["dampingX"] >= 0.0001f) || (snbc.config0weight[section]["dampingX"] >= 0.0001f)
+		|| (snbc.config[section]["dampingY"] >= 0.0001f) || (snbc.config0weight[section]["dampingY"] >= 0.0001f)
+		|| (snbc.config[section]["dampingZ"] >= 0.0001f) || (snbc.config0weight[section]["dampingZ"] >= 0.0001f)
+		|| (snbc.config[section]["dampingXRot"] >= 0.0001f) || (snbc.config0weight[section]["dampingXRot"] >= 0.0001f)
+		|| (snbc.config[section]["dampingYRot"] >= 0.0001f) || (snbc.config0weight[section]["dampingYRot"] >= 0.0001f)
+		|| (snbc.config[section]["dampingZRot"] >= 0.0001f) || (snbc.config0weight[section]["dampingZRot"] >= 0.0001f)
 		|| (snbc.config[section]["collisionXmaxoffset"] >= 100.0001f) || (snbc.config[section]["collisionXmaxoffset"] <= 99.9999f) //Doesn't set collision config?
 		|| (snbc.config0weight[section]["collisionXmaxoffset"] >= 100.0001f) || (snbc.config0weight[section]["collisionXmaxoffset"] <= 99.9999f)
 		|| (snbc.config[section]["collisionXminoffset"] <= -100.0001f) || (snbc.config[section]["collisionXminoffset"] >= -99.9999f)

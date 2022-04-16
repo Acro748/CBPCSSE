@@ -162,10 +162,31 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 }
 
 bool SimObj::updateConfig(Actor* actor) {
+
+	float actorWeight = 50;
+	try
+	{
+		if (actor != nullptr)
+		{
+			auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
+
+			if (actorRef != nullptr)
+			{
+				actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
+			}
+		}
+	}
+	catch (...)
+	{
+
+	}
+
 	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t) {
 		//LOG("t.first:[%s]", t.first);
 
 		for (auto& tt : t.second) {
+			tt.second.actorWeight = actorWeight;
+
 			std::string& section = configMap[tt.first];
 			//LOG("config section:[%s]", section.c_str());
 

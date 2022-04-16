@@ -230,6 +230,29 @@ int totalcallcount = 0;
 ///Average Update Time = 1671157 ns
 ///Average Update Time = 1661606 ns
 ///Average Update Time = 1504056 ns
+/// 
+/// 
+/// #Before improved parallel processing and split various parameters into linear and rotation and x, y, z axis / commit @ec81446 version
+/// 
+/// 
+/// 
+/// 
+/// #After improved parallel processing and split various parameters into linear and rotation and x, y, z axis
+/// 
+/// Collider Check Call Count : 384.96 - Average Update Time in 1000 frame = 1346796 ns
+/// Collider Check Call Count : 291.23 - Average Update Time in 1000 frame = 1298082 ns
+/// Collider Check Call Count : 298.41 - Average Update Time in 1000 frame = 1015710 ns
+/// Collider Check Call Count : 331.10 - Average Update Time in 1000 frame = 985820 ns
+/// Collider Check Call Count : 304.83 - Average Update Time in 1000 frame = 949595 ns
+/// Collider Check Call Count : 306.62 - Average Update Time in 1000 frame = 1016688 ns
+/// Collider Check Call Count : 326.43 - Average Update Time in 1000 frame = 1089660 ns
+/// Collider Check Call Count : 318.36 - Average Update Time in 1000 frame = 1104526 ns
+/// Collider Check Call Count : 320.38 - Average Update Time in 1000 frame = 1121897 ns
+/// Collider Check Call Count : 331.41 - Average Update Time in 1000 frame = 1059610 ns
+/// Collider Check Call Count : 293.70 - Average Update Time in 1000 frame = 1084620 ns
+///	Collider Check Call Count : 276.10 - Average Update Time in 1000 frame = 1110042 ns
+/// 
+/// 
 
 void updateActors() 
 {	
@@ -311,11 +334,6 @@ void updateActors()
 	}
 
 	callCount = 0;
-
-	//TESNPC * actorNPC;
-	Actor* actor;
-		
-	NiPointer<TESObjectREFR> ToRefr = NULL;
 
 	bool creatureFormChange = false;
 	bool playerWeightChange = false;
@@ -406,6 +424,11 @@ void updateActors()
 
 			concurrency::parallel_for(UInt32(0), processMan->actorsHigh.count + 1, [&](UInt32 i)
 			{
+				//TESNPC * actorNPC;
+				Actor* actor;
+
+				NiPointer<TESObjectREFR> ToRefr = NULL;
+
 				bool isValid = true;
 
 				if (i < processMan->actorsHigh.count)
@@ -416,7 +439,7 @@ void updateActors()
 					LookupREFRByHandle(processMan->actorsHigh[i], ToRefr);
 #else
 					LookupREFRByHandle2(processMan->actorsHigh[i], ToRefr);
-#endif
+#endif			
 				}
 				if (ToRefr != nullptr || i == processMan->actorsHigh.count)
 				{
@@ -492,6 +515,7 @@ void updateActors()
 		}
 	}
 
+	
 	if (ActorInCombat(*g_thePlayer))
 	{
 		if (actorEntries.size() > inCombatActorCount)
@@ -510,7 +534,7 @@ void updateActors()
 			actorEntries.resize(outOfCombatActorCount);
 		}
 	}
-
+	
 	#ifdef RUNTIME_VR_VERSION_1_4_15
 	auto playerIt = actors.find(0x14);
 	if (playerIt != actors.end())
@@ -526,8 +550,8 @@ void updateActors()
 	LOG("Starting collider hashing");
 
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
-	int colliderSphereCount = 0;
-	int colliderCapsuleCount = 0;
+	long colliderSphereCount = 0;
+	long colliderCapsuleCount = 0;
 
 	concurrency::parallel_for(size_t(0), actorEntries.size(), [&](size_t u)
 	{
@@ -555,7 +579,7 @@ void updateActors()
 								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
 							}
 						}
-						colliderSphereCount++;
+						InterlockedIncrement(&colliderSphereCount);
 					}
 					for (int j = 0; j < collider.second.collisionCapsules.size(); j++)
 					{
@@ -570,7 +594,7 @@ void updateActors()
 								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
 							}
 						}
-						colliderCapsuleCount++;
+						InterlockedIncrement(&colliderCapsuleCount);
 					}
 #ifdef RUNTIME_VR_VERSION_1_4_15
 					for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
@@ -623,8 +647,8 @@ void updateActors()
 			}
 		}
 	});
-	LOG("Collider sphere count = %d", colliderSphereCount);
-	LOG("Collider capsule count = %d", colliderCapsuleCount);
+	LOG("Collider sphere count = %ld", colliderSphereCount);
+	LOG("Collider capsule count = %ld", colliderCapsuleCount);
 
 	//Print partitions
 	/*LOG("============================");

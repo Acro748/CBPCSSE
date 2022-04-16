@@ -248,9 +248,9 @@ struct SpecificNPCConfig
 	std::vector<std::string> AffectedNodeLines;
 	std::vector<std::string> ColliderNodeLines;
 
-	std::vector<ConfigLine> AffectedNodesList;
+	concurrency::concurrent_vector<ConfigLine> AffectedNodesList;
 
-	std::vector<ConfigLine> ColliderNodesList;
+	concurrency::concurrent_vector<ConfigLine> ColliderNodesList;
 
 	float cbellybulge;
 	float cbellybulgemax;
@@ -341,9 +341,9 @@ extern std::vector<std::string> ColliderNodeLines;
 
 
 
-extern std::vector<ConfigLine> AffectedNodesList; //Nodes that can be collided with
+extern concurrency::concurrent_vector<ConfigLine> AffectedNodesList; //Nodes that can be collided with
 
-extern std::vector<ConfigLine> ColliderNodesList; //Nodes that can collide nodes
+extern concurrency::concurrent_vector<ConfigLine> ColliderNodesList; //Nodes that can collide nodes
 
 void loadCollisionConfig();
 void loadMasterConfig();

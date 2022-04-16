@@ -148,7 +148,7 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 	
 	actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
 
-	std::vector<ConfigLine>* AffectedNodesListPtr;
+	concurrency::concurrent_vector<ConfigLine>* AffectedNodesListPtr;
 
 	const char * actorrefname = "";
 	std::string actorRace = "";
@@ -196,7 +196,7 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 
 	std::vector<Sphere> spheres;
 
-	for (int i = 0; i < AffectedNodesListPtr->size(); i++)
+	concurrency::parallel_for(size_t(0), AffectedNodesListPtr->size(), [&](size_t i)
 	{
 		if (AffectedNodesListPtr->at(i).NodeName == nodeName)
 		{
@@ -204,7 +204,7 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 			IgnoredCollidersList = AffectedNodesListPtr->at(i).IgnoredColliders;
 			IgnoredSelfCollidersList = AffectedNodesListPtr->at(i).IgnoredSelfColliders;
 			IgnoreAllSelfColliders = AffectedNodesListPtr->at(i).IgnoreAllSelfColliders;
-			for(int j=0; j<spheres.size(); j++)
+			for (int j = 0; j < spheres.size(); j++)
 			{
 				spheres[j].offset0 = GetPointFromPercentage(spheres[j].offset0, spheres[j].offset100, actorWeight);
 
@@ -212,9 +212,8 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 
 				spheres[j].radius100pwr2 = spheres[j].radius0 * spheres[j].radius0;
 			}
-			break;
 		}
-	}
+	});
 	return spheres;
 }
 
@@ -224,7 +223,7 @@ std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::stri
 
 	actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
 
-	std::vector<ConfigLine>* AffectedNodesListPtr;
+	concurrency::concurrent_vector<ConfigLine>* AffectedNodesListPtr;
 
 	const char* actorrefname = "";
 	std::string actorRace = "";
@@ -272,7 +271,7 @@ std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::stri
 
 	std::vector<Capsule> capsules;
 
-	for (int i = 0; i < AffectedNodesListPtr->size(); i++)
+	concurrency::parallel_for(size_t(0), AffectedNodesListPtr->size(), [&](size_t i)
 	{
 		if (AffectedNodesListPtr->at(i).NodeName == nodeName)
 		{
@@ -291,12 +290,11 @@ std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::stri
 				capsules[j].End2_offset0 = GetPointFromPercentage(capsules[j].End2_offset0, capsules[j].End2_offset100, actorWeight);
 
 				capsules[j].End2_radius0 = GetPercentageValue(capsules[j].End2_radius0, capsules[j].End2_radius100, actorWeight);
-				
+
 				capsules[j].End2_radius100pwr2 = capsules[j].End2_radius0 * capsules[j].End2_radius0;
 			}
-			break;
 		}
-	}
+	});
 	return capsules;
 }
 
@@ -320,23 +318,6 @@ float solveQuad(float a, float b, float c) {
 
 void Thing::updateConfigValues(Actor* actor)
 {
-	try
-	{
-		if (actor != nullptr)
-		{
-			auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
-
-			if (actorRef != nullptr)
-			{
-				actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
-			}
-		}
-	}
-	catch (...)
-	{
-
-	}
-
 	stiffness = GetPercentageValue(stiffness_0, stiffness_100, actorWeight);
 	stiffnessX = GetPercentageValue(stiffnessX_0, stiffnessX_100, actorWeight);
 	stiffnessY = GetPercentageValue(stiffnessY_0, stiffnessY_100, actorWeight);
@@ -1621,10 +1602,6 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 	NiPoint3 diff = (target - oldWorldPos) * forceMultipler;
 	NiPoint3 diffRot = (target - oldWorldPosRot) * forceMultipler;
 
-	// move the bones based on the supplied weightings
-	// Convert the world translations into local coordinates
-	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
-
 	//It is not recommended to use, When used, there is a high possibility that the movement will be adversely affected due to min/maxoffset
 	//diff += NiPoint3(0, 0, varGravityCorrection) * (fpsCorrectionEnabled ? fpsCorrection : 1.0f);
 
@@ -1643,6 +1620,10 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		time = clock();
 		return;
 	}
+
+	// move the bones based on the supplied weightings
+	// Convert the world translations into local coordinates
+	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
 
 	NiPoint3 forceGravityBias = (NiPoint3(0, 0, varGravityBias) / fpsCorrection);
 	
