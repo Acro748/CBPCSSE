@@ -619,7 +619,7 @@ void updateActors()
 								if (std::find(ids.begin(), ids.end(), id) == ids.end())
 								{
 									ids.emplace_back(id);
-									partitions[id].partitionCollisions.emplace_back(collider.second);
+									partitions[id].partitionCollisions.push_back(collider.second);
 								}
 							}
 						}
@@ -633,7 +633,7 @@ void updateActors()
 								if (std::find(ids.begin(), ids.end(), id) == ids.end())
 								{
 									ids.emplace_back(id);
-									partitions[id].partitionCollisions.emplace_back(collider.second);
+									partitions[id].partitionCollisions.push_back(collider.second);
 								}
 							}
 						}
@@ -647,7 +647,7 @@ void updateActors()
 								if (std::find(ids.begin(), ids.end(), id) == ids.end())
 								{
 									ids.emplace_back(id);
-									partitions[id].partitionCollisions.emplace_back(collider.second);
+									partitions[id].partitionCollisions.push_back(collider.second);
 								}
 							}
 						}

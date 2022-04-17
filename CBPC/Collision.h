@@ -64,7 +64,7 @@ public:
 	NiPoint3 ClosestPointOnLineSegment(NiPoint3 lineStart, NiPoint3 lineEnd, NiPoint3 point);
 
 	#ifdef RUNTIME_VR_VERSION_1_4_15
-	bool IsItCollidingTriangleToAffectedNodes(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Triangle> &collisionTriangle, CollisionSetUpPackage CollisionSetUp, bool maybe);
+	bool IsItCollidingTriangleToAffectedNodes(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Triangle> &collisionTriangle, CollisionConfigs CollisionConfig, bool maybe);
 
 	std::vector<Triangle> collisionTriangles;
 	

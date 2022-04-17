@@ -6,8 +6,8 @@
 
 
 #ifdef RUNTIME_VR_VERSION_1_4_15
-void CreatePlayerColliders(std::unordered_map<std::string, Collision> &actorCollidersList);
-void UpdatePlayerColliders(std::unordered_map<std::string, Collision> &actorCollidersList);
+void CreatePlayerColliders(concurrency::concurrent_unordered_map<std::string, Collision> &actorCollidersList);
+void UpdatePlayerColliders(concurrency::concurrent_unordered_map<std::string, Collision> &actorCollidersList);
 #endif
 
 extern long callCount;

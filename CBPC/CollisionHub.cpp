@@ -8,7 +8,7 @@ PartitionMap partitions;
 long callCount = 0;
 #ifdef RUNTIME_VR_VERSION_1_4_15
 
-void CreatePlayerColliders(std::unordered_map<std::string, Collision> &actorCollidersList)
+void CreatePlayerColliders(concurrency::concurrent_unordered_map<std::string, Collision> &actorCollidersList)
 {
 	PlayerCharacter	* player = *g_thePlayer;
 
@@ -94,14 +94,14 @@ void CreatePlayerColliders(std::unordered_map<std::string, Collision> &actorColl
 						}
 					}
 				}
-				actorCollidersList.emplace(line.NodeName, nodeCollision);
+				actorCollidersList.insert(std::make_pair(line.NodeName, nodeCollision));
 				LOG_INFO("Added %s weapon collider", fs.data);
 			}
 		}
 	}
 }
 
-void UpdatePlayerColliders(std::unordered_map<std::string, Collision> &actorCollidersList)
+void UpdatePlayerColliders(concurrency::concurrent_unordered_map<std::string, Collision> &actorCollidersList)
 {
 	PlayerCharacter	* player = *g_thePlayer;
 
