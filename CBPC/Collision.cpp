@@ -64,43 +64,17 @@ void UpdateThingColliderPositions(NiPoint3 &Collisiondif, std::vector<Sphere>& t
 	lcollisiondif.y = clamp(lcollisiondif.y, CollisionConfig.CollisionMinOffset.y, CollisionConfig.CollisionMaxOffset.y);
 	lcollisiondif.z = clamp(lcollisiondif.z, CollisionConfig.CollisionMinOffset.z, CollisionConfig.CollisionMaxOffset.z);
 
-	Collisiondif = CollisionConfig.cnvRot * lcollisiondif;
-
-	NiMatrix33 newRot = CollisionConfig.objRot;
-
-	if (CollisionConfig.IsElasticCollision)
-	{
-		NiPoint3 rdiffXnew = lcollisiondif;
-		NiPoint3 rdiffYnew = lcollisiondif;
-		NiPoint3 rdiffZnew = lcollisiondif;
-
-		rdiffXnew.x *= CollisionConfig.RotationalX.x;
-		rdiffXnew.y *= CollisionConfig.RotationalX.y;
-		rdiffXnew.z *= CollisionConfig.RotationalX.z;
-
-		rdiffYnew.x *= CollisionConfig.RotationalY.x;
-		rdiffYnew.y *= CollisionConfig.RotationalY.y;
-		rdiffYnew.z *= CollisionConfig.RotationalY.z;
-
-		rdiffZnew.x *= CollisionConfig.RotationalZ.x;
-		rdiffZnew.y *= CollisionConfig.RotationalZ.y;
-		rdiffZnew.z *= CollisionConfig.RotationalZ.z;
-
-		NiMatrix33 colRot;
-		colRot.SetEulerAngles(rdiffYnew.x + rdiffYnew.y + rdiffYnew.z, rdiffZnew.x + rdiffZnew.y + rdiffZnew.z, rdiffXnew.x + rdiffXnew.y + rdiffXnew.z);
-
-		newRot = newRot * colRot;
-	}
+	Collisiondif = CollisionConfig.origRot * lcollisiondif;
 
 	for (int l = 0; l < thingCollisionSpheres.size(); l++)
 	{
-		thingCollisionSpheres[l].worldPos = CollisionConfig.maybePos + (newRot * thingCollisionSpheres[l].offset100) + Collisiondif;
+		thingCollisionSpheres[l].worldPos = CollisionConfig.maybePos + (CollisionConfig.objRot * thingCollisionSpheres[l].offset100) + Collisiondif;
 	}
 
 	for (int m = 0; m < thingCollisionCapsules.size(); m++)
 	{
-		thingCollisionCapsules[m].End1_worldPos = CollisionConfig.maybePos + (newRot * thingCollisionCapsules[m].End1_offset100) + Collisiondif;
-		thingCollisionCapsules[m].End2_worldPos = CollisionConfig.maybePos + (newRot * thingCollisionCapsules[m].End2_offset100) + Collisiondif;
+		thingCollisionCapsules[m].End1_worldPos = CollisionConfig.maybePos + (CollisionConfig.objRot * thingCollisionCapsules[m].End1_offset100) + Collisiondif;
+		thingCollisionCapsules[m].End2_worldPos = CollisionConfig.maybePos + (CollisionConfig.objRot * thingCollisionCapsules[m].End2_offset100) + Collisiondif;
 	}
 }
 

@@ -20,12 +20,8 @@ struct CollisionConfigs {
 	NiPoint3 maybePos = emptyPoint;
 	NiMatrix33 objRot;
 
-	NiMatrix33 cnvRot;
+	NiMatrix33 origRot;
 	NiMatrix33 invRot;
-
-	NiPoint3 RotationalX = emptyPoint;
-	NiPoint3 RotationalY = emptyPoint;
-	NiPoint3 RotationalZ = emptyPoint;
 
 	NiPoint3 CollisionMaxOffset = NiPoint3(100.0f, 100.0f, 100.0f);
 	NiPoint3 CollisionMinOffset = NiPoint3(-100.0f, -100.0f, -100.0f);

@@ -431,10 +431,6 @@ void Thing::updateConfigValues(Actor* actor)
 
 	CollisionConfig.IsElasticCollision = collisionElastic;
 
-	CollisionConfig.RotationalX = NiPoint3(linearXrotationX, linearYrotationX, linearZrotationX) * rotationalXnew;
-	CollisionConfig.RotationalY = NiPoint3(linearXrotationY, linearYrotationY, linearZrotationY) * rotationalYnew;
-	CollisionConfig.RotationalZ = NiPoint3(linearXrotationZ, linearYrotationZ, linearZrotationZ) * rotationalZnew;
-
 	CollisionConfig.CollisionMaxOffset = NiPoint3(collisionXmaxOffset, collisionYmaxOffset, collisionZmaxOffset);
 	CollisionConfig.CollisionMinOffset = NiPoint3(collisionXminOffset, collisionYminOffset, collisionZminOffset);
 
@@ -1042,7 +1038,7 @@ void Thing::updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, st
 	NiPoint3 collisionDiff = emptyPoint;
 
 	CollisionConfig.maybePos = pelvisPosition;
-	CollisionConfig.cnvRot = pelvisObj->m_parent->m_worldTransform.rot;
+	CollisionConfig.origRot = pelvisObj->m_parent->m_worldTransform.rot;
 	CollisionConfig.objRot = pelvisRotation;
 	CollisionConfig.invRot = pelvisObj->m_parent->m_worldTransform.rot.Transpose();
 		
@@ -1221,7 +1217,7 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_SetNode_lock
 	NiPoint3 collisionDiff = emptyPoint;
 
 	CollisionConfig.maybePos = bulgenodePosition;
-	CollisionConfig.cnvRot = bulgeObj->m_parent->m_worldTransform.rot;
+	CollisionConfig.origRot = bulgeObj->m_parent->m_worldTransform.rot;
 	CollisionConfig.objRot = bulgenodeRotation;
 	CollisionConfig.invRot = bulgeObj->m_parent->m_worldTransform.rot.Transpose();
 
@@ -1847,7 +1843,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		NiPoint3 lastcollisionVector = emptyPoint;
 
 		CollisionConfig.maybePos = maybePos;
-		CollisionConfig.cnvRot = obj->m_parent->m_worldTransform.rot;
+		CollisionConfig.origRot = obj->m_parent->m_worldTransform.rot;
 		CollisionConfig.objRot = objRotation;
 		CollisionConfig.invRot = invRot;
 
