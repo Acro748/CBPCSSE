@@ -1625,7 +1625,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 	// Convert the world translations into local coordinates
 	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
 
-	NiPoint3 forceGravityBias = (NiPoint3(0, 0, varGravityBias) / fpsCorrection);
+	NiPoint3 forceGravityBias = invRot * (NiPoint3(0, 0, varGravityBias) / fpsCorrection);
 	
 	NiPoint3 ldiff = emptyPoint;
 	NiPoint3 ldiffRot = emptyPoint;

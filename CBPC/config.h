@@ -165,7 +165,9 @@ struct Sphere
 	double radius100 = 4.0;
 	double radius100pwr2 = 16.0;
 	NiPoint3 worldPos = NiPoint3(0, 0, 0);
+
 	std::string NodeName;
+	int index = -1;
 };
 
 struct Capsule
@@ -184,6 +186,7 @@ struct Capsule
 	double End2_radius100pwr2 = 16.0;
 
 	std::string NodeName;
+	int index = -1;
 };
 
 struct ConfigLine

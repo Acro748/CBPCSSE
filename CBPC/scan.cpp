@@ -876,6 +876,7 @@ EventResult TESEquipEventHandler::ReceiveEvent(TESEquipEvent* evn, EventDispatch
 	return EventResult::kEvent_Continue;
 }
 
+
 /*
 class ScanDelegate : public TaskDelegate {
 public:
