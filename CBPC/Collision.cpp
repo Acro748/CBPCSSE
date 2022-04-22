@@ -58,14 +58,15 @@ void HandHapticFeedbackEffect(bool left)
 
 void UpdateThingColliderPositions(NiPoint3 &Collisiondif, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig)
 {
+	
 	auto lcollisiondif = CollisionConfig.invRot * Collisiondif;
-
+	
 	lcollisiondif.x = clamp(lcollisiondif.x, CollisionConfig.CollisionMinOffset.x, CollisionConfig.CollisionMaxOffset.x);
 	lcollisiondif.y = clamp(lcollisiondif.y, CollisionConfig.CollisionMinOffset.y, CollisionConfig.CollisionMaxOffset.y);
 	lcollisiondif.z = clamp(lcollisiondif.z, CollisionConfig.CollisionMinOffset.z, CollisionConfig.CollisionMaxOffset.z);
-
+	
 	Collisiondif = CollisionConfig.origRot * lcollisiondif;
-
+	
 	for (int l = 0; l < thingCollisionSpheres.size(); l++)
 	{
 		thingCollisionSpheres[l].worldPos = CollisionConfig.maybePos + (CollisionConfig.objRot * thingCollisionSpheres[l].offset100) + Collisiondif;
@@ -112,11 +113,9 @@ bool Collision::IsItColliding(NiPoint3 &collisiondif, std::vector<Sphere> &thing
 				float currentDistance = std::sqrt(currentDistancePwr2);
 				double Scalar = limitDistance - currentDistance; //Get vector scalar
 
-				auto NewCollisiondif = GetVectorFromCollision(colSpherePosition, thingSpherePosition, Scalar, currentDistance); //Get collision vector
+				collisiondif += GetVectorFromCollision(colSpherePosition, thingSpherePosition, Scalar, currentDistance); //Get collision vector
 
-				UpdateThingColliderPositions(NewCollisiondif, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
-
-				collisiondif += NewCollisiondif;
+				UpdateThingColliderPositions(collisiondif, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
 
 				#ifdef RUNTIME_VR_VERSION_1_4_15
 				if (collisionSpheres[i].NodeName == "LeftWandNode")

@@ -131,7 +131,7 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 //## thing_ReadNode_lock
 // It seems that a read error occurs when the GetObjectByName() function is called simultaneously
 
-	std::shared_mutex thing_Refresh_node_lock, thing_SetNode_lock, thing_ReadNode_lock;
+	std::shared_mutex thing_SetNode_lock, thing_ReadNode_lock, thing_Refresh_node_lock;
 
 	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
 	{
@@ -143,13 +143,13 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 			for (auto& tt : t.second) //The basic unit is parallel processing, but some physics chain nodes need sequential loading
 			{
 				tt.second.ActorCollisionsEnabled = CollisionsEnabled;
-				if (strcmp(t.first, pelvis) == 0)
+				if (strcmp(tt.first, pelvis) == 0)
 				{
-					tt.second.updatePelvis(actor, thing_Refresh_node_lock, thing_SetNode_lock, thing_ReadNode_lock);
+					tt.second.updatePelvis(actor, thing_SetNode_lock, thing_ReadNode_lock, thing_Refresh_node_lock);
 				}
 				else
 				{
-					tt.second.update(actor, thing_Refresh_node_lock, thing_SetNode_lock, thing_ReadNode_lock);
+					tt.second.update(actor, thing_SetNode_lock, thing_ReadNode_lock, thing_Refresh_node_lock);
 					if (tt.second.VirtualCollisionEnabled)
 					{
 						NodeCollisionSync[tt.first] = tt.second.collisionSync;

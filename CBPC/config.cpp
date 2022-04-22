@@ -1370,6 +1370,7 @@ void loadCollisionConfig()
 		{
 			std::string line;
 			std::string currentSetting;
+			float scaleWeight = 1.0f;
 			while (std::getline(file, line))
 			{
 				//trim(line);
@@ -1379,8 +1380,23 @@ void loadCollisionConfig()
 				{
 					if (line.substr(0, 1) == "[")
 					{
-						//newsetting
-						currentSetting = line;
+						std::vector<std::string> maincurrentSetting = split(line, ":");
+
+						if (maincurrentSetting.size() > 1)
+						{
+							currentSetting = maincurrentSetting[0];
+							scaleWeight = strtof(maincurrentSetting[1].c_str(), 0);
+
+							if (scaleWeight > 1.0f)
+								scaleWeight = 1.0f;
+							else if (scaleWeight < 0.0f)
+								scaleWeight = 0.0f;
+						}
+						else
+						{
+							//newsetting
+							currentSetting = line;
+						}
 					}
 					else
 					{
@@ -1469,6 +1485,7 @@ void loadCollisionConfig()
 							Capsule newCapsule; //type 1
 
 							int type = 0;
+
 							std::vector<std::string> LowHighWeight = split(line, '|');
 
 							std::vector<std::string> PointSplitted;
@@ -1522,11 +1539,13 @@ void loadCollisionConfig()
 										{
 											newSphere.NodeName = AffectedNodesList[i].NodeName;
 											AffectedNodesList[i].CollisionSpheres.emplace_back(newSphere);
+											AffectedNodesList[i].scaleWeight = scaleWeight;
 										}
 										else if (type == 1)
 										{
 											newCapsule.NodeName = AffectedNodesList[i].NodeName;
 											AffectedNodesList[i].CollisionCapsules.emplace_back(newCapsule);
+											AffectedNodesList[i].scaleWeight = scaleWeight;
 										}
 										break;
 									}
@@ -1542,11 +1561,13 @@ void loadCollisionConfig()
 										{
 											newSphere.NodeName = ColliderNodesList[i].NodeName;
 											ColliderNodesList[i].CollisionSpheres.emplace_back(newSphere);
+											ColliderNodesList[i].scaleWeight = scaleWeight;
 										}
 										else if (type == 1)
 										{
 											newCapsule.NodeName = ColliderNodesList[i].NodeName;
 											ColliderNodesList[i].CollisionCapsules.emplace_back(newCapsule);
+											ColliderNodesList[i].scaleWeight = scaleWeight;
 										}
 										break;
 									}
@@ -1625,6 +1646,7 @@ void loadExtraCollisionConfig()
 				{
 					std::string line;
 					std::string currentSetting;
+					float scaleWeight = 0.0f;
 					while (std::getline(file, line))
 					{
 						//trim(line);
@@ -1634,8 +1656,23 @@ void loadExtraCollisionConfig()
 						{
 							if (line.substr(0, 1) == "[")
 							{
-								//newsetting
-								currentSetting = line;
+								std::vector<std::string> maincurrentSetting = split(line, ":");
+
+								if (maincurrentSetting.size() > 1)
+								{
+									currentSetting = maincurrentSetting[0];
+									scaleWeight = strtof(maincurrentSetting[1].c_str(), 0);
+
+									if (scaleWeight > 1.0f)
+										scaleWeight = 1.0f;
+									else if (scaleWeight < 0.0f)
+										scaleWeight = 0.0f;
+								}
+								else
+								{
+									//newsetting
+									currentSetting = line;
+								}
 							}
 							else
 							{
@@ -1791,6 +1828,7 @@ void loadExtraCollisionConfig()
 										{
 											if (newNPCConfig.AffectedNodesList[i].NodeName == trimmedSetting)
 											{
+												newNPCConfig.AffectedNodesList[i].scaleWeight = scaleWeight;
 												if (type == 0)
 													newNPCConfig.AffectedNodesList[i].CollisionSpheres.emplace_back(newSphere);
 												else if (type == 1)
@@ -1805,6 +1843,7 @@ void loadExtraCollisionConfig()
 										{
 											if (newNPCConfig.ColliderNodesList[i].NodeName == trimmedSetting)
 											{
+												newNPCConfig.ColliderNodesList[i].scaleWeight = scaleWeight;
 												if (type == 0)
 													newNPCConfig.ColliderNodesList[i].CollisionSpheres.emplace_back(newSphere);
 												else if(type == 1)

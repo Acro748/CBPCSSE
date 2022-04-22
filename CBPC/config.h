@@ -197,6 +197,7 @@ struct ConfigLine
 	std::vector<std::string> IgnoredColliders;
 	std::vector<std::string> IgnoredSelfColliders;
 	bool IgnoreAllSelfColliders = false;
+	float scaleWeight = 1.0f;
 };
 
 enum ConditionType

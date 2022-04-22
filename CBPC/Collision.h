@@ -22,7 +22,7 @@ struct CollisionConfigs {
 
 	NiMatrix33 origRot;
 	NiMatrix33 invRot;
-
+	
 	NiPoint3 CollisionMaxOffset = NiPoint3(100.0f, 100.0f, 100.0f);
 	NiPoint3 CollisionMinOffset = NiPoint3(-100.0f, -100.0f, -100.0f);
 };
@@ -40,6 +40,10 @@ public:
 	float CollidedWeight = 50;
 
 	float ColliderWeight = 50;
+
+	float actorBaseScale = 1.0f;
+
+	float scaleWeight = 1.0f;
 
 	Actor* colliderActor;
 

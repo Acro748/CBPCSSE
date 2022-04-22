@@ -234,9 +234,12 @@ bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<s
 
 	auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
 	float npcWeight = 50.0f;
+	float actorBaseScale = 1.0f;
 	if (actorRef)
 	{
 		npcWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
+
+		actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
 	}
 
 	concurrency::concurrent_vector<ConfigLine>* ColliderNodesListPtr;
@@ -278,6 +281,8 @@ bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<s
 				Collision newCol = Collision::Collision(node, ColliderNodesListPtr->at(j).CollisionSpheres, ColliderNodesListPtr->at(j).CollisionCapsules, npcWeight);
 				newCol.colliderActor = actor;
 				newCol.colliderNodeName = fs.data;
+				newCol.scaleWeight = ColliderNodesListPtr->at(j).scaleWeight;
+				newCol.actorBaseScale = actorBaseScale;
 
 				actorCollidersList.insert(std::make_pair(ColliderNodesListPtr->at(j).NodeName, newCol));
 			}
@@ -301,25 +306,25 @@ void UpdateColliderPositions(concurrency::concurrent_unordered_map<std::string, 
 		if (NodeCollisionSyncList.find(collider.second.colliderNodeName) != NodeCollisionSyncList.end())
 			VirtualOffset = NodeCollisionSyncList[collider.second.colliderNodeName];
 
-		float Nodescale = collider.second.CollisionObject->m_worldTransform.scale;
+		float colliderNodescale = 1.0f - ((1.0f - (collider.second.CollisionObject->m_worldTransform.scale / collider.second.actorBaseScale)) * collider.second.scaleWeight);
 
 		for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
 		{
-			collider.second.collisionSpheres[j].offset100 = collider.second.collisionSpheres[j].offset0 * Nodescale;
+			collider.second.collisionSpheres[j].offset100 = collider.second.collisionSpheres[j].offset0 * collider.second.actorBaseScale * colliderNodescale;
 			collider.second.collisionSpheres[j].worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionSpheres[j].offset100) + VirtualOffset;
-			collider.second.collisionSpheres[j].radius100 = collider.second.collisionSpheres[j].radius0 * Nodescale;
+			collider.second.collisionSpheres[j].radius100 = collider.second.collisionSpheres[j].radius0 * collider.second.actorBaseScale * colliderNodescale;
 			collider.second.collisionSpheres[j].radius100pwr2 = collider.second.collisionSpheres[j].radius100 * collider.second.collisionSpheres[j].radius100;
 		}
 
 		for (int k = 0; k < collider.second.collisionCapsules.size(); k++)
 		{
-			collider.second.collisionCapsules[k].End1_offset100 = collider.second.collisionCapsules[k].End1_offset0 * Nodescale;
+			collider.second.collisionCapsules[k].End1_offset100 = collider.second.collisionCapsules[k].End1_offset0 * collider.second.actorBaseScale * colliderNodescale;
 			collider.second.collisionCapsules[k].End1_worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End1_offset100) + VirtualOffset;
-			collider.second.collisionCapsules[k].End1_radius100 = collider.second.collisionCapsules[k].End1_radius0 * Nodescale;
+			collider.second.collisionCapsules[k].End1_radius100 = collider.second.collisionCapsules[k].End1_radius0 * collider.second.actorBaseScale * colliderNodescale;
 			collider.second.collisionCapsules[k].End1_radius100pwr2 = collider.second.collisionCapsules[k].End1_radius100 * collider.second.collisionCapsules[k].End1_radius100;
-			collider.second.collisionCapsules[k].End2_offset100 = collider.second.collisionCapsules[k].End2_offset0 * Nodescale;
+			collider.second.collisionCapsules[k].End2_offset100 = collider.second.collisionCapsules[k].End2_offset0 * collider.second.actorBaseScale * colliderNodescale;
 			collider.second.collisionCapsules[k].End2_worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End2_offset100) + VirtualOffset;
-			collider.second.collisionCapsules[k].End2_radius100 = collider.second.collisionCapsules[k].End2_radius0 * Nodescale;
+			collider.second.collisionCapsules[k].End2_radius100 = collider.second.collisionCapsules[k].End2_radius0 * collider.second.actorBaseScale * colliderNodescale;
 			collider.second.collisionCapsules[k].End2_radius100pwr2 = collider.second.collisionCapsules[k].End2_radius100 * collider.second.collisionCapsules[k].End2_radius100;
 		}
 

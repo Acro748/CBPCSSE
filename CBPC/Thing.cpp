@@ -148,6 +148,8 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 	
 	actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
 
+	actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
+
 	concurrency::concurrent_vector<ConfigLine>* AffectedNodesListPtr;
 
 	const char * actorrefname = "";
@@ -212,6 +214,7 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 
 				spheres[j].radius100pwr2 = spheres[j].radius0 * spheres[j].radius0;
 			}
+			scaleWeight = AffectedNodesListPtr->at(i).scaleWeight;
 		}
 	});
 	return spheres;
@@ -222,6 +225,8 @@ std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::stri
 	auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
 
 	actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
+
+	actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
 
 	concurrency::concurrent_vector<ConfigLine>* AffectedNodesListPtr;
 
@@ -293,6 +298,7 @@ std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::stri
 
 				capsules[j].End2_radius100pwr2 = capsules[j].End2_radius0 * capsules[j].End2_radius0;
 			}
+			scaleWeight = AffectedNodesListPtr->at(i).scaleWeight;
 		}
 	});
 	return capsules;
@@ -433,7 +439,6 @@ void Thing::updateConfigValues(Actor* actor)
 
 	CollisionConfig.CollisionMaxOffset = NiPoint3(collisionXmaxOffset, collisionYmaxOffset, collisionZmaxOffset);
 	CollisionConfig.CollisionMinOffset = NiPoint3(collisionXminOffset, collisionYminOffset, collisionZminOffset);
-
 }
 
 void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& centry0weight) {
@@ -998,11 +1003,13 @@ void Thing::updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, st
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
+
+	float colliderNodescale = 1.0f - ((1.0f - (pelvisScale / actorBaseScale)) * scaleWeight);
 	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
-		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * pelvisScale;
+		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].worldPos = pelvisPosition + (pelvisRotation * thingCollisionSpheres[i].offset100);
-		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * pelvisScale;
+		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
 		for (int m = 0; m<hashIdList.size(); m++)
@@ -1015,13 +1022,13 @@ void Thing::updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, st
 	}	
 	for (int i = 0; i < thingCollisionCapsules.size(); i++)
 	{
-		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * pelvisScale;
+		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End1_offset100);
-		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * pelvisScale;
+		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
-		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * pelvisScale;
+		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End2_offset100);
-		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * pelvisScale;
+		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
@@ -1178,11 +1185,12 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_SetNode_lock
 
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
 
+	float colliderNodescale = 1.0f - ((1.0f - (bulgenodeScale / actorBaseScale)) * scaleWeight);
 	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
-		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * bulgenodeScale;
+		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionSpheres[i].offset100);
-		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * bulgenodeScale;
+		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
 		for (int m = 0; m<hashIdList.size(); m++)
@@ -1195,13 +1203,13 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_SetNode_lock
 	}
 	for (int i = 0; i < thingCollisionCapsules.size(); i++)
 	{
-		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * bulgenodeScale;
+		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End1_worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionCapsules[i].End1_offset100);
-		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * bulgenodeScale;
+		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
-		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * bulgenodeScale;
+		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End2_worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionCapsules[i].End2_offset100);
-		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * bulgenodeScale;
+		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
@@ -1326,18 +1334,21 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 	printMessageStr("Thing.update() start", boneName.data);*/
 
 	auto newTime = clock();
-	auto deltaT = newTime - time;
-
+	long deltaT = newTime - time;
 	time = newTime;
+
+	bool isSkippedmanyFrames = false;
+	if (deltaT >= 200)
+		isSkippedmanyFrames = true;
 
 	float fpsCorrection = 1.0f;
 
 	if (fpsCorrectionEnabled)
 	{
-		if (deltaT > fps60Tick * 4) deltaT = fps60Tick * 4; //edited
-		if (deltaT < fps60Tick * 0.25) deltaT = fps60Tick * 0.25; //edited
+		if (deltaT > 100) deltaT = 100; //edited
+		if (deltaT < 4) deltaT = 4; //edited
 
-		fpsCorrection = ((float)deltaT / fps60Tick); //added
+		fpsCorrection = (deltaT * 0.0625f); //added
 	}
 	else
 	{
@@ -1382,8 +1393,13 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 #ifdef RUNTIME_VR_VERSION_1_4_15	
 	}
 #endif
-	if (!obj)
+	if (!obj || !obj->m_parent)
+		return;
+
+	if (isSkippedmanyFrames)
 	{
+		oldWorldPos = obj->m_worldTransform.pos;
+		oldWorldPosRot = obj->m_worldTransform.pos;
 		return;
 	}
 
@@ -1395,9 +1411,6 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 			return;
 		}
 	}
-
-	if (!obj->m_parent)
-		return;
 
 	nodeScale = obj->m_worldTransform.scale;
 
@@ -1601,7 +1614,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 	//It is not recommended to use, When used, there is a high possibility that the movement will be adversely affected due to min/maxoffset
 	//diff += NiPoint3(0, 0, varGravityCorrection) * (fpsCorrectionEnabled ? fpsCorrection : 1.0f);
 
-	if (fabs(diff.x) > 100 || fabs(diff.y) > 100 || fabs(diff.z) > 100) //prevent shakes
+	if (fabs(diff.x) > 250 || fabs(diff.y) > 250 || fabs(diff.z) > 250) //prevent shakes
 	{
 		//logger.error("transform reset\n");
 		thing_SetNode_lock.lock();
@@ -1609,8 +1622,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		obj->m_localTransform.rot = thingDefaultRot;
 		thing_SetNode_lock.unlock();
 
-		oldWorldPos = target;
-		oldWorldPosRot = target;
+		oldWorldPos = target + thingDefaultPos;
+		oldWorldPosRot = target + thingDefaultPos;
 		velocity = emptyPoint;
 		velocityRot = emptyPoint;
 		time = clock();
@@ -1629,7 +1642,38 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 
 	concurrency::parallel_invoke(
 		[&] { //linear calculation
+		NiPoint3 InteriaMaxOffset = emptyPoint;
+		NiPoint3 InteriaMinOffset = emptyPoint;
+
+		if (collisionElastic)
+		{
+			if (multiplerInertia > 0.001f)
+			{
+				if (collisionInertia.x >= 0.0f)
+					InteriaMaxOffset.x = collisionInertia.x;
+				else
+					InteriaMinOffset.x = collisionInertia.x;
+
+				if (collisionInertia.y >= 0.0f)
+					InteriaMaxOffset.y = collisionInertia.y;
+				else
+					InteriaMinOffset.y = collisionInertia.y;
+
+				if (collisionInertia.z >= 0.0f)
+					InteriaMaxOffset.z = collisionInertia.z;
+				else
+					InteriaMinOffset.z = collisionInertia.z;
+			}
+
+			multiplerInertia -= originalDeltaT / timeTick;
+			if (multiplerInertia < 0.001f)
+				multiplerInertia = 0.0f;
+			collisionInertia *= multiplerInertia;
+		}
+
+
 		// Compute the "Spring" Force
+
 		float timeMultiplier = timeTick / (float)deltaT;
 		diff = invRot * (diff * timeMultiplier);
 
@@ -1677,9 +1721,9 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		ldiff = invRot * newdiff;
 		auto beforeldiff = ldiff;
 
-		ldiff.x = clamp(ldiff.x, XminOffset, XmaxOffset);
-		ldiff.y = clamp(ldiff.y, YminOffset, YmaxOffset);
-		ldiff.z = clamp(ldiff.z, ZminOffset, ZmaxOffset);
+		ldiff.x = clamp(ldiff.x, XminOffset + InteriaMinOffset.x, XmaxOffset + InteriaMaxOffset.x);
+		ldiff.y = clamp(ldiff.y, YminOffset + InteriaMinOffset.y, YmaxOffset + InteriaMaxOffset.y);
+		ldiff.z = clamp(ldiff.z, ZminOffset + InteriaMinOffset.z, ZmaxOffset + InteriaMaxOffset.z);
 
 		//It can allows the force of dissipated by min/maxoffsets to be spread in different directions
 		beforeldiff = beforeldiff - ldiff;
@@ -1688,15 +1732,45 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		ldiff.y = ldiff.y + ((beforeldiff.x * linearYspreadforceX) + (beforeldiff.z * linearYspreadforceZ));
 		ldiff.z = ldiff.z + ((beforeldiff.x * linearZspreadforceX) + (beforeldiff.y * linearZspreadforceY));
 
-		ldiff.x = clamp(ldiff.x, XminOffset, XmaxOffset);
-		ldiff.y = clamp(ldiff.y, YminOffset, YmaxOffset);
-		ldiff.z = clamp(ldiff.z, ZminOffset, ZmaxOffset);
+		ldiff.x = clamp(ldiff.x, XminOffset + InteriaMinOffset.x, XmaxOffset + InteriaMaxOffset.x);
+		ldiff.y = clamp(ldiff.y, YminOffset + InteriaMinOffset.y, YmaxOffset + InteriaMaxOffset.y);
+		ldiff.z = clamp(ldiff.z, ZminOffset + InteriaMinOffset.z, ZmaxOffset + InteriaMaxOffset.z);
 
 		//same the clamp(diff.z - varGravityCorrection, -maxOffset, maxOffset) + varGravityCorrection
 		//this is the reason for the endless shaking when unstable fps in v1.4.1x
 		ldiff = ldiff + (invRot * NiPoint3(0, 0, varGravityCorrection));
 	},
 		[&] { // rotation calculation
+
+		NiPoint3 InteriaMaxOffsetRot = emptyPoint;
+		NiPoint3 InteriaMinOffsetRot = emptyPoint;
+
+		if (collisionElastic)
+		{
+			if (multiplerInertiaRot > 0.001f)
+			{
+				if (collisionInertiaRot.x >= 0.0f)
+					InteriaMaxOffsetRot.x = collisionInertiaRot.x;
+				else
+					InteriaMinOffsetRot.x = collisionInertiaRot.x;
+
+				if (collisionInertiaRot.y >= 0.0f)
+					InteriaMaxOffsetRot.y = collisionInertiaRot.y;
+				else
+					InteriaMinOffsetRot.y = collisionInertiaRot.y;
+
+				if (collisionInertiaRot.z >= 0.0f)
+					InteriaMaxOffsetRot.z = collisionInertiaRot.z;
+				else
+					InteriaMinOffsetRot.z = collisionInertiaRot.z;
+			}
+
+			multiplerInertiaRot -= originalDeltaT / timeTickRot;
+			if (multiplerInertiaRot < 0.001f)
+				multiplerInertiaRot = 0.0f;
+			collisionInertiaRot *= multiplerInertiaRot;
+		}
+
 
 		float timeMultiplierRot = timeTickRot / (float)deltaTRot;
 		diffRot = invRot * (diffRot * timeMultiplierRot);
@@ -1741,9 +1815,9 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		ldiffRot = invRot * newdiffRot;
 		auto beforeldiffRot = ldiffRot;
 
-		ldiffRot.x = clamp(ldiffRot.x, XminOffsetRot, XmaxOffsetRot);
-		ldiffRot.y = clamp(ldiffRot.y, YminOffsetRot, YmaxOffsetRot);
-		ldiffRot.z = clamp(ldiffRot.z, ZminOffsetRot, ZmaxOffsetRot);
+		ldiffRot.x = clamp(ldiffRot.x, XminOffsetRot + InteriaMinOffsetRot.x, XmaxOffsetRot + InteriaMaxOffsetRot.x);
+		ldiffRot.y = clamp(ldiffRot.y, YminOffsetRot + InteriaMinOffsetRot.y, YmaxOffsetRot + InteriaMaxOffsetRot.y);
+		ldiffRot.z = clamp(ldiffRot.z, ZminOffsetRot + InteriaMinOffsetRot.z, ZmaxOffsetRot + InteriaMaxOffsetRot.z);
 
 		beforeldiffRot = beforeldiffRot - ldiffRot;
 
@@ -1751,9 +1825,9 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		ldiffRot.y = ldiffRot.y + ((beforeldiffRot.x * linearYspreadforceXRot) + (beforeldiffRot.z * linearYspreadforceZRot));
 		ldiffRot.z = ldiffRot.z + ((beforeldiffRot.x * linearZspreadforceXRot) + (beforeldiffRot.y * linearZspreadforceYRot));
 
-		ldiffRot.x = clamp(ldiffRot.x, XminOffsetRot, XmaxOffsetRot);
-		ldiffRot.y = clamp(ldiffRot.y, YminOffsetRot, YmaxOffsetRot);
-		ldiffRot.z = clamp(ldiffRot.z, ZminOffsetRot, ZmaxOffsetRot);
+		ldiffRot.x = clamp(ldiffRot.x, XminOffsetRot + InteriaMinOffsetRot.x, XmaxOffsetRot + InteriaMaxOffsetRot.x);
+		ldiffRot.y = clamp(ldiffRot.y, YminOffsetRot + InteriaMinOffsetRot.y, YmaxOffsetRot + InteriaMaxOffsetRot.y);
+		ldiffRot.z = clamp(ldiffRot.z, ZminOffsetRot + InteriaMinOffsetRot.z, ZmaxOffsetRot + InteriaMaxOffsetRot.z);
 
 		ldiffRot = ldiffRot + (invRot * NiPoint3(0, 0, varGravityCorrection));
 
@@ -1801,12 +1875,13 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 
 		NiPoint3 maybePos = target + (obj->m_parent->m_worldTransform.rot * (maybeldiff + (thingDefaultPos * nodeScale))); //add missing local pos
 
+		float colliderNodescale = 1.0f - ((1.0f - (nodeScale / actorBaseScale)) * scaleWeight);
 		//After cbp movement collision detection
 		for (int i = 0; i < thingCollisionSpheres.size(); i++)
 		{
-			thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * nodeScale;
+			thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * actorBaseScale * colliderNodescale;
 			thingCollisionSpheres[i].worldPos = maybePos + (objRotation * thingCollisionSpheres[i].offset100);
-			thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * nodeScale;
+			thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * actorBaseScale * colliderNodescale;
 			thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 			hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
 			for (int m = 0; m < hashIdList.size(); m++)
@@ -1819,13 +1894,13 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		}
 		for (int i = 0; i < thingCollisionCapsules.size(); i++)
 		{
-			thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * nodeScale;
+			thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * actorBaseScale * colliderNodescale;
 			thingCollisionCapsules[i].End1_worldPos = maybePos + (objRotation * thingCollisionCapsules[i].End1_offset100);
-			thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * nodeScale;
+			thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * actorBaseScale * colliderNodescale;
 			thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
-			thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * nodeScale;
+			thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * actorBaseScale * colliderNodescale;
 			thingCollisionCapsules[i].End2_worldPos = maybePos + (objRotation * thingCollisionCapsules[i].End2_offset100);
-			thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * nodeScale;
+			thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * actorBaseScale * colliderNodescale;
 			thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 			hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End2_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 				, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
@@ -2044,6 +2119,11 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 	{
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol)) + target - NiPoint3(0, 0, varGravityCorrection);
 		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * (ldiffRot + ldiffcol)) + target - NiPoint3(0, 0, varGravityCorrection);
+
+		collisionInertia += ldiffcol;
+		collisionInertiaRot += ldiffcol;
+		multiplerInertia = 1.0f;
+		multiplerInertiaRot = 1.0f;
 	}
 	else
 	{

@@ -394,6 +394,8 @@ public:
 
 	std::vector<Collision> ownColliders;
 
+	float scaleWeight = 1.0f;
+
 
 	std::vector<Sphere> CreateThingCollisionSpheres(Actor* actor, std::string nodeName);
 	std::vector<Capsule> CreateThingCollisionCapsules(Actor * actor, std::string nodeName);
@@ -413,11 +415,17 @@ public:
 	NiPoint3 thingDefaultPos;
 	NiMatrix33 thingDefaultRot;
 
+	float actorBaseScale = 1.0f;
 	float nodeScale = 1.0f;
 
 	//Extra variables
 	NiPoint3 collisionBuffer = emptyPoint;
 	NiPoint3 collisionSync = emptyPoint;
+
+	NiPoint3 collisionInertia = emptyPoint;
+	NiPoint3 collisionInertiaRot = emptyPoint;
+	float multiplerInertia = 0.0f;
+	float multiplerInertiaRot = 0.0f;
 
 	CollisionConfigs CollisionConfig;
 
@@ -436,7 +444,4 @@ public:
 	float forceAmplitude = 1.0f;
 
 	float varGravityCorrection = -1 * gravityCorrection;
-
-	//FPS corrction
-	const float fps60Tick = 1.0f / 60.0f * (float)CLOCKS_PER_SEC;
 };
