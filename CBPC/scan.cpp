@@ -250,18 +250,18 @@ int totalcallcount = 0;
 /// 
 /// #After improved parallel processing and split various parameters into linear and rotation and x, y, z axis
 /// 
-/// Collider Check Call Count : 384.96 - Average Update Time in 1000 frame = 1346796 ns
-/// Collider Check Call Count : 291.23 - Average Update Time in 1000 frame = 1298082 ns
-/// Collider Check Call Count : 298.41 - Average Update Time in 1000 frame = 1015710 ns
-/// Collider Check Call Count : 331.10 - Average Update Time in 1000 frame = 985820 ns
-/// Collider Check Call Count : 304.83 - Average Update Time in 1000 frame = 949595 ns
-/// Collider Check Call Count : 306.62 - Average Update Time in 1000 frame = 1016688 ns
-/// Collider Check Call Count : 326.43 - Average Update Time in 1000 frame = 1089660 ns
-/// Collider Check Call Count : 318.36 - Average Update Time in 1000 frame = 1104526 ns
-/// Collider Check Call Count : 320.38 - Average Update Time in 1000 frame = 1121897 ns
-/// Collider Check Call Count : 331.41 - Average Update Time in 1000 frame = 1059610 ns
-/// Collider Check Call Count : 293.70 - Average Update Time in 1000 frame = 1084620 ns
-///	Collider Check Call Count : 276.10 - Average Update Time in 1000 frame = 1110042 ns
+/// Collider Check Call Count : 251.79 - Average Update Time in 1000 frame = 1144834 ns
+/// Collider Check Call Count : 234.31 - Average Update Time in 1000 frame = 1193492 ns
+/// Collider Check Call Count : 242.52 - Average Update Time in 1000 frame = 929558 ns
+/// Collider Check Call Count : 242.65 - Average Update Time in 1000 frame = 991846 ns
+/// Collider Check Call Count : 242.24 - Average Update Time in 1000 frame = 883637 ns
+/// Collider Check Call Count : 228.08 - Average Update Time in 1000 frame = 918521 ns
+/// Collider Check Call Count : 230.28 - Average Update Time in 1000 frame = 895346 ns
+/// Collider Check Call Count : 252.78 - Average Update Time in 1000 frame = 969604 ns
+/// Collider Check Call Count : 357.66 - Average Update Time in 1000 frame = 1109611 ns
+/// Collider Check Call Count : 377.34 - Average Update Time in 1000 frame = 1171070 ns
+/// Collider Check Call Count : 394.79 - Average Update Time in 1000 frame = 1224570 ns
+/// Collider Check Call Count : 310.38 - Average Update Time in 1000 frame = 1249355 ns
 /// 
 
 void updateActors() 

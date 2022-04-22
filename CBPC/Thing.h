@@ -100,12 +100,12 @@ public:
 	float linearYspreadforceZ = 0.0f;
 	float linearZspreadforceX = 0.0f;
 	float linearZspreadforceY = 0.0f;
-	float linearXspreadforceYRot = 0.0f;
-	float linearXspreadforceZRot = 0.0f;
-	float linearYspreadforceXRot = 0.0f;
-	float linearYspreadforceZRot = 0.0f;
-	float linearZspreadforceXRot = 0.0f;
-	float linearZspreadforceYRot = 0.0f;
+	float rotationXspreadforceRotY = 0.0f;
+	float rotationXspreadforceRotZ = 0.0f;
+	float rotationYspreadforceRotX = 0.0f;
+	float rotationYspreadforceRotZ = 0.0f;
+	float rotationZspreadforceRotX = 0.0f;
+	float rotationZspreadforceRotY = 0.0f;
 
 	float forceMultipler = 1.0f;
 
@@ -203,12 +203,12 @@ public:
 	float linearYspreadforceZ_100 = 0.0f;
 	float linearZspreadforceX_100 = 0.0f;
 	float linearZspreadforceY_100 = 0.0f;
-	float linearXspreadforceYRot_100 = 0.0f;
-	float linearXspreadforceZRot_100 = 0.0f;
-	float linearYspreadforceXRot_100 = 0.0f;
-	float linearYspreadforceZRot_100 = 0.0f;
-	float linearZspreadforceXRot_100 = 0.0f;
-	float linearZspreadforceYRot_100 = 0.0f;
+	float rotationXspreadforceRotY_100 = 0.0f;
+	float rotationXspreadforceRotZ_100 = 0.0f;
+	float rotationYspreadforceRotX_100 = 0.0f;
+	float rotationYspreadforceRotZ_100 = 0.0f;
+	float rotationZspreadforceRotX_100 = 0.0f;
+	float rotationZspreadforceRotY_100 = 0.0f;
 
 	float forceMultipler_100 = 1.0f;
 
@@ -306,12 +306,12 @@ public:
 	float linearYspreadforceZ_0 = 0.0f;
 	float linearZspreadforceX_0 = 0.0f;
 	float linearZspreadforceY_0 = 0.0f;
-	float linearXspreadforceYRot_0 = 0.0f;
-	float linearXspreadforceZRot_0 = 0.0f;
-	float linearYspreadforceXRot_0 = 0.0f;
-	float linearYspreadforceZRot_0 = 0.0f;
-	float linearZspreadforceXRot_0 = 0.0f;
-	float linearZspreadforceYRot_0 = 0.0f;
+	float rotationXspreadforceRotY_0 = 0.0f;
+	float rotationXspreadforceRotZ_0 = 0.0f;
+	float rotationYspreadforceRotX_0 = 0.0f;
+	float rotationYspreadforceRotZ_0 = 0.0f;
+	float rotationZspreadforceRotX_0 = 0.0f;
+	float rotationZspreadforceRotY_0 = 0.0f;
 
 	float forceMultipler_0 = 1.0f;
 

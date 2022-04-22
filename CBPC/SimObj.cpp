@@ -135,12 +135,13 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 
 	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
 	{
-		bool isStopPhysics = false;
-		if (ActorNodeStoppedPhysicsMap.find(GetActorNodeString(actor, t.first)) != ActorNodeStoppedPhysicsMap.end())
-			isStopPhysics = ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, t.first)];
+		for (auto& tt : t.second) //The basic unit is parallel processing, but some physics chain nodes need sequential loading
+		{
+			bool isStopPhysics = false;
+			if (ActorNodeStoppedPhysicsMap.find(GetActorNodeString(actor, tt.first)) != ActorNodeStoppedPhysicsMap.end())
+				isStopPhysics = ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, tt.first)];
 
-		if (!isStopPhysics){
-			for (auto& tt : t.second) //The basic unit is parallel processing, but some physics chain nodes need sequential loading
+			if (!isStopPhysics)
 			{
 				tt.second.ActorCollisionsEnabled = CollisionsEnabled;
 				if (strcmp(tt.first, pelvis) == 0)

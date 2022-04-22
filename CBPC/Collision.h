@@ -53,7 +53,7 @@ public:
 	
 	bool CheckCollision(NiPoint3 &collisionDiff, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig, bool maybe);
 
-	bool CheckPelvisCollision(NiPoint3& collisionDiff, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig);
+	bool CheckPelvisCollision(NiPoint3 &collisionDiff, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig);
 	std::vector<Sphere> collisionSpheres;
 	std::vector<Capsule> collisionCapsules;
 	

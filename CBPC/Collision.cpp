@@ -58,7 +58,6 @@ void HandHapticFeedbackEffect(bool left)
 
 void UpdateThingColliderPositions(NiPoint3 &Collisiondif, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig)
 {
-	
 	auto lcollisiondif = CollisionConfig.invRot * Collisiondif;
 	
 	lcollisiondif.x = clamp(lcollisiondif.x, CollisionConfig.CollisionMinOffset.x, CollisionConfig.CollisionMaxOffset.x);
@@ -426,7 +425,7 @@ bool Collision::IsItCollidingTriangleToAffectedNodes(NiPoint3 &collisiondif, std
 }
 #endif
 
-bool Collision::CheckPelvisCollision(NiPoint3& collisionDiff, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig)
+bool Collision::CheckPelvisCollision(NiPoint3 &collisionDiff, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig)
 {
 	/*LARGE_INTEGER startingTime, endingTime, elapsedMicroseconds;
 	LARGE_INTEGER frequency;

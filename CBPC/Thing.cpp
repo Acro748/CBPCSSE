@@ -393,12 +393,12 @@ void Thing::updateConfigValues(Actor* actor)
 	linearYspreadforceZ = GetPercentageValue(linearYspreadforceZ_0, linearYspreadforceZ_100, actorWeight);
 	linearZspreadforceX = GetPercentageValue(linearZspreadforceX_0, linearZspreadforceX_100, actorWeight);
 	linearZspreadforceY = GetPercentageValue(linearZspreadforceY_0, linearZspreadforceY_100, actorWeight);
-	linearXspreadforceYRot = GetPercentageValue(linearXspreadforceYRot_0, linearXspreadforceYRot_100, actorWeight);
-	linearXspreadforceZRot = GetPercentageValue(linearXspreadforceZRot_0, linearXspreadforceZRot_100, actorWeight);
-	linearYspreadforceXRot = GetPercentageValue(linearYspreadforceXRot_0, linearYspreadforceXRot_100, actorWeight);
-	linearYspreadforceZRot = GetPercentageValue(linearYspreadforceZRot_0, linearYspreadforceZRot_100, actorWeight);
-	linearZspreadforceXRot = GetPercentageValue(linearZspreadforceXRot_0, linearZspreadforceXRot_100, actorWeight);
-	linearZspreadforceYRot = GetPercentageValue(linearZspreadforceYRot_0, linearZspreadforceYRot_100, actorWeight);
+	rotationXspreadforceRotY = GetPercentageValue(rotationXspreadforceRotY_0, rotationXspreadforceRotY_100, actorWeight);
+	rotationXspreadforceRotZ = GetPercentageValue(rotationXspreadforceRotZ_0, rotationXspreadforceRotZ_100, actorWeight);
+	rotationYspreadforceRotX = GetPercentageValue(rotationYspreadforceRotX_0, rotationYspreadforceRotX_100, actorWeight);
+	rotationYspreadforceRotZ = GetPercentageValue(rotationYspreadforceRotZ_0, rotationYspreadforceRotZ_100, actorWeight);
+	rotationZspreadforceRotX = GetPercentageValue(rotationZspreadforceRotX_0, rotationZspreadforceRotX_100, actorWeight);
+	rotationZspreadforceRotY = GetPercentageValue(rotationZspreadforceRotY_0, rotationZspreadforceRotY_100, actorWeight);
 
 	forceMultipler = GetPercentageValue(forceMultipler_0, forceMultipler_100, actorWeight);
 
@@ -588,12 +588,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearZspreadforceX_100 = centry["linearZspreadforceX"];
 	linearZspreadforceY_100 = centry["linearZspreadforceY"];
 
-	linearXspreadforceYRot_100 = centry["linearXspreadforceYRot"];
-	linearXspreadforceZRot_100 = centry["linearXspreadforceZRot"];
-	linearYspreadforceXRot_100 = centry["linearYspreadforceXRot"];
-	linearYspreadforceZRot_100 = centry["linearYspreadforceZRot"];
-	linearZspreadforceXRot_100 = centry["linearZspreadforceXRot"];
-	linearZspreadforceYRot_100 = centry["linearZspreadforceYRot"];
+	rotationXspreadforceRotY_100 = centry["rotationXspreadforceRotY"];
+	rotationXspreadforceRotZ_100 = centry["rotationXspreadforceRotZ"];
+	rotationYspreadforceRotX_100 = centry["rotationYspreadforceRotX"];
+	rotationYspreadforceRotZ_100 = centry["rotationYspreadforceRotZ"];
+	rotationZspreadforceRotX_100 = centry["rotationZspreadforceRotX"];
+	rotationZspreadforceRotY_100 = centry["rotationZspreadforceRotY"];
 
 	forceMultipler_100 = centry["forceMultipler"];
 
@@ -783,12 +783,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearZspreadforceX_0 = centry0weight["linearZspreadforceX"];
 	linearZspreadforceY_0 = centry0weight["linearZspreadforceY"];
 
-	linearXspreadforceYRot_0 = centry0weight["linearXspreadforceYRot"];
-	linearXspreadforceZRot_0 = centry0weight["linearXspreadforceZRot"];
-	linearYspreadforceXRot_0 = centry0weight["linearYspreadforceXRot"];
-	linearYspreadforceZRot_0 = centry0weight["linearYspreadforceZRot"];
-	linearZspreadforceXRot_0 = centry0weight["linearZspreadforceXRot"];
-	linearZspreadforceYRot_0 = centry0weight["linearZspreadforceYRot"];
+	rotationXspreadforceRotY_0 = centry0weight["rotationXspreadforceRotY"];
+	rotationXspreadforceRotZ_0 = centry0weight["rotationXspreadforceRotZ"];
+	rotationYspreadforceRotX_0 = centry0weight["rotationYspreadforceRotX"];
+	rotationYspreadforceRotZ_0 = centry0weight["rotationYspreadforceRotZ"];
+	rotationZspreadforceRotX_0 = centry0weight["rotationZspreadforceRotX"];
+	rotationZspreadforceRotY_0 = centry0weight["rotationZspreadforceRotY"];
 
 	forceMultipler_0 = centry0weight["forceMultipler"];
 
@@ -852,7 +852,7 @@ template <typename T> int sgn(T val) {
 	return (T(0) < val) - (val < T(0));
 }
 
-void Thing::updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_Refresh_node_lock)
+void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_Refresh_node_lock)
 {
 	if (skipFramesPelvisCount > 0)
 	{
@@ -877,7 +877,7 @@ void Thing::updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, st
 
 	auto loadedState = actor->loadedState;
 
-	if (!loadedState || !loadedState->node) 
+	if (!loadedState || !loadedState->node)
 	{
 		return;
 	}
@@ -900,13 +900,13 @@ void Thing::updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, st
 	}
 	else
 	{
-		if(updatePussyFirstRun)
+		if (updatePussyFirstRun)
 		{
 			updatePussyFirstRun = false;
-			
+
 			auto leftpair = std::make_pair(actor->baseForm->formID, leftPus.data);
 			thing_map_lock.lock();
-			std::map<std::pair<UInt32, const char *>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(leftpair);
+			std::map<std::pair<UInt32, const char*>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(leftpair);
 
 			if (posMap == thingDefaultPosList.end())
 			{
@@ -970,10 +970,11 @@ void Thing::updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, st
 			}
 			thing_map_lock.unlock();
 			LOG_INFO("Left pussy default pos -> %g %g %g , Right pussy default pos ->  %g %g %g , Back pussy default pos ->  %g %g %g , Front pussy default pos ->  %g %g %g", leftPussyDefaultPos.x, leftPussyDefaultPos.y, leftPussyDefaultPos.z, rightPussyDefaultPos.x, rightPussyDefaultPos.y, rightPussyDefaultPos.z, backPussyDefaultPos.x, backPussyDefaultPos.y, backPussyDefaultPos.z, frontPussyDefaultPos.x, frontPussyDefaultPos.y, frontPussyDefaultPos.z);
-		
-		//	CollisionSetUp.IsTriggerCollision = true;
+
+			CollisionConfig.CollisionMaxOffset = NiPoint3(100, 100, 100);
+			CollisionConfig.CollisionMinOffset = NiPoint3(-100, -100, -100);
 		}
-		
+
 		//There's nothing problem with editing, but if editing once then all node world positions are updated.
 		//so it seems that a high probability of overloading if it is processed by parallel processing.
 		thing_SetNode_lock.lock();
@@ -1012,34 +1013,34 @@ void Thing::updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, st
 		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
-		for (int m = 0; m<hashIdList.size(); m++)
+		for (int m = 0; m < hashIdList.size(); m++)
 		{
 			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
 			{
 				thingIdList.emplace_back(hashIdList[m]);
 			}
 		}
-	}	
+	}
 	for (int i = 0; i < thingCollisionCapsules.size(); i++)
 	{
 		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * actorBaseScale * colliderNodescale;
-		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End1_offset100);
+		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation * thingCollisionCapsules[i].End1_offset100);
 		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
 		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * actorBaseScale * colliderNodescale;
-		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End2_offset100);
+		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation * thingCollisionCapsules[i].End2_offset100);
 		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
-		for (int m = 0; m<hashIdList.size(); m++)
+		for (int m = 0; m < hashIdList.size(); m++)
 		{
 			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
 			{
 				thingIdList.emplace_back(hashIdList[m]);
 			}
 		}
-	}	
+	}
 
 
 	NiPoint3 collisionDiff = emptyPoint;
@@ -1048,11 +1049,13 @@ void Thing::updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, st
 	CollisionConfig.origRot = pelvisObj->m_parent->m_worldTransform.rot;
 	CollisionConfig.objRot = pelvisRotation;
 	CollisionConfig.invRot = pelvisObj->m_parent->m_worldTransform.rot.Transpose();
-		
+
+	bool genitalPenetration = false;
+
 	for (int j = 0; j < thingIdList.size(); j++)
 	{
 		int id = thingIdList[j];
-		if(partitions.find(id) != partitions.end())
+		if (partitions.find(id) != partitions.end())
 		{
 			//LOG_INFO("Pelvis hashId=%d", id);
 			for (int i = 0; i < partitions[id].partitionCollisions.size(); i++)
@@ -1073,43 +1076,48 @@ void Thing::updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, st
 				partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
 				//now not that do reach max value just by get closer and just affected by the collider size
-				partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
+				bool isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
+				if (isColliding)
+					genitalPenetration = true;
 			}
 		}
 	}
 
 	// Collision Stuff End
-	
-	NiPoint3 leftVector = collisionDiff;
-	NiPoint3 rightVector = collisionDiff;
-	NiPoint3 backVector = collisionDiff;
-	NiPoint3 frontVector = collisionDiff;
 
-	float opening = distance(collisionDiff, emptyPoint);
+	if (genitalPenetration)
+	{
+		NiPoint3 leftVector = collisionDiff;
+		NiPoint3 rightVector = collisionDiff;
+		NiPoint3 backVector = collisionDiff;
+		NiPoint3 frontVector = collisionDiff;
 
-	CalculateDiffVagina(leftVector, opening, true, true);
-	CalculateDiffVagina(rightVector, opening, true, false);
-	CalculateDiffVagina(backVector, opening, false, true);
-	CalculateDiffVagina(frontVector, opening, false, false);
+		float opening = distance(collisionDiff, emptyPoint);
 
-	NormalizeNiPoint(leftVector, thing_vaginaOpeningLimit*-1.0f, thing_vaginaOpeningLimit);
-	NormalizeNiPoint(rightVector, thing_vaginaOpeningLimit*-1.0f, thing_vaginaOpeningLimit);
-	backVector.y = clamp(backVector.y, thing_vaginaOpeningLimit*-0.5f, thing_vaginaOpeningLimit*0.5f);
-	backVector.z = clamp(backVector.z, thing_vaginaOpeningLimit*-0.165f, thing_vaginaOpeningLimit*0.165f);
-	frontVector.y = clamp(frontVector.y, thing_vaginaOpeningLimit*-0.125f, thing_vaginaOpeningLimit*0.125f);
-	frontVector.z = clamp(frontVector.z, thing_vaginaOpeningLimit*-0.25f, thing_vaginaOpeningLimit*0.25f);
-	
-	thing_SetNode_lock.lock();
-	leftPusObj->m_localTransform.pos = leftPussyDefaultPos + leftVector;
-	rightPusObj->m_localTransform.pos = rightPussyDefaultPos + rightVector;
-	backPusObj->m_localTransform.pos = backPussyDefaultPos + backVector;
-	frontPusObj->m_localTransform.pos = frontPussyDefaultPos + frontVector;
-	thing_SetNode_lock.unlock();
+		CalculateDiffVagina(leftVector, opening, true, true);
+		CalculateDiffVagina(rightVector, opening, true, false);
+		CalculateDiffVagina(backVector, opening, false, true);
+		CalculateDiffVagina(frontVector, opening, false, false);
 
-	RefreshNode(leftPusObj, thing_Refresh_node_lock);
-	RefreshNode(rightPusObj, thing_Refresh_node_lock);
-	RefreshNode(backPusObj, thing_Refresh_node_lock);
-	RefreshNode(frontPusObj, thing_Refresh_node_lock);
+		NormalizeNiPoint(leftVector, thing_vaginaOpeningLimit * -1.0f, thing_vaginaOpeningLimit);
+		NormalizeNiPoint(rightVector, thing_vaginaOpeningLimit * -1.0f, thing_vaginaOpeningLimit);
+		backVector.y = clamp(backVector.y, thing_vaginaOpeningLimit * -0.5f, thing_vaginaOpeningLimit * 0.5f);
+		backVector.z = clamp(backVector.z, thing_vaginaOpeningLimit * -0.165f, thing_vaginaOpeningLimit * 0.165f);
+		frontVector.y = clamp(frontVector.y, thing_vaginaOpeningLimit * -0.125f, thing_vaginaOpeningLimit * 0.125f);
+		frontVector.z = clamp(frontVector.z, thing_vaginaOpeningLimit * -0.25f, thing_vaginaOpeningLimit * 0.25f);
+
+		thing_SetNode_lock.lock();
+		leftPusObj->m_localTransform.pos = leftPussyDefaultPos + leftVector;
+		rightPusObj->m_localTransform.pos = rightPussyDefaultPos + rightVector;
+		backPusObj->m_localTransform.pos = backPussyDefaultPos + backVector;
+		frontPusObj->m_localTransform.pos = frontPussyDefaultPos + frontVector;
+		thing_SetNode_lock.unlock();
+
+		RefreshNode(leftPusObj, thing_Refresh_node_lock);
+		RefreshNode(rightPusObj, thing_Refresh_node_lock);
+		RefreshNode(backPusObj, thing_Refresh_node_lock);
+		RefreshNode(frontPusObj, thing_Refresh_node_lock);
+	}
 	/*QueryPerformanceCounter(&endingTime);
 	elapsedMicroseconds.QuadPart = endingTime.QuadPart - startingTime.QuadPart;
 	elapsedMicroseconds.QuadPart *= 1000000000LL;
@@ -1173,7 +1181,8 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_SetNode_lock
 		thing_map_lock.unlock();
 		LOG_INFO("Belly default pos -> %g %g %g", bellyDefaultPos.x, bellyDefaultPos.y, bellyDefaultPos.z);
 
-	//	CollisionSetUp.IsTriggerCollision = true;
+		CollisionConfig.CollisionMaxOffset = NiPoint3(100, 100, 100);
+		CollisionConfig.CollisionMinOffset = NiPoint3(-100, -100, -100);
 	}
 
 	bulgenodeRotation = bulgeObj->m_worldTransform.rot;
@@ -1645,27 +1654,24 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		NiPoint3 InteriaMaxOffset = emptyPoint;
 		NiPoint3 InteriaMinOffset = emptyPoint;
 
-		if (collisionElastic)
+		if (multiplerInertia >= 0.001f)
 		{
-			if (multiplerInertia > 0.001f)
-			{
-				if (collisionInertia.x >= 0.0f)
-					InteriaMaxOffset.x = collisionInertia.x;
-				else
-					InteriaMinOffset.x = collisionInertia.x;
+			if (collisionInertia.x >= 0.0f)
+				InteriaMaxOffset.x = collisionInertia.x;
+			else
+				InteriaMinOffset.x = collisionInertia.x;
 
-				if (collisionInertia.y >= 0.0f)
-					InteriaMaxOffset.y = collisionInertia.y;
-				else
-					InteriaMinOffset.y = collisionInertia.y;
+			if (collisionInertia.y >= 0.0f)
+				InteriaMaxOffset.y = collisionInertia.y;
+			else
+				InteriaMinOffset.y = collisionInertia.y;
 
-				if (collisionInertia.z >= 0.0f)
-					InteriaMaxOffset.z = collisionInertia.z;
-				else
-					InteriaMinOffset.z = collisionInertia.z;
-			}
+			if (collisionInertia.z >= 0.0f)
+				InteriaMaxOffset.z = collisionInertia.z;
+			else
+				InteriaMinOffset.z = collisionInertia.z;
 
-			multiplerInertia -= originalDeltaT / timeTick;
+			multiplerInertia -= (((float)originalDeltaT / timeTick) * 0.01f);
 			if (multiplerInertia < 0.001f)
 				multiplerInertia = 0.0f;
 			collisionInertia *= multiplerInertia;
@@ -1728,9 +1734,9 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		//It can allows the force of dissipated by min/maxoffsets to be spread in different directions
 		beforeldiff = beforeldiff - ldiff;
 
-		ldiff.x = ldiff.x + ((beforeldiff.y * linearXspreadforceY) + (beforeldiff.z * linearXspreadforceZ));
-		ldiff.y = ldiff.y + ((beforeldiff.x * linearYspreadforceX) + (beforeldiff.z * linearYspreadforceZ));
-		ldiff.z = ldiff.z + ((beforeldiff.x * linearZspreadforceX) + (beforeldiff.y * linearZspreadforceY));
+		ldiff.x = ldiff.x + ((beforeldiff.y * linearYspreadforceX) + (beforeldiff.z * linearZspreadforceX));
+		ldiff.y = ldiff.y + ((beforeldiff.x * linearXspreadforceY) + (beforeldiff.z * linearZspreadforceY));
+		ldiff.z = ldiff.z + ((beforeldiff.x * linearXspreadforceZ) + (beforeldiff.y * linearYspreadforceZ));
 
 		ldiff.x = clamp(ldiff.x, XminOffset + InteriaMinOffset.x, XmaxOffset + InteriaMaxOffset.x);
 		ldiff.y = clamp(ldiff.y, YminOffset + InteriaMinOffset.y, YmaxOffset + InteriaMaxOffset.y);
@@ -1745,27 +1751,24 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		NiPoint3 InteriaMaxOffsetRot = emptyPoint;
 		NiPoint3 InteriaMinOffsetRot = emptyPoint;
 
-		if (collisionElastic)
+		if (multiplerInertiaRot >= 0.001f)
 		{
-			if (multiplerInertiaRot > 0.001f)
-			{
-				if (collisionInertiaRot.x >= 0.0f)
-					InteriaMaxOffsetRot.x = collisionInertiaRot.x;
-				else
-					InteriaMinOffsetRot.x = collisionInertiaRot.x;
+			if (collisionInertiaRot.x >= 0.0f)
+				InteriaMaxOffsetRot.x = collisionInertiaRot.x;
+			else
+				InteriaMinOffsetRot.x = collisionInertiaRot.x;
 
-				if (collisionInertiaRot.y >= 0.0f)
-					InteriaMaxOffsetRot.y = collisionInertiaRot.y;
-				else
-					InteriaMinOffsetRot.y = collisionInertiaRot.y;
+			if (collisionInertiaRot.y >= 0.0f)
+				InteriaMaxOffsetRot.y = collisionInertiaRot.y;
+			else
+				InteriaMinOffsetRot.y = collisionInertiaRot.y;
 
-				if (collisionInertiaRot.z >= 0.0f)
-					InteriaMaxOffsetRot.z = collisionInertiaRot.z;
-				else
-					InteriaMinOffsetRot.z = collisionInertiaRot.z;
-			}
+			if (collisionInertiaRot.z >= 0.0f)
+				InteriaMaxOffsetRot.z = collisionInertiaRot.z;
+			else
+				InteriaMinOffsetRot.z = collisionInertiaRot.z;
 
-			multiplerInertiaRot -= originalDeltaT / timeTickRot;
+			multiplerInertiaRot -= (((float)originalDeltaT / timeTickRot) * 0.01f);
 			if (multiplerInertiaRot < 0.001f)
 				multiplerInertiaRot = 0.0f;
 			collisionInertiaRot *= multiplerInertiaRot;
@@ -1813,21 +1816,22 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		varRotationalZnew = varRotationalZnew * forceAmplitude;
 
 		ldiffRot = invRot * newdiffRot;
-		auto beforeldiffRot = ldiffRot;
 
-		ldiffRot.x = clamp(ldiffRot.x, XminOffsetRot + InteriaMinOffsetRot.x, XmaxOffsetRot + InteriaMaxOffsetRot.x);
-		ldiffRot.y = clamp(ldiffRot.y, YminOffsetRot + InteriaMinOffsetRot.y, YmaxOffsetRot + InteriaMaxOffsetRot.y);
-		ldiffRot.z = clamp(ldiffRot.z, ZminOffsetRot + InteriaMinOffsetRot.z, ZmaxOffsetRot + InteriaMaxOffsetRot.z);
+		auto beforenewrdiffRot = ldiffRot;
 
-		beforeldiffRot = beforeldiffRot - ldiffRot;
+		ldiffRot.x = clamp(ldiffRot.x, YminOffsetRot + InteriaMinOffsetRot.x, YmaxOffsetRot + InteriaMaxOffsetRot.x); //rot y
+		ldiffRot.y = clamp(ldiffRot.y, ZminOffsetRot + InteriaMinOffsetRot.y, ZmaxOffsetRot + InteriaMaxOffsetRot.y); //rot z
+		ldiffRot.z = clamp(ldiffRot.z, XminOffsetRot + InteriaMinOffsetRot.z, XmaxOffsetRot + InteriaMaxOffsetRot.z); //rot x
 
-		ldiffRot.x = ldiffRot.x + ((beforeldiffRot.y * linearXspreadforceYRot) + (beforeldiffRot.z * linearXspreadforceZRot));
-		ldiffRot.y = ldiffRot.y + ((beforeldiffRot.x * linearYspreadforceXRot) + (beforeldiffRot.z * linearYspreadforceZRot));
-		ldiffRot.z = ldiffRot.z + ((beforeldiffRot.x * linearZspreadforceXRot) + (beforeldiffRot.y * linearZspreadforceYRot));
+		beforenewrdiffRot = beforenewrdiffRot - ldiffRot;
 
-		ldiffRot.x = clamp(ldiffRot.x, XminOffsetRot + InteriaMinOffsetRot.x, XmaxOffsetRot + InteriaMaxOffsetRot.x);
-		ldiffRot.y = clamp(ldiffRot.y, YminOffsetRot + InteriaMinOffsetRot.y, YmaxOffsetRot + InteriaMaxOffsetRot.y);
-		ldiffRot.z = clamp(ldiffRot.z, ZminOffsetRot + InteriaMinOffsetRot.z, ZmaxOffsetRot + InteriaMaxOffsetRot.z);
+		ldiffRot.x = ldiffRot.x + ((beforenewrdiffRot.z * rotationXspreadforceRotY) + (beforenewrdiffRot.y * rotationZspreadforceRotY));
+		ldiffRot.y = ldiffRot.y + ((beforenewrdiffRot.z * rotationXspreadforceRotZ) + (beforenewrdiffRot.x * rotationYspreadforceRotZ));
+		ldiffRot.z = ldiffRot.z + ((beforenewrdiffRot.x * rotationYspreadforceRotX) + (beforenewrdiffRot.y * rotationZspreadforceRotX));
+
+		ldiffRot.x = clamp(ldiffRot.x, YminOffsetRot + InteriaMinOffsetRot.x, YmaxOffsetRot + InteriaMaxOffsetRot.x); //rot y
+		ldiffRot.y = clamp(ldiffRot.y, ZminOffsetRot + InteriaMinOffsetRot.y, ZmaxOffsetRot + InteriaMaxOffsetRot.y); //rot z
+		ldiffRot.z = clamp(ldiffRot.z, XminOffsetRot + InteriaMinOffsetRot.z, XmaxOffsetRot + InteriaMaxOffsetRot.z); //rot x
 
 		ldiffRot = ldiffRot + (invRot * NiPoint3(0, 0, varGravityCorrection));
 
@@ -1837,14 +1841,14 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 
 		rdiffXnew.x *= linearXrotationX;
 		rdiffXnew.y *= linearYrotationX;
-		rdiffXnew.z *= linearZrotationX;
+		rdiffXnew.z *= linearZrotationX; //1
 
-		rdiffYnew.x *= linearXrotationY;
+		rdiffYnew.x *= linearXrotationY; //1
 		rdiffYnew.y *= linearYrotationY;
 		rdiffYnew.z *= linearZrotationY;
 
 		rdiffZnew.x *= linearXrotationZ;
-		rdiffZnew.y *= linearYrotationZ;
+		rdiffZnew.y *= linearYrotationZ; //1
 		rdiffZnew.z *= linearZrotationZ;
 
 		newRot.SetEulerAngles(rdiffYnew.x + rdiffYnew.y + rdiffYnew.z, rdiffZnew.x + rdiffZnew.y + rdiffZnew.z, rdiffXnew.x + rdiffXnew.y + rdiffXnew.z);
