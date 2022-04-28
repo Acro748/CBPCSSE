@@ -393,12 +393,12 @@ void Thing::updateConfigValues(Actor* actor)
 	linearYspreadforceZ = GetPercentageValue(linearYspreadforceZ_0, linearYspreadforceZ_100, actorWeight);
 	linearZspreadforceX = GetPercentageValue(linearZspreadforceX_0, linearZspreadforceX_100, actorWeight);
 	linearZspreadforceY = GetPercentageValue(linearZspreadforceY_0, linearZspreadforceY_100, actorWeight);
-	rotationXspreadforceRotY = GetPercentageValue(rotationXspreadforceRotY_0, rotationXspreadforceRotY_100, actorWeight);
-	rotationXspreadforceRotZ = GetPercentageValue(rotationXspreadforceRotZ_0, rotationXspreadforceRotZ_100, actorWeight);
-	rotationYspreadforceRotX = GetPercentageValue(rotationYspreadforceRotX_0, rotationYspreadforceRotX_100, actorWeight);
-	rotationYspreadforceRotZ = GetPercentageValue(rotationYspreadforceRotZ_0, rotationYspreadforceRotZ_100, actorWeight);
-	rotationZspreadforceRotX = GetPercentageValue(rotationZspreadforceRotX_0, rotationZspreadforceRotX_100, actorWeight);
-	rotationZspreadforceRotY = GetPercentageValue(rotationZspreadforceRotY_0, rotationZspreadforceRotY_100, actorWeight);
+	rotationXspreadforceY = GetPercentageValue(rotationXspreadforceY_0, rotationXspreadforceY_100, actorWeight);
+	rotationXspreadforceZ = GetPercentageValue(rotationXspreadforceZ_0, rotationXspreadforceZ_100, actorWeight);
+	rotationYspreadforceX = GetPercentageValue(rotationYspreadforceX_0, rotationYspreadforceX_100, actorWeight);
+	rotationYspreadforceZ = GetPercentageValue(rotationYspreadforceZ_0, rotationYspreadforceZ_100, actorWeight);
+	rotationZspreadforceX = GetPercentageValue(rotationZspreadforceX_0, rotationZspreadforceX_100, actorWeight);
+	rotationZspreadforceY = GetPercentageValue(rotationZspreadforceY_0, rotationZspreadforceY_100, actorWeight);
 
 	forceMultipler = GetPercentageValue(forceMultipler_0, forceMultipler_100, actorWeight);
 
@@ -535,12 +535,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 
 		if (XmaxOffsetRot_100 < 0.001f && XminOffsetRot_100 < 0.001f && YmaxOffsetRot_100 < 0.001f && YminOffsetRot_100 < 0.001f && ZmaxOffsetRot_100 < 0.001f && ZminOffsetRot_100 < 0.001f)
 		{
-			XmaxOffsetRot_100 = XmaxOffset_100;
-			XminOffsetRot_100 = XminOffset_100;
-			YmaxOffsetRot_100 = YmaxOffset_100;
-			YminOffsetRot_100 = YminOffset_100;
-			ZmaxOffsetRot_100 = ZmaxOffset_100;
-			ZminOffsetRot_100 = ZminOffset_100;
+			XmaxOffsetRot_100 = ZmaxOffset_100;
+			XminOffsetRot_100 = ZminOffset_100;
+			YmaxOffsetRot_100 = XmaxOffset_100;
+			YminOffsetRot_100 = XminOffset_100;
+			ZmaxOffsetRot_100 = YmaxOffset_100;
+			ZminOffsetRot_100 = YminOffset_100;
 		}
 	}
 	XdefaultOffset_100 = centry["Xdefaultoffset_100"];
@@ -588,12 +588,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearZspreadforceX_100 = centry["linearZspreadforceX"];
 	linearZspreadforceY_100 = centry["linearZspreadforceY"];
 
-	rotationXspreadforceRotY_100 = centry["rotationXspreadforceRotY"];
-	rotationXspreadforceRotZ_100 = centry["rotationXspreadforceRotZ"];
-	rotationYspreadforceRotX_100 = centry["rotationYspreadforceRotX"];
-	rotationYspreadforceRotZ_100 = centry["rotationYspreadforceRotZ"];
-	rotationZspreadforceRotX_100 = centry["rotationZspreadforceRotX"];
-	rotationZspreadforceRotY_100 = centry["rotationZspreadforceRotY"];
+	rotationXspreadforceY_100 = centry["rotationXspreadforceY"];
+	rotationXspreadforceZ_100 = centry["rotationXspreadforceZ"];
+	rotationYspreadforceX_100 = centry["rotationYspreadforceX"];
+	rotationYspreadforceZ_100 = centry["rotationYspreadforceZ"];
+	rotationZspreadforceX_100 = centry["rotationZspreadforceX"];
+	rotationZspreadforceY_100 = centry["rotationZspreadforceY"];
 
 	forceMultipler_100 = centry["forceMultipler"];
 
@@ -731,12 +731,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 
 		if (XmaxOffsetRot_0 < 0.001f && XminOffsetRot_0 < 0.001f && YmaxOffsetRot_0 < 0.001f && YminOffsetRot_0 < 0.001f && ZmaxOffsetRot_0 < 0.001f && ZminOffsetRot_0 < 0.001f)
 		{
-			XmaxOffsetRot_0 = XmaxOffset_0;
-			XminOffsetRot_0 = XminOffset_0;
-			YmaxOffsetRot_0 = YmaxOffset_0;
-			YminOffsetRot_0 = YminOffset_0;
-			ZmaxOffsetRot_0 = ZmaxOffset_0;
-			ZminOffsetRot_0 = ZminOffset_0;
+			XmaxOffsetRot_0 = ZmaxOffset_0;
+			XminOffsetRot_0 = ZminOffset_0;
+			YmaxOffsetRot_0 = XmaxOffset_0;
+			YminOffsetRot_0 = XminOffset_0;
+			ZmaxOffsetRot_0 = YmaxOffset_0;
+			ZminOffsetRot_0 = YminOffset_0;
 		}
 	}
 	XdefaultOffset_0 = centry0weight["Xdefaultoffset_0"];
@@ -783,12 +783,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearZspreadforceX_0 = centry0weight["linearZspreadforceX"];
 	linearZspreadforceY_0 = centry0weight["linearZspreadforceY"];
 
-	rotationXspreadforceRotY_0 = centry0weight["rotationXspreadforceRotY"];
-	rotationXspreadforceRotZ_0 = centry0weight["rotationXspreadforceRotZ"];
-	rotationYspreadforceRotX_0 = centry0weight["rotationYspreadforceRotX"];
-	rotationYspreadforceRotZ_0 = centry0weight["rotationYspreadforceRotZ"];
-	rotationZspreadforceRotX_0 = centry0weight["rotationZspreadforceRotX"];
-	rotationZspreadforceRotY_0 = centry0weight["rotationZspreadforceRotY"];
+	rotationXspreadforceY_0 = centry0weight["rotationXspreadforceY"];
+	rotationXspreadforceZ_0 = centry0weight["rotationXspreadforceZ"];
+	rotationYspreadforceX_0 = centry0weight["rotationYspreadforceX"];
+	rotationYspreadforceZ_0 = centry0weight["rotationYspreadforceZ"];
+	rotationZspreadforceX_0 = centry0weight["rotationZspreadforceX"];
+	rotationZspreadforceY_0 = centry0weight["rotationZspreadforceY"];
 
 	forceMultipler_0 = centry0weight["forceMultipler"];
 
@@ -1494,74 +1494,74 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 						{
 						if (IsLeftBreastBone)
 						{
-								for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
+							for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
 							{
-									if (!keywords[index])
-										continue;
-									if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedL.data) == 0)
-							{
-										IsAsNaked = true;
-								}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyL.data) == 0)
-									{
-										isHeavyArmor = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightL.data) == 0)
-										{
-										isLightArmor = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingL.data) == 0)
-							{
-										isClothed = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpL.data) == 0)
+								if (!keywords[index])
+									continue;
+								if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedL.data) == 0)
 								{
-										isNoPushUp = true;
+									IsAsNaked = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyL.data) == 0)
+								{
+									isHeavyArmor = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightL.data) == 0)
+								{
+									isLightArmor = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingL.data) == 0)
+								{
+									isClothed = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpL.data) == 0)
+								{
+									isNoPushUp = true;
 								}
 
 							}
 						}
 						else if (IsRightBreastBone)
 						{
-								for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
+							for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
 							{
-									if (!keywords[index])
-										continue;
-									if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedR.data) == 0)
-							{
-										IsAsNaked = true;
-								}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyR.data) == 0)
-							{
-										isHeavyArmor = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightR.data) == 0)
-									{
-										isLightArmor = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingR.data) == 0)
+								if (!keywords[index])
+									continue;
+								if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedR.data) == 0)
 								{
-										isClothed = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpR.data) == 0)
-										{
-										isNoPushUp = true;
-										}
-									}
+									IsAsNaked = true;
 								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyR.data) == 0)
+								{
+									isHeavyArmor = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightR.data) == 0)
+								{
+									isLightArmor = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingR.data) == 0)
+								{
+									isClothed = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpR.data) == 0)
+								{
+									isNoPushUp = true;
+								}
+							}
+						}
 						}
 
 						if (IsAsNaked)
-							{
+						{
 							isHeavyArmor = false;
 							isLightArmor = false;
 							isClothed = false;
-										}
+						}
 						else if (!isHeavyArmor && !isLightArmor && !isClothed)
-								{
-								isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
-								isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
-								isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
+						{
+							isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
+							isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
+							isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
 
 						}
 					}
@@ -1654,6 +1654,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		NiPoint3 InteriaMaxOffset = emptyPoint;
 		NiPoint3 InteriaMinOffset = emptyPoint;
 
+		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
 		if (multiplerInertia >= 0.001f)
 		{
 			if (collisionInertia.x >= 0.0f)
@@ -1671,7 +1672,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 			else
 				InteriaMinOffset.z = collisionInertia.z;
 
-			multiplerInertia -= (((float)originalDeltaT / timeTick) * 0.01f);
+			multiplerInertia -= (((float)originalDeltaT / timeTick) * 0.01f * timeStep);
 			if (multiplerInertia < 0.001f)
 				multiplerInertia = 0.0f;
 			collisionInertia *= multiplerInertia;
@@ -1751,6 +1752,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		NiPoint3 InteriaMaxOffsetRot = emptyPoint;
 		NiPoint3 InteriaMinOffsetRot = emptyPoint;
 
+		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
 		if (multiplerInertiaRot >= 0.001f)
 		{
 			if (collisionInertiaRot.x >= 0.0f)
@@ -1768,7 +1770,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 			else
 				InteriaMinOffsetRot.z = collisionInertiaRot.z;
 
-			multiplerInertiaRot -= (((float)originalDeltaT / timeTickRot) * 0.01f);
+			multiplerInertiaRot -= (((float)originalDeltaT / timeTickRot) * 0.01f * timeStepRot);
 			if (multiplerInertiaRot < 0.001f)
 				multiplerInertiaRot = 0.0f;
 			collisionInertiaRot *= multiplerInertiaRot;
@@ -1778,9 +1780,10 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		float timeMultiplierRot = timeTickRot / (float)deltaTRot;
 		diffRot = invRot * (diffRot * timeMultiplierRot);
 
-		NiPoint3 stiffnessXYZRot = NiPoint3(stiffnessXRot, stiffnessYRot, stiffnessZRot);
-		NiPoint3 stiffness2XYZRot = NiPoint3(stiffness2XRot, stiffness2YRot, stiffness2ZRot);
-		NiPoint3 dampingXYZRot = NiPoint3(dampingXRot, dampingYRot, dampingZRot);
+		// linear X = rotation Y, linear Y = rotation Z, linear Z = rotation X
+		NiPoint3 stiffnessXYZRot = NiPoint3(stiffnessYRot, stiffnessZRot, stiffnessXRot);
+		NiPoint3 stiffness2XYZRot = NiPoint3(stiffness2YRot, stiffness2ZRot, stiffness2XRot);
+		NiPoint3 dampingXYZRot = NiPoint3(dampingYRot, dampingZRot, dampingXRot);
 
 		NiPoint3 diff2Rot(diffRot.x * diffRot.x * sgn(diffRot.x), diffRot.y * diffRot.y * sgn(diffRot.y), diffRot.z * diffRot.z * sgn(diffRot.z));
 		NiPoint3 forceRot = (NiPoint3((diffRot.x * stiffnessXYZRot.x) + (diff2Rot.x * stiffness2XYZRot.x)
@@ -1825,9 +1828,9 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 
 		beforenewrdiffRot = beforenewrdiffRot - ldiffRot;
 
-		ldiffRot.x = ldiffRot.x + ((beforenewrdiffRot.z * rotationXspreadforceRotY) + (beforenewrdiffRot.y * rotationZspreadforceRotY));
-		ldiffRot.y = ldiffRot.y + ((beforenewrdiffRot.z * rotationXspreadforceRotZ) + (beforenewrdiffRot.x * rotationYspreadforceRotZ));
-		ldiffRot.z = ldiffRot.z + ((beforenewrdiffRot.x * rotationYspreadforceRotX) + (beforenewrdiffRot.y * rotationZspreadforceRotX));
+		ldiffRot.x = ldiffRot.x + ((beforenewrdiffRot.z * rotationXspreadforceY) + (beforenewrdiffRot.y * rotationZspreadforceY));
+		ldiffRot.y = ldiffRot.y + ((beforenewrdiffRot.z * rotationXspreadforceZ) + (beforenewrdiffRot.x * rotationYspreadforceZ));
+		ldiffRot.z = ldiffRot.z + ((beforenewrdiffRot.x * rotationYspreadforceX) + (beforenewrdiffRot.y * rotationZspreadforceX));
 
 		ldiffRot.x = clamp(ldiffRot.x, YminOffsetRot + InteriaMinOffsetRot.x, YmaxOffsetRot + InteriaMaxOffsetRot.x); //rot y
 		ldiffRot.y = clamp(ldiffRot.y, ZminOffsetRot + InteriaMinOffsetRot.y, ZmaxOffsetRot + InteriaMaxOffsetRot.y); //rot z
@@ -2121,8 +2124,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 	//### To be free from unstable FPS, have to remove the varGravityCorrection from the next frame
 	if (collisionElastic && maybeNot)
 	{
-		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol)) + target - NiPoint3(0, 0, varGravityCorrection);
-		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * (ldiffRot + ldiffcol)) + target - NiPoint3(0, 0, varGravityCorrection);
+		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol + ldiffGcol)) + target - NiPoint3(0, 0, varGravityCorrection);
+		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * (ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot)) + target - NiPoint3(0, 0, varGravityCorrection);
 
 		collisionInertia += ldiffcol;
 		collisionInertiaRot += ldiffcol;

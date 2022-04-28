@@ -295,6 +295,7 @@ void updateActors()
 			consoleCollisionReload.store(false);
 
 			loadMasterConfig();
+			loadConfig();
 			loadCollisionConfig();
 			loadExtraCollisionConfig();
 
@@ -437,7 +438,7 @@ void updateActors()
 				//TESNPC * actorNPC;
 				Actor* actor;
 
-				NiPointer<TESObjectREFR> ToRefr = NULL;
+				NiPointer<TESObjectREFR> ToRefr = nullptr;
 
 				bool isValid = true;
 
@@ -706,9 +707,8 @@ void updateActors()
 	//}
 
 	static int count = 0;
-	if ((configReloadCount && count++ > configReloadCount) || consoleConfigReload.load())
+	if ((configReloadCount && count++ > configReloadCount))
 	{
-		consoleConfigReload.store(false);
 		count = 0;
 		loadConfig();
 		for each (auto & a in actorEntries)
@@ -874,6 +874,204 @@ EventResult TESEquipEventHandler::ReceiveEvent(TESEquipEvent* evn, EventDispatch
 	}		
 
 	return EventResult::kEvent_Continue;
+}
+
+bool AddColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> position, float scale, int index)
+{
+	if (index < 0)
+		return false;
+
+	if (!actor || !actor->loadedState || !actor->loadedState->node)
+		return false;
+
+	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
+
+	if (!node)
+		return false;
+
+	auto objIt = actors.find(actor->formID);
+	if (objIt == actors.end())
+		return false;
+
+	if (position.Length() != 3)
+		return false;
+
+	NiPoint3 nodePosition = emptyPoint;
+	position.Get(&nodePosition.x, 0);
+	position.Get(&nodePosition.y, 1);
+	position.Get(&nodePosition.z, 2);
+
+	NiPoint3 VirtualOffset = emptyPoint;
+
+	if (objIt->second.NodeCollisionSync.find(nodeName.data) != objIt->second.NodeCollisionSync.end())
+		VirtualOffset = objIt->second.NodeCollisionSync[nodeName.data];
+
+	Sphere newSphere;
+
+	newSphere.offset0 = nodePosition;
+	newSphere.offset100 = newSphere.offset0;
+	newSphere.radius0 = scale;
+	newSphere.radius100 = newSphere.radius0;
+	newSphere.radius100pwr2 = newSphere.radius100 * newSphere.radius100;
+	newSphere.worldPos = node->m_worldTransform.pos + (node->m_worldTransform.rot * newSphere.offset100) + VirtualOffset;
+	newSphere.index = index;
+	newSphere.NodeName = nodeName.data;
+
+	auto colliders = objIt->second.actorColliders;
+
+	if (colliders.find(nodeName.data) != colliders.end())
+	{
+		auto col = colliders.find(nodeName.data)->second;
+
+		col.collisionSpheres.emplace_back(newSphere);
+	}
+	else
+	{
+		std::vector<Sphere>newSpherelist;
+		std::vector<Capsule>newCapsulelist;
+
+		newSpherelist.emplace_back(newSphere);
+
+		Collision newCol = Collision::Collision(node, newSpherelist, newCapsulelist, 50.0f);
+		newCol.colliderActor = actor;
+		newCol.colliderNodeName = nodeName.data;
+
+		colliders.insert(std::make_pair(newCol.colliderNodeName, newCol));
+	}
+
+	return true;
+}
+
+bool AddColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> End1_position, float End1_scale, VMArray<float> End2_position, float End2_scale, int index)
+{
+	if (index < 0)
+		return false;
+
+	if (!actor || !actor->loadedState || !actor->loadedState->node)
+		return false;
+
+	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
+
+	if (!node)
+		return false;
+
+	auto objIt = actors.find(actor->formID);
+	if (objIt == actors.end())
+		return false;
+
+	if (End1_position.Length() != 3 || End2_position.Length() != 3)
+		return false;
+
+	NiPoint3 End1_nodePosition = emptyPoint;
+	NiPoint3 End2_nodePosition = emptyPoint;
+
+	End1_position.Get(&End1_nodePosition.x, 0);
+	End1_position.Get(&End1_nodePosition.y, 1);
+	End1_position.Get(&End1_nodePosition.z, 2);
+
+	End2_position.Get(&End2_nodePosition.x, 0);
+	End2_position.Get(&End2_nodePosition.y, 1);
+	End2_position.Get(&End2_nodePosition.z, 2);
+
+	NiPoint3 VirtualOffset = emptyPoint;
+
+	if (objIt->second.NodeCollisionSync.find(nodeName.data) != objIt->second.NodeCollisionSync.end())
+		VirtualOffset = objIt->second.NodeCollisionSync[nodeName.data];
+
+	Capsule newCalsule;
+
+	newCalsule.End1_offset0 = End1_nodePosition;
+	newCalsule.End1_offset100 = newCalsule.End1_offset0 * node->m_worldTransform.scale;
+	newCalsule.End1_radius0 = End1_scale;
+	newCalsule.End1_radius100 = newCalsule.End1_radius0 * node->m_worldTransform.scale;
+	newCalsule.End1_radius100pwr2 = newCalsule.End1_radius100 * newCalsule.End1_radius100;
+	newCalsule.End2_offset0 = End2_nodePosition;
+	newCalsule.End2_offset100 = newCalsule.End2_offset0 * node->m_worldTransform.scale;
+	newCalsule.End2_radius0 = End2_scale;
+	newCalsule.End2_radius100 = newCalsule.End2_radius0 * node->m_worldTransform.scale;
+	newCalsule.End2_radius100pwr2 = newCalsule.End2_radius100 * newCalsule.End2_radius100;
+
+	newCalsule.End1_worldPos = node->m_worldTransform.pos + (node->m_worldTransform.rot * newCalsule.End1_offset100) + VirtualOffset;
+	newCalsule.End2_worldPos = node->m_worldTransform.pos + (node->m_worldTransform.rot * newCalsule.End2_offset100) + VirtualOffset;
+	newCalsule.index = index;
+	newCalsule.NodeName = nodeName.data;
+
+	auto colliders = objIt->second.actorColliders;
+
+	if (colliders.find(nodeName.data) != colliders.end())
+	{
+		auto col = colliders.find(nodeName.data)->second;
+
+		col.collisionCapsules.emplace_back(newCalsule);
+	}
+	else
+	{
+		std::vector<Sphere>newSpherelist;
+		std::vector<Capsule>newCapsulelist;
+
+		newCapsulelist.emplace_back(newCalsule);
+
+		Collision newCol = Collision::Collision(node, newSpherelist, newCapsulelist, 50.0f);
+		newCol.colliderActor = actor;
+		newCol.colliderNodeName = nodeName.data;
+
+		colliders.insert(std::make_pair(newCol.colliderNodeName, newCol));
+	}
+
+	return true;
+}
+
+bool RemoveCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, int type, int index) // type 0 = sphere / type 1 = capsule
+{
+	if (!actor || !actor->loadedState || !actor->loadedState->node)
+		return false;
+
+	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
+
+	if (!node)
+		return false;
+
+	auto objIt = actors.find(actor->formID);
+	if (objIt == actors.end())
+		return false;
+
+	auto colliders = objIt->second.actorColliders;
+
+	if (colliders.find(nodeName.data) == colliders.end())
+		return false;
+
+	auto col = colliders.find(nodeName.data)->second;
+
+	if (type == 0)
+	{
+		auto colSpheres = col.collisionSpheres;
+		int i = 0;
+		while (i < colSpheres.size())
+		{
+			if (colSpheres.at(i).index == index)
+			{
+				colSpheres.erase(colSpheres.begin() + i);
+			}
+			else
+				i++;
+		}
+	}
+	else if (type == 1)
+	{
+		auto colCapsules = col.collisionCapsules;
+		int i = 0;
+		while (i < colCapsules.size())
+		{
+			if (colCapsules.at(i).index == index)
+			{
+				colCapsules.erase(colCapsules.begin() + i);
+			}
+			else
+				i++;
+		}
+	}
+
+	return true;
 }
 
 

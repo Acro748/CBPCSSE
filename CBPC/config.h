@@ -241,7 +241,7 @@ struct Conditions
 	std::vector<ConditionItem> AndItems;
 };
 
-extern std::unordered_map<std::string, Conditions> nodeConditionsMap;
+extern concurrency::concurrent_unordered_map<std::string, Conditions> nodeConditionsMap;
 
 
 struct SpecificNPCConfig

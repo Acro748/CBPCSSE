@@ -70,7 +70,7 @@ bool SimObj::bind(Actor *actor, bool isMale)
 						continue;
 					}
 				}
-				if (!CheckActorForConditions(actor, nodeConditionsMap[affectedBones.at(i).at(j)]))
+				if ((nodeConditionsMap.find(affectedBones.at(i).at(j)) != nodeConditionsMap.end()) && !CheckActorForConditions(actor, nodeConditionsMap[affectedBones.at(i).at(j)]))
 				{
 					continue;
 				}

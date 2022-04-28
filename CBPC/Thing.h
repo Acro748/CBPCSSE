@@ -100,12 +100,12 @@ public:
 	float linearYspreadforceZ = 0.0f;
 	float linearZspreadforceX = 0.0f;
 	float linearZspreadforceY = 0.0f;
-	float rotationXspreadforceRotY = 0.0f;
-	float rotationXspreadforceRotZ = 0.0f;
-	float rotationYspreadforceRotX = 0.0f;
-	float rotationYspreadforceRotZ = 0.0f;
-	float rotationZspreadforceRotX = 0.0f;
-	float rotationZspreadforceRotY = 0.0f;
+	float rotationXspreadforceY = 0.0f;
+	float rotationXspreadforceZ = 0.0f;
+	float rotationYspreadforceX = 0.0f;
+	float rotationYspreadforceZ = 0.0f;
+	float rotationZspreadforceX = 0.0f;
+	float rotationZspreadforceY = 0.0f;
 
 	float forceMultipler = 1.0f;
 
@@ -203,12 +203,12 @@ public:
 	float linearYspreadforceZ_100 = 0.0f;
 	float linearZspreadforceX_100 = 0.0f;
 	float linearZspreadforceY_100 = 0.0f;
-	float rotationXspreadforceRotY_100 = 0.0f;
-	float rotationXspreadforceRotZ_100 = 0.0f;
-	float rotationYspreadforceRotX_100 = 0.0f;
-	float rotationYspreadforceRotZ_100 = 0.0f;
-	float rotationZspreadforceRotX_100 = 0.0f;
-	float rotationZspreadforceRotY_100 = 0.0f;
+	float rotationXspreadforceY_100 = 0.0f;
+	float rotationXspreadforceZ_100 = 0.0f;
+	float rotationYspreadforceX_100 = 0.0f;
+	float rotationYspreadforceZ_100 = 0.0f;
+	float rotationZspreadforceX_100 = 0.0f;
+	float rotationZspreadforceY_100 = 0.0f;
 
 	float forceMultipler_100 = 1.0f;
 
@@ -306,12 +306,12 @@ public:
 	float linearYspreadforceZ_0 = 0.0f;
 	float linearZspreadforceX_0 = 0.0f;
 	float linearZspreadforceY_0 = 0.0f;
-	float rotationXspreadforceRotY_0 = 0.0f;
-	float rotationXspreadforceRotZ_0 = 0.0f;
-	float rotationYspreadforceRotX_0 = 0.0f;
-	float rotationYspreadforceRotZ_0 = 0.0f;
-	float rotationZspreadforceRotX_0 = 0.0f;
-	float rotationZspreadforceRotY_0 = 0.0f;
+	float rotationXspreadforceY_0 = 0.0f;
+	float rotationXspreadforceZ_0 = 0.0f;
+	float rotationYspreadforceX_0 = 0.0f;
+	float rotationYspreadforceZ_0 = 0.0f;
+	float rotationZspreadforceX_0 = 0.0f;
+	float rotationZspreadforceY_0 = 0.0f;
 
 	float forceMultipler_0 = 1.0f;
 

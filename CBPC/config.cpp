@@ -5,7 +5,7 @@
 
 
 std::string versionStr = "1.5.x";
-UInt32 version = 0x010500;
+UInt32 version = 0x0105ff;
 
 
 #pragma warning(disable : 4996)
@@ -101,7 +101,7 @@ std::atomic<bool> consoleConfigReload = false;
 std::atomic<bool> consoleCollisionReload = false;
 
 concurrency::concurrent_unordered_map<std::string, std::string> configMap;
-std::unordered_map<std::string, Conditions> nodeConditionsMap;
+concurrency::concurrent_unordered_map<std::string, Conditions> nodeConditionsMap;
 config_t config;
 config_t config0weight;
 
@@ -503,12 +503,12 @@ void loadConfig() {
 			config[it.second]["linearYspreadforceZ"] = 0.0f;
 			config[it.second]["linearZspreadforceX"] = 0.0f;
 			config[it.second]["linearZspreadforceY"] = 0.0f;
-			config[it.second]["rotationXspreadforceRotY"] = 0.0f;
-			config[it.second]["rotationXspreadforceRotZ"] = 0.0f;
-			config[it.second]["rotationYspreadforceRotX"] = 0.0f;
-			config[it.second]["rotationYspreadforceRotZ"] = 0.0f;
-			config[it.second]["rotationZspreadforceRotX"] = 0.0f;
-			config[it.second]["rotationZspreadforceRotY"] = 0.0f;
+			config[it.second]["rotationXspreadforceY"] = 0.0f;
+			config[it.second]["rotationXspreadforceZ"] = 0.0f;
+			config[it.second]["rotationYspreadforceX"] = 0.0f;
+			config[it.second]["rotationYspreadforceZ"] = 0.0f;
+			config[it.second]["rotationZspreadforceX"] = 0.0f;
+			config[it.second]["rotationZspreadforceY"] = 0.0f;
 			config[it.second]["forceMultipler"] = 1.0f;
 			config[it.second]["gravityInvertedCorrection"] = 0.0f;
 			config[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -597,12 +597,12 @@ void loadConfig() {
 			config0weight[it.second]["linearYspreadforceZ"] = 0.0f;
 			config0weight[it.second]["linearZspreadforceX"] = 0.0f;
 			config0weight[it.second]["linearZspreadforceY"] = 0.0f;
-			config0weight[it.second]["rotationXspreadforceRotY"] = 0.0f;
-			config0weight[it.second]["rotationXspreadforceRotZ"] = 0.0f;
-			config0weight[it.second]["rotationYspreadforceRotX"] = 0.0f;
-			config0weight[it.second]["rotationYspreadforceRotZ"] = 0.0f;
-			config0weight[it.second]["rotationZspreadforceRotX"] = 0.0f;
-			config0weight[it.second]["rotationZspreadforceRotY"] = 0.0f;
+			config0weight[it.second]["rotationXspreadforceY"] = 0.0f;
+			config0weight[it.second]["rotationXspreadforceZ"] = 0.0f;
+			config0weight[it.second]["rotationYspreadforceX"] = 0.0f;
+			config0weight[it.second]["rotationYspreadforceZ"] = 0.0f;
+			config0weight[it.second]["rotationZspreadforceX"] = 0.0f;
+			config0weight[it.second]["rotationZspreadforceY"] = 0.0f;
 			config0weight[it.second]["forceMultipler"] = 1.0f;
 			config0weight[it.second]["gravityInvertedCorrection"] = 0.0f;
 			config0weight[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -749,12 +749,12 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["linearYspreadforceZ"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearZspreadforceX"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearZspreadforceY"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["rotationXspreadforceRotY"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["rotationXspreadforceRotZ"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["rotationYspreadforceRotX"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["rotationYspreadforceRotZ"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["rotationZspreadforceRotX"] = 0.0f;
-											newNPCBounceConfig.config[it.second]["rotationZspreadforceRotY"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationXspreadforceY"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationXspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationYspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationYspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationZspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationZspreadforceY"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["forceMultipler"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["gravityInvertedCorrection"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -843,12 +843,12 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["linearYspreadforceZ"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearZspreadforceX"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearZspreadforceY"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["rotationXspreadforceRotY"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["rotationXspreadforceRotZ"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["rotationYspreadforceRotX"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["rotationYspreadforceRotZ"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["rotationZspreadforceRotX"] = 0.0f;
-											newNPCBounceConfig.config0weight[it.second]["rotationZspreadforceRotY"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationXspreadforceY"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationXspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationYspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationYspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationZspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationZspreadforceY"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["forceMultipler"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityInvertedCorrection"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -2964,178 +2964,6 @@ void StopPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName)
 	}
 }
 
-/*
-void AddColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, float position[3], float scale, int index)
-{
-	if (index < 0)
-		return;
-
-	if (!actor || !actor->loadedState || !actor->loadedState->node)
-		return;
-
-	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
-
-	if (!node)
-		return;
-
-	auto objIt = actors.find(actor->formID);
-	if (objIt == actors.end())
-		return;
-
-	NiPoint3 VirtualOffset = emptyPoint;
-
-	if (objIt->second.NodeCollisionSync.find(nodeName.data) != objIt->second.NodeCollisionSync.end())
-		VirtualOffset = objIt->second.NodeCollisionSync[nodeName.data];
-
-	Sphere newSphere;
-
-	newSphere.offset0 = NiPoint3(position[0], position[1], position[2]);
-	newSphere.offset100 = newSphere.offset0;
-	newSphere.radius0 = scale;
-	newSphere.radius100 = newSphere.radius0;
-	newSphere.radius100pwr2 = newSphere.radius100 * newSphere.radius100;
-	newSphere.worldPos = node->m_worldTransform.pos + (node->m_worldTransform.rot * newSphere.offset100) + VirtualOffset;
-	newSphere.index = index;
-	newSphere.NodeName = nodeName.data;
-
-	auto colliders = objIt->second.actorColliders;
-
-	if (colliders.find(nodeName.data) != colliders.end())
-	{
-		auto col = colliders[nodeName.data];
-
-		col.collisionSpheres.emplace_back(newSphere);
-	}
-	else
-	{
-		std::vector<Sphere>newSpherelist;
-		std::vector<Capsule>newCapsulelist;
-
-		newSpherelist.emplace_back(newSphere);
-
-		Collision newCol = Collision::Collision(node, newSpherelist, newCapsulelist, 50.0f);
-		newCol.colliderActor = actor;
-		newCol.colliderNodeName = nodeName.data;
-
-		colliders.insert(std::make_pair(nodeName.data, newCol));
-	}
-}
-
-void AddColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, float End1_position[3], float End1_scale, float End2_position[3], float End2_scale, int index)
-{
-	if (index < 0)
-		return;
-
-	if (!actor || !actor->loadedState || !actor->loadedState->node)
-		return;
-
-	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
-
-	if (!node)
-		return;
-
-	auto objIt = actors.find(actor->formID);
-	if (objIt == actors.end())
-		return;
-
-	NiPoint3 VirtualOffset = emptyPoint;
-
-	if (objIt->second.NodeCollisionSync.find(nodeName.data) != objIt->second.NodeCollisionSync.end())
-		VirtualOffset = objIt->second.NodeCollisionSync[nodeName.data];
-
-	Capsule newCalsule;
-
-	newCalsule.End1_offset0 = NiPoint3(End1_position[0], End1_position[1], End1_position[2]);
-	newCalsule.End1_offset100 = newCalsule.End1_offset0 * node->m_worldTransform.scale;
-	newCalsule.End1_radius0 = End1_scale;
-	newCalsule.End1_radius100 = newCalsule.End1_radius0 * node->m_worldTransform.scale;
-	newCalsule.End1_radius100pwr2 = newCalsule.End1_radius100 * newCalsule.End1_radius100;
-	newCalsule.End2_offset0 = NiPoint3(End2_position[0], End2_position[1], End2_position[2]);
-	newCalsule.End2_offset100 = newCalsule.End2_offset0 * node->m_worldTransform.scale;
-	newCalsule.End2_radius0 = End2_scale;
-	newCalsule.End2_radius100 = newCalsule.End2_radius0 * node->m_worldTransform.scale;
-	newCalsule.End2_radius100pwr2 = newCalsule.End2_radius100 * newCalsule.End2_radius100;
-
-	newCalsule.End1_worldPos = node->m_worldTransform.pos + (node->m_worldTransform.rot * newCalsule.End1_offset100) + VirtualOffset;
-	newCalsule.End2_worldPos = node->m_worldTransform.pos + (node->m_worldTransform.rot * newCalsule.End2_offset100) + VirtualOffset;
-	newCalsule.index = index;
-	newCalsule.NodeName = nodeName.data;
-
-	auto colliders = objIt->second.actorColliders;
-
-	if (colliders.find(nodeName.data) != colliders.end())
-	{
-		auto col = colliders[nodeName.data];
-
-		col.collisionSpheres.emplace_back(newCalsule);
-	}
-	else
-	{
-		std::vector<Sphere>newSpherelist;
-		std::vector<Capsule>newCapsulelist;
-
-		newCapsulelist.emplace_back(newCalsule);
-
-		Collision newCol = Collision::Collision(node, newSpherelist, newCapsulelist, 50.0f);
-		newCol.colliderActor = actor;
-		newCol.colliderNodeName = nodeName.data;
-
-		colliders.insert(std::make_pair(nodeName.data, newCol));
-	}
-}
-
-void RemoveCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, int type, int index) // type 0 = sphere / type 1 = capsule
-{
-	if (!actor || !actor->loadedState || !actor->loadedState->node)
-		return;
-
-	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
-
-	if (!node)
-		return;
-
-	auto objIt = actors.find(actor->formID);
-	if (objIt == actors.end())
-		return;
-
-	auto colliders = objIt->second.actorColliders;
-
-	if (colliders.find(nodeName.data) == colliders.end())
-		return;
-
-	auto col = colliders[nodeName.data];
-
-	if (type == 0)
-	{
-		auto colSpheres = col.collisionSpheres;
-		int i = 0;
-		while (i < colSpheres.size())
-		{
-			if (colSpheres.at(i).index == index)
-			{
-				colSpheres.erase(colSpheres.begin() + i);
-			}
-			else
-				i++;
-		}
-	}
-	else if (type == 1)
-	{
-		auto colCapsules = col.collisionCapsules;
-		int i = 0;
-		while (i < colCapsules.size())
-		{
-			if (colCapsules.at(i).index == index)
-			{
-				colCapsules.erase(colCapsules.begin() + i);
-			}
-			else
-				i++;
-		}
-	}
-}
-*/
-
 //Initializes openvr system. Required for haptic triggers.
 bool RegisterFuncs(VMClassRegistry* registry)
 {
@@ -3159,13 +2987,13 @@ bool RegisterFuncs(VMClassRegistry* registry)
 		new NativeFunction2 <StaticFunctionTag, void, Actor*, BSFixedString> ("StopPhysics", "CBPCPluginScript", StopPhysics, registry));
 	/*
 	registry->RegisterFunction(
-		new NativeFunction5 <StaticFunctionTag, void, Actor*, BSFixedString, float*, float, int> ("AddColliderSphere", "CBPCPluginScript", AddColliderSphere, registry));
+		new NativeFunction5 <StaticFunctionTag, bool, Actor*, BSFixedString, VMArray<float>, float, int> ("AddColliderSphere", "CBPCPluginScript", AddColliderSphere, registry));
 
 	registry->RegisterFunction(
-		new NativeFunction7 <StaticFunctionTag, void, Actor*, BSFixedString, float*, float, float*, float, int> ("AddColliderCapsule", "CBPCPluginScript", AddColliderCapsule, registry));
+		new NativeFunction7 <StaticFunctionTag, bool, Actor*, BSFixedString, VMArray<float>, float, VMArray<float>, float, int> ("AddColliderCapsule", "CBPCPluginScript", AddColliderCapsule, registry));
 
 	registry->RegisterFunction(
-		new NativeFunction4 <StaticFunctionTag, void, Actor*, BSFixedString, int, int> ("RemoveCollider", "CBPCPluginScript", RemoveCollider, registry));
+		new NativeFunction4 <StaticFunctionTag, bool, Actor*, BSFixedString, int, int> ("RemoveCollider", "CBPCPluginScript", RemoveCollider, registry));
 		*/
 	LOG("CBPC registerFunction\n");
 	return true;

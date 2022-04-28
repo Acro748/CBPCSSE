@@ -242,7 +242,7 @@ static inline float clamp(float val, float min, float max) {
 
 static inline bool CompareNiPoints(NiPoint3 collisionVector, NiPoint3 emptyPoint)
 {
-	return fabsf(collisionVector.x - emptyPoint.x) < 0.000001f && fabsf(collisionVector.y == emptyPoint.y) < 0.000001f && fabsf(collisionVector.z == emptyPoint.z) < 0.000001f;
+	return fabsf(collisionVector.x - emptyPoint.x) < 0.000001f && fabsf(collisionVector.y - emptyPoint.y) < 0.000001f && fabsf(collisionVector.z - emptyPoint.z) < 0.000001f;
 }
 
 static inline BSFixedString ReturnUsableString(std::string str)
