@@ -2036,12 +2036,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 
 					//it can allow only force up to the radius for doesn't get crushed by the ground
 					if (Scalar > bottomRadius)
-					{
-						if (Scalar < bottomRadius * 1.5f)
-							Scalar = bottomRadius;
-						else
-							Scalar = 0;
-					}
+						Scalar = 0;
 
 					GroundCollisionVector = NiPoint3(0, 0, Scalar);
 				}
@@ -2127,8 +2122,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol + ldiffGcol)) + target - NiPoint3(0, 0, varGravityCorrection);
 		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * (ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot)) + target - NiPoint3(0, 0, varGravityCorrection);
 
-		collisionInertia += ldiffcol;
-		collisionInertiaRot += ldiffcol;
+		collisionInertia += (ldiffcol + ldiffGcol);
+		collisionInertiaRot += ((ldiffcol + ldiffGcol) * collisionMultiplerRot);
 		multiplerInertia = 1.0f;
 		multiplerInertiaRot = 1.0f;
 	}

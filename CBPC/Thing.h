@@ -14,8 +14,6 @@
 extern const char *leftPussy;
 extern const char *rightPussy;
 
-extern std::shared_mutex thing_map_lock;
-
 class Thing {
 	BSFixedString boneName;
 	NiPoint3 oldWorldPos;

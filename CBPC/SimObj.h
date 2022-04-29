@@ -129,9 +129,3 @@ static_assert(offsetof(AIProcessManager, activeEffectShaders) <= 0x108, "Unk141F
 typedef bool(*_IsInCombatNative)(Actor* actor);
 
 bool ActorInCombat(Actor* actor);
-
-
-//void AddColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, float position[3], float scale, int index);
-//void AddColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, float End1_position[3], float End1_scale, float End2_position[3], float End2_scale, int index);
-//void RemoveCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, int type, int index);
-

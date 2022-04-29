@@ -141,8 +141,6 @@ enum eLogLevels
 
 void Log(const int msgLogLevel, const char * fmt, ...);
 
-extern std::shared_mutex log_lock;
-
 #define LOG(fmt, ...) Log(LOGLEVEL_WARN, fmt, ##__VA_ARGS__)
 #define LOG_ERR(fmt, ...) Log(LOGLEVEL_ERR, fmt, ##__VA_ARGS__)
 #define LOG_INFO(fmt, ...) Log(LOGLEVEL_INFO, fmt, ##__VA_ARGS__)
@@ -167,7 +165,7 @@ struct Sphere
 	NiPoint3 worldPos = NiPoint3(0, 0, 0);
 
 	std::string NodeName;
-	int index = -1;
+	UInt32 index = -1;
 };
 
 struct Capsule
@@ -388,6 +386,9 @@ BSFixedString GetVersionMinor(StaticFunctionTag* base);
 BSFixedString GetVersionBeta(StaticFunctionTag* base);
 void StartPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName);
 void StopPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName);
+bool AttachColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> position, float radius, float scaleWeight, UInt32 index);
+bool AttachColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> End1_position, float End1_radius, VMArray<float> End2_position, float End2_radius, float scaleWeight, UInt32 index);
+bool DetachCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, UInt32 type, UInt32 index);
 
 
 extern std::string versionStr;
