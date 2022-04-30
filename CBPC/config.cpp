@@ -2987,13 +2987,13 @@ bool RegisterFuncs(VMClassRegistry* registry)
 		new NativeFunction2 <StaticFunctionTag, void, Actor*, BSFixedString> ("StopPhysics", "CBPCPluginScript", StopPhysics, registry));
 	
 	registry->RegisterFunction(
-		new NativeFunction6 <StaticFunctionTag, bool, Actor*, BSFixedString, VMArray<float>, float, float, UInt32> ("AttachColliderSphere", "CBPCPluginScript", AttachColliderSphere, registry));
+		new NativeFunction7 <StaticFunctionTag, bool, Actor*, BSFixedString, VMArray<float>, float, float, UInt32, bool> ("AttachColliderSphere", "CBPCPluginScript", AttachColliderSphere, registry));
 
 	registry->RegisterFunction(
-		new NativeFunction8 <StaticFunctionTag, bool, Actor*, BSFixedString, VMArray<float>, float, VMArray<float>, float, float, UInt32> ("AttachColliderCapsule", "CBPCPluginScript", AttachColliderCapsule, registry));
+		new NativeFunction9 <StaticFunctionTag, bool, Actor*, BSFixedString, VMArray<float>, float, VMArray<float>, float, float, UInt32, bool> ("AttachColliderCapsule", "CBPCPluginScript", AttachColliderCapsule, registry));
 
 	registry->RegisterFunction(
-		new NativeFunction4 <StaticFunctionTag, bool, Actor*, BSFixedString, UInt32, UInt32> ("DetachCollider", "CBPCPluginScript", DetachCollider, registry));
+		new NativeFunction5 <StaticFunctionTag, bool, Actor*, BSFixedString, UInt32, UInt32, bool> ("DetachCollider", "CBPCPluginScript", DetachCollider, registry));
 		
 	LOG("CBPC registerFunction\n");
 	return true;

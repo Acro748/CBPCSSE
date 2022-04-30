@@ -184,7 +184,7 @@ struct Capsule
 	double End2_radius100pwr2 = 16.0;
 
 	std::string NodeName;
-	int index = -1;
+	UInt32 index = -1;
 };
 
 struct ConfigLine
@@ -386,9 +386,9 @@ BSFixedString GetVersionMinor(StaticFunctionTag* base);
 BSFixedString GetVersionBeta(StaticFunctionTag* base);
 void StartPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName);
 void StopPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName);
-bool AttachColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> position, float radius, float scaleWeight, UInt32 index);
-bool AttachColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> End1_position, float End1_radius, VMArray<float> End2_position, float End2_radius, float scaleWeight, UInt32 index);
-bool DetachCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, UInt32 type, UInt32 index);
+bool AttachColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> position, float radius, float scaleWeight, UInt32 index, bool IsAffectedNodes);
+bool AttachColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> End1_position, float End1_radius, VMArray<float> End2_position, float End2_radius, float scaleWeight, UInt32 index, bool IsAffectedNodes);
+bool DetachCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, UInt32 type, UInt32 index, bool IsAffectedNodes);
 
 
 extern std::string versionStr;

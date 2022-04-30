@@ -877,7 +877,7 @@ EventResult TESEquipEventHandler::ReceiveEvent(TESEquipEvent* evn, EventDispatch
 }
 
 //papyrus scripts for collider attach or detach
-bool AttachColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> position, float radius, float scaleWeight, UInt32 index)
+bool AttachColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> position, float radius, float scaleWeight, UInt32 index, bool IsAffectedNodes)
 {
 	if (!actor || !actor->loadedState || !actor->loadedState->node)
 		return false;
@@ -885,10 +885,6 @@ bool AttachColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString n
 	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
 
 	if (!node)
-		return false;
-
-	auto objIt = actors.find(actor->formID);
-	if (objIt == actors.end())
 		return false;
 
 	if (position.Length() != 3)
@@ -908,46 +904,77 @@ bool AttachColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString n
 	newSphere.index = index;
 	newSphere.NodeName = nodeName.data;
 
-	auto &colliders = objIt->second.actorColliders;
+	auto objIt = actors.find(actor->formID);
+	if (objIt == actors.end())
+		return false;
 
-	if (colliders.find(nodeName.data) != colliders.end())
+	if (!IsAffectedNodes)
 	{
-		auto &col = colliders.find(nodeName.data)->second;
+		auto& colliders = objIt->second.actorColliders;
 
-		col.collisionSpheres.emplace_back(newSphere);
+		if (colliders.find(nodeName.data) != colliders.end())
+		{
+			auto& col = colliders.find(nodeName.data)->second;
+
+			col.collisionSpheres.emplace_back(newSphere);
+		}
+		else
+		{
+			std::vector<Sphere>newSpherelist;
+			std::vector<Capsule>newCapsulelist;
+
+			newSpherelist.emplace_back(newSphere);
+
+			Collision newCol = Collision::Collision(node, newSpherelist, newCapsulelist, 0.0f);
+			newCol.colliderActor = actor;
+			newCol.colliderNodeName = nodeName.data;
+
+			if (scaleWeight > 1.0f)
+				newCol.scaleWeight = 1.0f;
+			else if (scaleWeight < 0.0f)
+				newCol.scaleWeight = 0.0f;
+			else
+				newCol.scaleWeight = scaleWeight;
+
+			auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
+			float actorBaseScale = 1.0f;
+			if (actorRef)
+				actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
+
+			newCol.actorBaseScale = actorBaseScale;
+
+			colliders.insert(std::make_pair(newCol.colliderNodeName, newCol));
+		}
+
+		return true;
 	}
 	else
 	{
-		std::vector<Sphere>newSpherelist;
-		std::vector<Capsule>newCapsulelist;
+		auto& things = objIt->second.things;
 
-		newSpherelist.emplace_back(newSphere);
+		bool isthereThing = false;
 
-		Collision newCol = Collision::Collision(node, newSpherelist, newCapsulelist, 0.0f);
-		newCol.colliderActor = actor;
-		newCol.colliderNodeName = nodeName.data;
+		for (auto &t : things)
+		{
+			for (auto &tt : t.second)
+			{
+				if (strcmp(tt.first, nodeName.data) == 0)
+				{
+					isthereThing = true;
 
-		if (scaleWeight > 1.0f)
-			newCol.scaleWeight = 1.0f;
-		else if (scaleWeight < 0.0f)
-			newCol.scaleWeight = 0.0f;
-		else 
-			newCol.scaleWeight = scaleWeight;
+					auto& ttIt = tt.second;
 
-		auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
-		float actorBaseScale = 1.0f;
-		if (actorRef)
-			actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
+					ttIt.thingCollisionSpheres.emplace_back(newSphere);
+				}
+			}
+		}
 
-		newCol.actorBaseScale = actorBaseScale;
-
-		colliders.insert(std::make_pair(newCol.colliderNodeName, newCol));
+		return isthereThing;
 	}
-
-	return true;
+	return false;
 }
 
-bool AttachColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> End1_position, float End1_radius, VMArray<float> End2_position, float End2_radius, float scaleWeight, UInt32 index)
+bool AttachColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> End1_position, float End1_radius, VMArray<float> End2_position, float End2_radius, float scaleWeight, UInt32 index, bool IsAffectedNodes)
 {
 	if (!actor || !actor->loadedState || !actor->loadedState->node)
 		return false;
@@ -955,10 +982,6 @@ bool AttachColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString 
 	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
 
 	if (!node)
-		return false;
-
-	auto objIt = actors.find(actor->formID);
-	if (objIt == actors.end())
 		return false;
 
 	if (End1_position.Length() != 3 || End2_position.Length() != 3)
@@ -988,46 +1011,76 @@ bool AttachColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString 
 	newCapsule.index = index;
 	newCapsule.NodeName = nodeName.data;
 
-	auto &colliders = objIt->second.actorColliders;
+	auto objIt = actors.find(actor->formID);
+	if (objIt == actors.end())
+		return false;
 
-	if (colliders.find(nodeName.data) != colliders.end())
+	if (!IsAffectedNodes)
 	{
-		auto &col = colliders.find(nodeName.data)->second;
+		auto& colliders = objIt->second.actorColliders;
 
-		col.collisionCapsules.emplace_back(newCapsule);
+		if (colliders.find(nodeName.data) != colliders.end())
+		{
+			auto& col = colliders.find(nodeName.data)->second;
+
+			col.collisionCapsules.emplace_back(newCapsule);
+		}
+		else
+		{
+			std::vector<Sphere>newSpherelist;
+			std::vector<Capsule>newCapsulelist;
+
+			newCapsulelist.emplace_back(newCapsule);
+
+			Collision newCol = Collision::Collision(node, newSpherelist, newCapsulelist, 50.0f);
+			newCol.colliderActor = actor;
+			newCol.colliderNodeName = nodeName.data;
+
+			if (scaleWeight > 1.0f)
+				newCol.scaleWeight = 1.0f;
+			else if (scaleWeight < 0.0f)
+				newCol.scaleWeight = 0.0f;
+			else
+				newCol.scaleWeight = scaleWeight;
+
+			auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
+			float actorBaseScale = 1.0f;
+			if (actorRef)
+				actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
+
+			newCol.actorBaseScale = actorBaseScale;
+
+			colliders.insert(std::make_pair(newCol.colliderNodeName, newCol));
+		}
+		return true;
 	}
 	else
 	{
-		std::vector<Sphere>newSpherelist;
-		std::vector<Capsule>newCapsulelist;
+		auto& things = objIt->second.things;
 
-		newCapsulelist.emplace_back(newCapsule);
+		bool isthereThing = false;
 
-		Collision newCol = Collision::Collision(node, newSpherelist, newCapsulelist, 50.0f);
-		newCol.colliderActor = actor;
-		newCol.colliderNodeName = nodeName.data;
+		for (auto& t : things)
+		{
+			for (auto& tt : t.second)
+			{
+				if (strcmp(tt.first, nodeName.data) == 0)
+				{
+					isthereThing = true;
 
-		if (scaleWeight > 1.0f)
-			newCol.scaleWeight = 1.0f;
-		else if (scaleWeight < 0.0f)
-			newCol.scaleWeight = 0.0f;
-		else
-			newCol.scaleWeight = scaleWeight;
+					auto& ttIt = tt.second;
 
-		auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
-		float actorBaseScale = 1.0f;
-		if (actorRef)
-			actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
+					ttIt.thingCollisionCapsules.emplace_back(newCapsule);
+				}
+			}
+		}
 
-		newCol.actorBaseScale = actorBaseScale;
-
-		colliders.insert(std::make_pair(newCol.colliderNodeName, newCol));
+		return isthereThing;
 	}
-
-	return true;
+	return false;
 }
 
-bool DetachCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, UInt32 type, UInt32 index) // type 0 = sphere / type 1 = capsule
+bool DetachCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, UInt32 type, UInt32 index, bool IsAffectedNodes) // type 0 = sphere / type 1 = capsule
 {
 	if (!actor || !actor->loadedState || !actor->loadedState->node)
 		return false;
@@ -1041,44 +1094,96 @@ bool DetachCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeNam
 	if (objIt == actors.end())
 		return false;
 
-	auto &colliders = objIt->second.actorColliders;
-
-	if (colliders.find(nodeName.data) == colliders.end())
-		return false;
-
-	auto &col = colliders.find(nodeName.data)->second;
-
-	bool isremoveThere = false;
-	if (type == 0)
+	if (!IsAffectedNodes)
 	{
-		int i = 0;
-		while (i < col.collisionSpheres.size())
-		{
-			if (col.collisionSpheres.at(i).index == index)
-			{
-				isremoveThere = true;
-				col.collisionSpheres.erase(col.collisionSpheres.begin() + i);
-			}
-			else
-				i++;
-		}
-	}
-	else if (type == 1)
-	{
-		int i = 0;
-		while (i < col.collisionCapsules.size())
-		{
-			if (col.collisionCapsules.at(i).index == index)
-			{
-				isremoveThere = true;
-				col.collisionCapsules.erase(col.collisionCapsules.begin() + i);
-			}
-			else
-				i++;
-		}
-	}
+		auto& colliders = objIt->second.actorColliders;
 
-	return isremoveThere;
+		if (colliders.find(nodeName.data) == colliders.end())
+			return false;
+
+		auto& col = colliders.find(nodeName.data)->second;
+
+		bool isremoveThere = false;
+		if (type == 0)
+		{
+			int i = 0;
+			while (i < col.collisionSpheres.size())
+			{
+				if (col.collisionSpheres.at(i).index == index)
+				{
+					isremoveThere = true;
+					col.collisionSpheres.erase(col.collisionSpheres.begin() + i);
+				}
+				else
+					i++;
+			}
+		}
+		else if (type == 1)
+		{
+			int i = 0;
+			while (i < col.collisionCapsules.size())
+			{
+				if (col.collisionCapsules.at(i).index == index)
+				{
+					isremoveThere = true;
+					col.collisionCapsules.erase(col.collisionCapsules.begin() + i);
+				}
+				else
+					i++;
+			}
+		}
+
+		return isremoveThere;
+	}
+	else
+	{
+		auto& things = objIt->second.things;
+
+		bool isremoveThere = false;
+
+		for (auto& t : things)
+		{
+			for (auto& tt : t.second)
+			{
+				if (strcmp(tt.first, nodeName.data) == 0)
+				{
+					auto& ttIt = tt.second;
+
+					if (type == 0)
+					{
+						int i = 0;
+						while (i < ttIt.thingCollisionSpheres.size())
+						{
+							if (ttIt.thingCollisionSpheres.at(i).index == index)
+							{
+								isremoveThere = true;
+								ttIt.thingCollisionSpheres.erase(ttIt.thingCollisionSpheres.begin() + i);
+							}
+							else
+								i++;
+						}
+					}
+					else if (type == 1)
+					{
+						int i = 0;
+						while (i < ttIt.thingCollisionCapsules.size())
+						{
+							if (ttIt.thingCollisionCapsules.at(i).index == index)
+							{
+								isremoveThere = true;
+								ttIt.thingCollisionCapsules.erase(ttIt.thingCollisionCapsules.begin() + i);
+							}
+							else
+								i++;
+						}
+					}
+				}
+			}
+		}
+
+		return isremoveThere;
+	}
+	return false;
 }
 
 
