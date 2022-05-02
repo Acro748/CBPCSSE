@@ -993,13 +993,10 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_SetNode_lock, st
 	// Collision Stuff Start
 	NiPoint3 collisionVector = emptyPoint;
 
-	NiMatrix33 pelvisRotation;
-	NiPoint3 pelvisPosition;
-	float pelvisScale;
-
-	pelvisRotation = pelvisObj->m_worldTransform.rot;
-	pelvisPosition = pelvisObj->m_worldTransform.pos;
-	pelvisScale = pelvisObj->m_worldTransform.scale;
+	NiMatrix33 pelvisRotation = pelvisObj->m_worldTransform.rot;
+	NiPoint3 pelvisPosition = pelvisObj->m_worldTransform.pos;
+	float pelvisScale = pelvisObj->m_worldTransform.scale;
+	float pelvisInvScale = 1.0f / pelvisScale; //world transform pos to local transform pos edited by scale
 
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
@@ -1092,7 +1089,7 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_SetNode_lock, st
 		NiPoint3 backVector = collisionDiff;
 		NiPoint3 frontVector = collisionDiff;
 
-		float opening = distance(collisionDiff, emptyPoint);
+		float opening = distance(collisionDiff, emptyPoint) * pelvisInvScale;
 
 		CalculateDiffVagina(leftVector, opening, true, true);
 		CalculateDiffVagina(rightVector, opening, true, false);
@@ -1133,10 +1130,6 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_SetNode_lock
 	}
 
 	NiPoint3 collisionVector = emptyPoint;
-	
-	NiMatrix33 bulgenodeRotation;
-	NiPoint3 bulgenodePosition;
-	float bulgenodeScale;
 
 	thing_ReadNode_lock.lock();
 	NiAVObject* bellyObj = actor->loadedState->node->GetObjectByName(&belly.data);
@@ -1185,9 +1178,13 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_SetNode_lock
 		CollisionConfig.CollisionMinOffset = NiPoint3(-100, -100, -100);
 	}
 
-	bulgenodeRotation = bulgeObj->m_worldTransform.rot;
-	bulgenodePosition = bulgeObj->m_worldTransform.pos;
-	bulgenodeScale = bulgeObj->m_worldTransform.scale;
+	NiMatrix33 bulgenodeRotation = bulgeObj->m_worldTransform.rot;
+	NiPoint3 bulgenodePosition = bulgeObj->m_worldTransform.pos;
+	float bulgenodeScale = bulgeObj->m_worldTransform.scale;
+	float bellynodeInvScale = 1.0f;
+
+	if (bellyObj->m_parent)
+		bellynodeInvScale = 1.0f / bellyObj->m_parent->m_worldTransform.scale; //world transform pos to local transform pos edited by scale
 
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
@@ -1285,7 +1282,7 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_SetNode_lock
 			//LOG("opening:%g", opening);
 	//		bellyBulgeCountDown = 1000;
 			
-			float horPos = opening * thing_bellybulgemultiplier;
+			float horPos = opening * thing_bellybulgemultiplier * bellynodeInvScale;
 			horPos = clamp(horPos, 0.0f, thing_bellybulgemax);
 			float lowPos = (thing_bellybulgeposlowest / thing_bellybulgemax) * horPos;
 
@@ -1421,7 +1418,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 		}
 	}
 
-	nodeScale = obj->m_worldTransform.scale;
+	float nodeScale = obj->m_worldTransform.scale;
+	float nodeParentInvScale = 1.0f / obj->m_parent->m_worldTransform.scale; //world transform pos to local transform pos edited by scale
 
 	bool IsThereCollision = false;
 	bool maybeNot = false;
@@ -1470,28 +1468,29 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 
 			//Calculate the resulting gravity
 			varGravityCorrection = (gravityRatio * gravityCorrection) + ((1.0 - gravityRatio) * gravityInvertedCorrection);
+		}
 
 			//Determine which armor the actor is wearing
-			if (skipArmorCheck <= 0) //This is a little heavy, check only on equip/unequip events
+		if (skipArmorCheck <= 0) //This is a little heavy, check only on equip/unequip events
+		{
+			forceAmplitude = 1.0f;
+
+			//				thing_armorKeyword_lock.lock();
+			TESForm* wornForm = papyrusActor::GetWornForm(actor, 0x00000004);
+
+			if (wornForm != nullptr)
 			{
-				forceAmplitude = 1.0f;
-
-//				thing_armorKeyword_lock.lock();
-				TESForm* wornForm = papyrusActor::GetWornForm(actor, 0x00000004);
-
-				if (wornForm != nullptr)
+				TESObjectARMO* armor = DYNAMIC_CAST(wornForm, TESForm, TESObjectARMO);
+				if (armor != nullptr)
 				{
-					TESObjectARMO* armor = DYNAMIC_CAST(wornForm, TESForm, TESObjectARMO);
-					if (armor != nullptr)
+					bool IsAsNaked = false;
+					isHeavyArmor = false;
+					isLightArmor = false;
+					isClothed = false;
+					isNoPushUp = false;
+					auto keywords = armor->keyword.keywords;
+					if (keywords)
 					{
-						bool IsAsNaked = false;
-						isHeavyArmor = false;
-						isLightArmor = false;
-						isClothed = false;
-						isNoPushUp = false;
-						auto keywords = armor->keyword.keywords;
-						if (keywords)
-						{
 						if (IsLeftBreastBone)
 						{
 							for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
@@ -1549,27 +1548,20 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 								}
 							}
 						}
-						}
-
-						if (IsAsNaked)
-						{
-							isHeavyArmor = false;
-							isLightArmor = false;
-							isClothed = false;
-						}
-						else if (!isHeavyArmor && !isLightArmor && !isClothed)
-						{
-							isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
-							isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
-							isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
-
-						}
 					}
-					else
+
+					if (IsAsNaked)
 					{
-						isClothed = false;
-						isLightArmor = false;
 						isHeavyArmor = false;
+						isLightArmor = false;
+						isClothed = false;
+					}
+					else if (!isHeavyArmor && !isLightArmor && !isClothed)
+					{
+						isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
+						isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
+						isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
+
 					}
 				}
 				else
@@ -1578,10 +1570,14 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 					isLightArmor = false;
 					isHeavyArmor = false;
 				}
-				skipArmorCheck--;
-
-//				thing_armorKeyword_lock.unlock();
 			}
+			else
+			{
+				isClothed = false;
+				isLightArmor = false;
+				isHeavyArmor = false;
+			}
+			skipArmorCheck--;
 
 			if (isHeavyArmor)
 			{
@@ -1882,7 +1878,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 
 		NiPoint3 maybePos = target + (obj->m_parent->m_worldTransform.rot * (maybeldiff + (thingDefaultPos * nodeScale))); //add missing local pos
 
-		float colliderNodescale = 1.0f - ((1.0f - (nodeScale / actorBaseScale)) * scaleWeight);
+		float colliderNodescale = 1.0f - ((1.0f - (nodeScale / actorBaseScale)) * scaleWeight); //Calibrate the scale gap between collider and actual mesh caused by bone weight
+		
 		//After cbp movement collision detection
 		for (int i = 0; i < thingCollisionSpheres.size(); i++)
 		{
@@ -2055,7 +2052,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 			//However, simply applying the multipler then changes the actual node position,so that's making the collisions out of sync
 			//Therefore to make perfect collision
 			//it seems to be pushed out as much as colliding to the naked eye, but the actual position of the colliding node must be maintained original position
-			maybeIdiffcol = (ldiffcol + ldiffGcol) * collisionMultipler;
+			maybeIdiffcol = (ldiffcol + ldiffGcol) * collisionMultipler / obj->m_parent->m_worldTransform.scale;
 
 			//add collision vector buffer of one frame to some reduce jitter and add softness by collision
 			//be particularly useful for both nodes colliding that defined in both affected and collider nodes
@@ -2134,9 +2131,9 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::sha
 	}
 
 	thing_SetNode_lock.lock();
-	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (ldiff.x * varLinearX) + maybeIdiffcol.x;
-	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (ldiff.y * varLinearY) + maybeIdiffcol.y;
-	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (ldiff.z * varLinearZ) + maybeIdiffcol.z;
+	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (((ldiff.x * varLinearX) + maybeIdiffcol.x) * nodeParentInvScale);
+	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (((ldiff.y * varLinearY) + maybeIdiffcol.y) * nodeParentInvScale);
+	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (((ldiff.z * varLinearZ) + maybeIdiffcol.z) * nodeParentInvScale);
 	obj->m_localTransform.rot = thingDefaultRot * newRot;
 	thing_SetNode_lock.unlock();
 

@@ -414,7 +414,6 @@ public:
 	NiMatrix33 thingDefaultRot;
 
 	float actorBaseScale = 1.0f;
-	float nodeScale = 1.0f;
 
 	//Extra variables
 	NiPoint3 collisionBuffer = emptyPoint;
