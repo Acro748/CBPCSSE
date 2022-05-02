@@ -6,6 +6,8 @@
 #include <fstream>
 
 #include <shared_mutex>
+#include <concurrent_vector.h>
+#include <concurrent_unordered_map.h>
 
 #include "skse64/NiGeometry.h"
 #include "skse64\GameReferences.h"
@@ -33,10 +35,10 @@
 #include "skse64/openvr_1_0_12.h"
 #endif
 
-typedef std::unordered_map<std::string, float> configEntry_t;
-typedef std::unordered_map<std::string, configEntry_t> config_t;
+typedef concurrency::concurrent_unordered_map<std::string, float> configEntry_t;
+typedef concurrency::concurrent_unordered_map<std::string, configEntry_t> config_t;
 
-extern std::unordered_map<std::string, std::string> configMap;
+extern concurrency::concurrent_unordered_map<std::string, std::string> configMap;
 
 extern int configReloadCount;
 extern config_t config;
@@ -45,7 +47,7 @@ extern config_t config0weight;
 extern int collisionSkipFrames;
 extern int collisionSkipFramesPelvis;
 
-extern std::unordered_map<std::string, bool> ActorNodeStoppedPhysicsMap;
+extern concurrency::concurrent_unordered_map<std::string, bool> ActorNodeStoppedPhysicsMap;
 
 
 //typedef std::unordered_map<std::string, bool> nodeCollisionMap;
@@ -139,8 +141,6 @@ enum eLogLevels
 
 void Log(const int msgLogLevel, const char * fmt, ...);
 
-extern std::shared_mutex log_lock;
-
 #define LOG(fmt, ...) Log(LOGLEVEL_WARN, fmt, ##__VA_ARGS__)
 #define LOG_ERR(fmt, ...) Log(LOGLEVEL_ERR, fmt, ##__VA_ARGS__)
 #define LOG_INFO(fmt, ...) Log(LOGLEVEL_INFO, fmt, ##__VA_ARGS__)
@@ -163,7 +163,9 @@ struct Sphere
 	double radius100 = 4.0;
 	double radius100pwr2 = 16.0;
 	NiPoint3 worldPos = NiPoint3(0, 0, 0);
+
 	std::string NodeName;
+	UInt32 index = -1;
 };
 
 struct Capsule
@@ -182,6 +184,7 @@ struct Capsule
 	double End2_radius100pwr2 = 16.0;
 
 	std::string NodeName;
+	UInt32 index = -1;
 };
 
 struct ConfigLine
@@ -192,6 +195,7 @@ struct ConfigLine
 	std::vector<std::string> IgnoredColliders;
 	std::vector<std::string> IgnoredSelfColliders;
 	bool IgnoreAllSelfColliders = false;
+	float scaleWeight = 1.0f;
 };
 
 enum ConditionType
@@ -235,7 +239,7 @@ struct Conditions
 	std::vector<ConditionItem> AndItems;
 };
 
-extern std::unordered_map<std::string, Conditions> nodeConditionsMap;
+extern concurrency::concurrent_unordered_map<std::string, Conditions> nodeConditionsMap;
 
 
 struct SpecificNPCConfig
@@ -246,9 +250,9 @@ struct SpecificNPCConfig
 	std::vector<std::string> AffectedNodeLines;
 	std::vector<std::string> ColliderNodeLines;
 
-	std::vector<ConfigLine> AffectedNodesList;
+	concurrency::concurrent_vector<ConfigLine> AffectedNodesList;
 
-	std::vector<ConfigLine> ColliderNodesList;
+	concurrency::concurrent_vector<ConfigLine> ColliderNodesList;
 
 	float cbellybulge;
 	float cbellybulgemax;
@@ -339,9 +343,9 @@ extern std::vector<std::string> ColliderNodeLines;
 
 
 
-extern std::vector<ConfigLine> AffectedNodesList; //Nodes that can be collided with
+extern concurrency::concurrent_vector<ConfigLine> AffectedNodesList; //Nodes that can be collided with
 
-extern std::vector<ConfigLine> ColliderNodesList; //Nodes that can collide nodes
+extern concurrency::concurrent_vector<ConfigLine> ColliderNodesList; //Nodes that can collide nodes
 
 void loadCollisionConfig();
 void loadMasterConfig();
@@ -382,6 +386,9 @@ BSFixedString GetVersionMinor(StaticFunctionTag* base);
 BSFixedString GetVersionBeta(StaticFunctionTag* base);
 void StartPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName);
 void StopPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName);
+bool AttachColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> position, float radius, float scaleWeight, UInt32 index, bool IsAffectedNodes);
+bool AttachColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> End1_position, float End1_radius, VMArray<float> End2_position, float End2_radius, float scaleWeight, UInt32 index, bool IsAffectedNodes);
+bool DetachCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, UInt32 type, UInt32 index, bool IsAffectedNodes);
 
 
 extern std::string versionStr;

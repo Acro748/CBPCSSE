@@ -8,7 +8,7 @@
 
 extern SKSETaskInterface *g_task;
 
-std::unordered_map<UInt32, SimObj> actors;
+concurrency::concurrent_unordered_map<UInt32, SimObj> actors;
 
 std::vector<UInt32> notExteriorWorlds = { 0x69857, 0x1EE62, 0x20DCB, 0x1FAE2, 0x34240, 0x50015, 0x2C965, 0x29AB7, 0x4F838, 0x3A9D6, 0x243DE, 0xC97EB, 0xC350D, 0x1CDD3, 0x1CDD9, 0x21EDB, 0x1E49D, 0x2B101, 0x2A9D8, 0x20BFE };
 
@@ -230,6 +230,39 @@ int totalcallcount = 0;
 ///Average Update Time = 1671157 ns
 ///Average Update Time = 1661606 ns
 ///Average Update Time = 1504056 ns
+/// 
+/// 
+/// #Before improved parallel processing and split various parameters into linear and rotation and x, y, z axis / commit @ec81446 version
+/// 
+/// Collider Check Call Count : 380.26 - Average Update Time in 1000 frame = 1561098 ns
+/// Collider Check Call Count : 411.90 - Average Update Time in 1000 frame = 1485466 ns
+/// Collider Check Call Count : 339.33 - Average Update Time in 1000 frame = 1412256 ns
+/// Collider Check Call Count : 301.92 - Average Update Time in 1000 frame = 1354423 ns
+/// Collider Check Call Count : 285.34 - Average Update Time in 1000 frame = 1289628 ns
+/// Collider Check Call Count : 363.90 - Average Update Time in 1000 frame = 1278498 ns
+/// Collider Check Call Count : 322.97 - Average Update Time in 1000 frame = 1333380 ns
+/// Collider Check Call Count : 322.50 - Average Update Time in 1000 frame = 1232475 ns
+/// Collider Check Call Count : 282.30 - Average Update Time in 1000 frame = 1329061 ns
+/// Collider Check Call Count : 318.72 - Average Update Time in 1000 frame = 1381797 ns
+/// Collider Check Call Count : 324.52 - Average Update Time in 1000 frame = 1378233 ns
+/// Collider Check Call Count : 294.08 - Average Update Time in 1000 frame = 1362536 ns
+/// 
+/// 
+/// #After improved parallel processing and split various parameters into linear and rotation and x, y, z axis
+/// 
+/// Collider Check Call Count : 251.79 - Average Update Time in 1000 frame = 1144834 ns
+/// Collider Check Call Count : 234.31 - Average Update Time in 1000 frame = 1193492 ns
+/// Collider Check Call Count : 242.52 - Average Update Time in 1000 frame = 929558 ns
+/// Collider Check Call Count : 242.65 - Average Update Time in 1000 frame = 991846 ns
+/// Collider Check Call Count : 242.24 - Average Update Time in 1000 frame = 883637 ns
+/// Collider Check Call Count : 228.08 - Average Update Time in 1000 frame = 918521 ns
+/// Collider Check Call Count : 230.28 - Average Update Time in 1000 frame = 895346 ns
+/// Collider Check Call Count : 252.78 - Average Update Time in 1000 frame = 969604 ns
+/// Collider Check Call Count : 357.66 - Average Update Time in 1000 frame = 1109611 ns
+/// Collider Check Call Count : 377.34 - Average Update Time in 1000 frame = 1171070 ns
+/// Collider Check Call Count : 394.79 - Average Update Time in 1000 frame = 1224570 ns
+/// Collider Check Call Count : 310.38 - Average Update Time in 1000 frame = 1249355 ns
+/// 
 
 void updateActors() 
 {	
@@ -262,6 +295,7 @@ void updateActors()
 			consoleCollisionReload.store(false);
 
 			loadMasterConfig();
+			loadConfig();
 			loadCollisionConfig();
 			loadExtraCollisionConfig();
 
@@ -311,11 +345,6 @@ void updateActors()
 	}
 
 	callCount = 0;
-
-	//TESNPC * actorNPC;
-	Actor* actor;
-		
-	NiPointer<TESObjectREFR> ToRefr = NULL;
 
 	bool creatureFormChange = false;
 	bool playerWeightChange = false;
@@ -404,8 +433,15 @@ void updateActors()
 
 			NiPoint3 relativeActorPos;
 
-			for (UInt32 i = 0; i < processMan->actorsHigh.count+1; i++)
+			concurrency::parallel_for(UInt32(0), processMan->actorsHigh.count + 1, [&](UInt32 i)
 			{
+				//TESNPC * actorNPC;
+				Actor* actor;
+
+				NiPointer<TESObjectREFR> ToRefr = nullptr;
+
+				bool isValid = true;
+
 				if (i < processMan->actorsHigh.count)
 				{
 #ifdef RUNTIME_VR_VERSION_1_4_15
@@ -414,7 +450,7 @@ void updateActors()
 					LookupREFRByHandle(processMan->actorsHigh[i], ToRefr);
 #else
 					LookupREFRByHandle2(processMan->actorsHigh[i], ToRefr);
-#endif
+#endif			
 				}
 				if (ToRefr != nullptr || i == processMan->actorsHigh.count)
 				{
@@ -445,12 +481,12 @@ void updateActors()
 								}
 							}
 							else */if (actor->race->data.raceFlags & TESRace::kRace_Child)
-								continue;
+								isValid = false;
 
 							LOG("actorRace: %s", actorRace.c_str());
 						}
 
-						if (actor->loadedState->node)
+						if (actor->loadedState->node && isValid)
 						{
 							relativeActorPos = actor->loadedState->node->m_worldTransform.pos - (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
 
@@ -459,37 +495,38 @@ void updateActors()
 							if ((actor->flags1 & Actor::kFlags_IsPlayerTeammate) != Actor::kFlags_IsPlayerTeammate)
 							{
 								if (actorDistSqr > actorBounceDistance)
-									continue;
+									isValid = false;
 
 								if (!ActorIsInAngle(actor, originalHeading, cameraPosition))
 								{
-									continue;
+									isValid = false;
 								}
 							}
 
-							if (actors.find(actor->formID) == actors.end()) //If actor isn't in the actors list
+							if (actors.find(actor->formID) == actors.end() && isValid) //If actor isn't in the actors list
 							{
 								//logger.info("Tracking Actor with form ID %08x in cell %ld\n", actor->formID, actor->parentCell);
 								if (IsActorValid(actor))
 								{
 									auto obj = SimObj(actor);
 									obj.actorDistSqr = actorDistSqr;
-									actors.emplace(actor->formID, obj);
-									actorEntries.emplace_back(ActorEntry{ actor->formID, actor, IsActorMale(actor) ? 1 : 0, actorDistSqr, actorDistSqr <= actorDistance });
+									actors.insert(std::make_pair(actor->formID, obj));
+									actorEntries.push_back(ActorEntry{ actor->formID, actor, IsActorMale(actor) ? 1 : 0, actorDistSqr, actorDistSqr <= actorDistance });
 								}
 							}
-							else if (IsActorValid(actor))
+							else if (IsActorValid(actor) && isValid)
 							{
 								actors[actor->formID].actorDistSqr = actorDistSqr;
-								actorEntries.emplace_back(ActorEntry{ actor->formID, actor, IsActorMale(actor) ? 1 : 0, actorDistSqr, actorDistSqr <= actorDistance });
+								actorEntries.push_back(ActorEntry{ actor->formID, actor, IsActorMale(actor) ? 1 : 0, actorDistSqr, actorDistSqr <= actorDistance });
 							}
 						}
 					}
 				}
-			}
+			});
 		}
 	}
 
+	
 	if (ActorInCombat(*g_thePlayer))
 	{
 		if (actorEntries.size() > inCombatActorCount)
@@ -508,7 +545,7 @@ void updateActors()
 			actorEntries.resize(outOfCombatActorCount);
 		}
 	}
-
+	
 	#ifdef RUNTIME_VR_VERSION_1_4_15
 	auto playerIt = actors.find(0x14);
 	if (playerIt != actors.end())
@@ -522,109 +559,107 @@ void updateActors()
 	partitions.clear();
 
 	LOG("Starting collider hashing");
-	std::vector<int> ids;
-
-	std::vector<int> hashIdList;
 
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
-	int colliderSphereCount = 0;
-	int colliderCapsuleCount = 0;
+	long colliderSphereCount = 0;
+	long colliderCapsuleCount = 0;
 
-	for (int u = 0; u < actorEntries.size(); u++)
+	concurrency::parallel_for(size_t(0), actorEntries.size(), [&](size_t u)
 	{
-		if (actorEntries[u].collisionsEnabled == false)
-			continue;
-
-		auto objIt = actors.find(actorEntries[u].id);
-		if (objIt != actors.end())
-		{				
-			UpdateColliderPositions(objIt->second.actorColliders, objIt->second.NodeCollisionSync);
-
-			for (auto &collider : objIt->second.actorColliders)
+		if (actorEntries[u].collisionsEnabled == true)
+		{
+			auto objIt = actors.find(actorEntries[u].id);
+			if (objIt != actors.end())
 			{
-				ids.clear();
-				for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
-				{
-					hashIdList = GetHashIdsFromPos(collider.second.collisionSpheres[j].worldPos - playerPos, collider.second.collisionSpheres[j].radius100);
+				UpdateColliderPositions(objIt->second.actorColliders, objIt->second.NodeCollisionSync);
 
-					for (int m = 0; m < hashIdList.size(); m++)
-					{
-						if (std::find(ids.begin(), ids.end(), hashIdList[m]) == ids.end())
-						{
-							//LOG_INFO("ids.emplace_back(%d)", hashIdList[m]);
-							ids.emplace_back(hashIdList[m]);
-							partitions[hashIdList[m]].partitionCollisions.emplace_back(collider.second);
-						}
-					}
-					colliderSphereCount++;
-				}
-				for (int j = 0; j < collider.second.collisionCapsules.size(); j++)
+				concurrency::parallel_for_each(objIt->second.actorColliders.begin(), objIt->second.actorColliders.end(), [&](const auto& collider)
 				{
-					hashIdList = GetHashIdsFromPos((collider.second.collisionCapsules[j].End1_worldPos + collider.second.collisionCapsules[j].End2_worldPos) * 0.5f - playerPos
-						, (collider.second.collisionCapsules[j].End1_radius100 + collider.second.collisionCapsules[j].End2_radius100) * 0.5f);
-					for (int m = 0; m < hashIdList.size(); m++)
+					std::vector<int> ids;
+					std::vector<int> hashIdList;
+					for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
 					{
-						if (std::find(ids.begin(), ids.end(), hashIdList[m]) == ids.end())
-						{
-							//LOG_INFO("ids.emplace_back(%d)", hashIdList[m]);
-							ids.emplace_back(hashIdList[m]);
-							partitions[hashIdList[m]].partitionCollisions.emplace_back(collider.second);
-						}
-					}
-					colliderCapsuleCount++;
-				}
-				#ifdef RUNTIME_VR_VERSION_1_4_15
-				for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
-				{
-					for (int k = 0; k < 101; k = k + 20)
-					{
-						NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].a, collider.second.collisionTriangles[j].b, k);
+						hashIdList = GetHashIdsFromPos(collider.second.collisionSpheres[j].worldPos - playerPos, collider.second.collisionSpheres[j].radius100);
 
-						int id = GetHashIdFromPos(pos - playerPos);
-						if (id != -1)
+						for (int m = 0; m < hashIdList.size(); m++)
 						{
-							if (std::find(ids.begin(), ids.end(), id) == ids.end())
+							if (std::find(ids.begin(), ids.end(), hashIdList[m]) == ids.end())
 							{
-								ids.emplace_back(id);
-								partitions[id].partitionCollisions.emplace_back(collider.second);
+								//LOG_INFO("ids.emplace_back(%d)", hashIdList[m]);
+								ids.emplace_back(hashIdList[m]);
+								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
+							}
+						}
+						InterlockedIncrement(&colliderSphereCount);
+					}
+					for (int j = 0; j < collider.second.collisionCapsules.size(); j++)
+					{
+						hashIdList = GetHashIdsFromPos((collider.second.collisionCapsules[j].End1_worldPos + collider.second.collisionCapsules[j].End2_worldPos) * 0.5f - playerPos
+							, (collider.second.collisionCapsules[j].End1_radius100 + collider.second.collisionCapsules[j].End2_radius100) * 0.5f);
+						for (int m = 0; m < hashIdList.size(); m++)
+						{
+							if (std::find(ids.begin(), ids.end(), hashIdList[m]) == ids.end())
+							{
+								//LOG_INFO("ids.emplace_back(%d)", hashIdList[m]);
+								ids.emplace_back(hashIdList[m]);
+								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
+							}
+						}
+						InterlockedIncrement(&colliderCapsuleCount);
+					}
+#ifdef RUNTIME_VR_VERSION_1_4_15
+					for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
+					{
+						for (int k = 0; k < 101; k = k + 20)
+						{
+							NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].a, collider.second.collisionTriangles[j].b, k);
+
+							int id = GetHashIdFromPos(pos - playerPos);
+							if (id != -1)
+							{
+								if (std::find(ids.begin(), ids.end(), id) == ids.end())
+								{
+									ids.emplace_back(id);
+									partitions[id].partitionCollisions.push_back(collider.second);
+								}
+							}
+						}
+						for (int k = 0; k < 101; k = k + 20)
+						{
+							NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].a, collider.second.collisionTriangles[j].c, k);
+
+							int id = GetHashIdFromPos(pos - playerPos);
+							if (id != -1)
+							{
+								if (std::find(ids.begin(), ids.end(), id) == ids.end())
+								{
+									ids.emplace_back(id);
+									partitions[id].partitionCollisions.push_back(collider.second);
+								}
+							}
+						}
+						for (int k = 0; k < 101; k = k + 20)
+						{
+							NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].b, collider.second.collisionTriangles[j].c, k);
+
+							int id = GetHashIdFromPos(pos - playerPos);
+							if (id != -1)
+							{
+								if (std::find(ids.begin(), ids.end(), id) == ids.end())
+								{
+									ids.emplace_back(id);
+									partitions[id].partitionCollisions.push_back(collider.second);
+								}
 							}
 						}
 					}
-					for (int k = 0; k < 101; k = k + 20)
-					{
-						NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].a, collider.second.collisionTriangles[j].c, k);
-
-						int id = GetHashIdFromPos(pos - playerPos);
-						if (id != -1)
-						{
-							if (std::find(ids.begin(), ids.end(), id) == ids.end())
-							{
-								ids.emplace_back(id);
-								partitions[id].partitionCollisions.emplace_back(collider.second);
-							}
-						}
-					}
-					for (int k = 0; k < 101; k = k + 20)
-					{
-						NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].b, collider.second.collisionTriangles[j].c, k);
-
-						int id = GetHashIdFromPos(pos - playerPos);
-						if (id != -1)
-						{
-							if (std::find(ids.begin(), ids.end(), id) == ids.end())
-							{
-								ids.emplace_back(id);
-								partitions[id].partitionCollisions.emplace_back(collider.second);
-							}
-						}
-					}
-				}
-				#endif
+#endif
+				});
 			}
 		}
-	}
-	LOG("Collider sphere count = %d", colliderSphereCount);
-	LOG("Collider capsule count = %d", colliderCapsuleCount);
+	});
+	LOG("Collider sphere count = %ld", colliderSphereCount);
+	LOG("Collider capsule count = %ld", colliderCapsuleCount);
 
 	//Print partitions
 	/*LOG("============================");
@@ -672,9 +707,8 @@ void updateActors()
 	//}
 
 	static int count = 0;
-	if ((configReloadCount && count++ > configReloadCount) || consoleConfigReload.load())
+	if ((configReloadCount && count++ > configReloadCount))
 	{
-		consoleConfigReload.store(false);
 		count = 0;
 		loadConfig();
 		for each (auto & a in actorEntries)
@@ -841,6 +875,317 @@ EventResult TESEquipEventHandler::ReceiveEvent(TESEquipEvent* evn, EventDispatch
 
 	return EventResult::kEvent_Continue;
 }
+
+//papyrus scripts for collider attach or detach
+bool AttachColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> position, float radius, float scaleWeight, UInt32 index, bool IsAffectedNodes)
+{
+	if (!actor || !actor->loadedState || !actor->loadedState->node)
+		return false;
+
+	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
+
+	if (!node)
+		return false;
+
+	if (position.Length() != 3)
+		return false;
+
+	NiPoint3 nodePosition = emptyPoint;
+	position.Get(&nodePosition.x, 0);
+	position.Get(&nodePosition.y, 1);
+	position.Get(&nodePosition.z, 2);
+
+	Sphere newSphere;
+
+	newSphere.offset0 = nodePosition;
+	newSphere.offset100 = newSphere.offset0;
+	newSphere.radius0 = radius;
+	newSphere.radius100 = newSphere.radius0;
+	newSphere.index = index;
+	newSphere.NodeName = nodeName.data;
+
+	auto objIt = actors.find(actor->formID);
+	if (objIt == actors.end())
+		return false;
+
+	if (!IsAffectedNodes)
+	{
+		auto& colliders = objIt->second.actorColliders;
+
+		if (colliders.find(nodeName.data) != colliders.end())
+		{
+			auto& col = colliders.find(nodeName.data)->second;
+
+			col.collisionSpheres.emplace_back(newSphere);
+		}
+		else
+		{
+			std::vector<Sphere>newSpherelist;
+			std::vector<Capsule>newCapsulelist;
+
+			newSpherelist.emplace_back(newSphere);
+
+			Collision newCol = Collision::Collision(node, newSpherelist, newCapsulelist, 0.0f);
+			newCol.colliderActor = actor;
+			newCol.colliderNodeName = nodeName.data;
+
+			if (scaleWeight > 1.0f)
+				newCol.scaleWeight = 1.0f;
+			else if (scaleWeight < 0.0f)
+				newCol.scaleWeight = 0.0f;
+			else
+				newCol.scaleWeight = scaleWeight;
+
+			auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
+			float actorBaseScale = 1.0f;
+			if (actorRef)
+				actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
+
+			newCol.actorBaseScale = actorBaseScale;
+
+			colliders.insert(std::make_pair(newCol.colliderNodeName, newCol));
+		}
+
+		return true;
+	}
+	else
+	{
+		auto& things = objIt->second.things;
+
+		bool isthereThing = false;
+
+		for (auto &t : things)
+		{
+			for (auto &tt : t.second)
+			{
+				if (strcmp(tt.first, nodeName.data) == 0)
+				{
+					isthereThing = true;
+
+					auto& ttIt = tt.second;
+
+					ttIt.thingCollisionSpheres.emplace_back(newSphere);
+				}
+			}
+		}
+
+		return isthereThing;
+	}
+	return false;
+}
+
+bool AttachColliderCapsule(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> End1_position, float End1_radius, VMArray<float> End2_position, float End2_radius, float scaleWeight, UInt32 index, bool IsAffectedNodes)
+{
+	if (!actor || !actor->loadedState || !actor->loadedState->node)
+		return false;
+
+	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
+
+	if (!node)
+		return false;
+
+	if (End1_position.Length() != 3 || End2_position.Length() != 3)
+		return false;
+
+	NiPoint3 End1_nodePosition = emptyPoint;
+	NiPoint3 End2_nodePosition = emptyPoint;
+
+	End1_position.Get(&End1_nodePosition.x, 0);
+	End1_position.Get(&End1_nodePosition.y, 1);
+	End1_position.Get(&End1_nodePosition.z, 2);
+
+	End2_position.Get(&End2_nodePosition.x, 0);
+	End2_position.Get(&End2_nodePosition.y, 1);
+	End2_position.Get(&End2_nodePosition.z, 2);
+
+	Capsule newCapsule;
+
+	newCapsule.End1_offset0 = End1_nodePosition;
+	newCapsule.End1_offset100 = newCapsule.End1_offset0;
+	newCapsule.End1_radius0 = End1_radius;
+	newCapsule.End1_radius100 = newCapsule.End1_radius0;
+	newCapsule.End2_offset0 = End2_nodePosition;
+	newCapsule.End2_offset100 = newCapsule.End2_offset0;
+	newCapsule.End2_radius0 = End2_radius;
+	newCapsule.End2_radius100 = newCapsule.End2_radius0;
+	newCapsule.index = index;
+	newCapsule.NodeName = nodeName.data;
+
+	auto objIt = actors.find(actor->formID);
+	if (objIt == actors.end())
+		return false;
+
+	if (!IsAffectedNodes)
+	{
+		auto& colliders = objIt->second.actorColliders;
+
+		if (colliders.find(nodeName.data) != colliders.end())
+		{
+			auto& col = colliders.find(nodeName.data)->second;
+
+			col.collisionCapsules.emplace_back(newCapsule);
+		}
+		else
+		{
+			std::vector<Sphere>newSpherelist;
+			std::vector<Capsule>newCapsulelist;
+
+			newCapsulelist.emplace_back(newCapsule);
+
+			Collision newCol = Collision::Collision(node, newSpherelist, newCapsulelist, 50.0f);
+			newCol.colliderActor = actor;
+			newCol.colliderNodeName = nodeName.data;
+
+			if (scaleWeight > 1.0f)
+				newCol.scaleWeight = 1.0f;
+			else if (scaleWeight < 0.0f)
+				newCol.scaleWeight = 0.0f;
+			else
+				newCol.scaleWeight = scaleWeight;
+
+			auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
+			float actorBaseScale = 1.0f;
+			if (actorRef)
+				actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
+
+			newCol.actorBaseScale = actorBaseScale;
+
+			colliders.insert(std::make_pair(newCol.colliderNodeName, newCol));
+		}
+		return true;
+	}
+	else
+	{
+		auto& things = objIt->second.things;
+
+		bool isthereThing = false;
+
+		for (auto& t : things)
+		{
+			for (auto& tt : t.second)
+			{
+				if (strcmp(tt.first, nodeName.data) == 0)
+				{
+					isthereThing = true;
+
+					auto& ttIt = tt.second;
+
+					ttIt.thingCollisionCapsules.emplace_back(newCapsule);
+				}
+			}
+		}
+
+		return isthereThing;
+	}
+	return false;
+}
+
+bool DetachCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, UInt32 type, UInt32 index, bool IsAffectedNodes) // type 0 = sphere / type 1 = capsule
+{
+	if (!actor || !actor->loadedState || !actor->loadedState->node)
+		return false;
+
+	NiAVObject* node = actor->loadedState->node->GetObjectByName(&nodeName.data);
+
+	if (!node)
+		return false;
+
+	auto objIt = actors.find(actor->formID);
+	if (objIt == actors.end())
+		return false;
+
+	if (!IsAffectedNodes)
+	{
+		auto& colliders = objIt->second.actorColliders;
+
+		if (colliders.find(nodeName.data) == colliders.end())
+			return false;
+
+		auto& col = colliders.find(nodeName.data)->second;
+
+		bool isremoveThere = false;
+		if (type == 0)
+		{
+			int i = 0;
+			while (i < col.collisionSpheres.size())
+			{
+				if (col.collisionSpheres.at(i).index == index)
+				{
+					isremoveThere = true;
+					col.collisionSpheres.erase(col.collisionSpheres.begin() + i);
+				}
+				else
+					i++;
+			}
+		}
+		else if (type == 1)
+		{
+			int i = 0;
+			while (i < col.collisionCapsules.size())
+			{
+				if (col.collisionCapsules.at(i).index == index)
+				{
+					isremoveThere = true;
+					col.collisionCapsules.erase(col.collisionCapsules.begin() + i);
+				}
+				else
+					i++;
+			}
+		}
+
+		return isremoveThere;
+	}
+	else
+	{
+		auto& things = objIt->second.things;
+
+		bool isremoveThere = false;
+
+		for (auto& t : things)
+		{
+			for (auto& tt : t.second)
+			{
+				if (strcmp(tt.first, nodeName.data) == 0)
+				{
+					auto& ttIt = tt.second;
+
+					if (type == 0)
+					{
+						int i = 0;
+						while (i < ttIt.thingCollisionSpheres.size())
+						{
+							if (ttIt.thingCollisionSpheres.at(i).index == index)
+							{
+								isremoveThere = true;
+								ttIt.thingCollisionSpheres.erase(ttIt.thingCollisionSpheres.begin() + i);
+							}
+							else
+								i++;
+						}
+					}
+					else if (type == 1)
+					{
+						int i = 0;
+						while (i < ttIt.thingCollisionCapsules.size())
+						{
+							if (ttIt.thingCollisionCapsules.at(i).index == index)
+							{
+								isremoveThere = true;
+								ttIt.thingCollisionCapsules.erase(ttIt.thingCollisionCapsules.begin() + i);
+							}
+							else
+								i++;
+						}
+					}
+				}
+			}
+		}
+
+		return isremoveThere;
+	}
+	return false;
+}
+
 
 /*
 class ScanDelegate : public TaskDelegate {

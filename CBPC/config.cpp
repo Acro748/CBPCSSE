@@ -4,8 +4,8 @@
 #include <common/ICriticalSection.h>
 
 
-std::string versionStr = "1.5.0";
-UInt32 version = 0x010500;
+std::string versionStr = "1.5.x";
+UInt32 version = 0x0105ff;
 
 
 #pragma warning(disable : 4996)
@@ -28,9 +28,9 @@ std::vector<std::string> ColliderNodeLines;
 
 
 
-std::vector<ConfigLine> AffectedNodesList; //Nodes that can be collided with
+concurrency::concurrent_vector<ConfigLine> AffectedNodesList; //Nodes that can be collided with
 
-std::vector<ConfigLine> ColliderNodesList; //Nodes that can collide nodes
+concurrency::concurrent_vector<ConfigLine> ColliderNodesList; //Nodes that can collide nodes
 
 //The basic unit is parallel processing, but some physics chain nodes need sequential loading
 std::vector<std::vector<std::string>> affectedBones;
@@ -44,7 +44,7 @@ std::vector<SpecificNPCConfig> specificNPCConfigList;
 std::vector<SpecificNPCBounceConfig> specificNPCBounceConfigList;
 
 
-std::unordered_map<std::string, bool> ActorNodeStoppedPhysicsMap;
+concurrency::concurrent_unordered_map<std::string, bool> ActorNodeStoppedPhysicsMap;
 
 //std::unordered_map<Actor*, nodeCollisionMap> LeftBreastCollisionMap;
 //std::unordered_map<Actor*, nodeCollisionMap> RightBreastCollisionMap;
@@ -100,8 +100,8 @@ std::atomic<bool> MainMenuOpen = false;
 std::atomic<bool> consoleConfigReload = false;
 std::atomic<bool> consoleCollisionReload = false;
 
-std::unordered_map<std::string, std::string> configMap;
-std::unordered_map<std::string, Conditions> nodeConditionsMap;
+concurrency::concurrent_unordered_map<std::string, std::string> configMap;
+concurrency::concurrent_unordered_map<std::string, Conditions> nodeConditionsMap;
 config_t config;
 config_t config0weight;
 
@@ -439,8 +439,26 @@ void loadConfig() {
 		{
 			//100 weight
 			config[it.second]["stiffness"] = 0.0f;
+			config[it.second]["stiffnessX"] = 0.0f;
+			config[it.second]["stiffnessY"] = 0.0f;
+			config[it.second]["stiffnessZ"] = 0.0f;
+			config[it.second]["stiffnessXRot"] = 0.0f;
+			config[it.second]["stiffnessYRot"] = 0.0f;
+			config[it.second]["stiffnessZRot"] = 0.0f;
 			config[it.second]["stiffness2"] = 0.0f;
+			config[it.second]["stiffness2X"] = 0.0f;
+			config[it.second]["stiffness2Y"] = 0.0f;
+			config[it.second]["stiffness2Z"] = 0.0f;
+			config[it.second]["stiffness2XRot"] = 0.0f;
+			config[it.second]["stiffness2YRot"] = 0.0f;
+			config[it.second]["stiffness2ZRot"] = 0.0f;
 			config[it.second]["damping"] = 0.0f;
+			config[it.second]["dampingX"] = 0.0f;
+			config[it.second]["dampingY"] = 0.0f;
+			config[it.second]["dampingZ"] = 0.0f;
+			config[it.second]["dampingXRot"] = 0.0f;
+			config[it.second]["dampingYRot"] = 0.0f;
+			config[it.second]["dampingZRot"] = 0.0f;
 			config[it.second]["maxoffset"] = 0.0f;
 			config[it.second]["Xmaxoffset"] = 5.0f;
 			config[it.second]["Xminoffset"] = -5.0f;
@@ -448,6 +466,12 @@ void loadConfig() {
 			config[it.second]["Yminoffset"] = -5.0f;
 			config[it.second]["Zmaxoffset"] = 5.0f;
 			config[it.second]["Zminoffset"] = -5.0f;
+			config[it.second]["XmaxoffsetRot"] = 0.0f;
+			config[it.second]["XminoffsetRot"] = 0.0f;
+			config[it.second]["YmaxoffsetRot"] = 0.0f;
+			config[it.second]["YminoffsetRot"] = 0.0f;
+			config[it.second]["ZmaxoffsetRot"] = 0.0f;
+			config[it.second]["ZminoffsetRot"] = 0.0f;
 			config[it.second]["Xdefaultoffset"] = 0.0f;
 			config[it.second]["Ydefaultoffset"] = 0.0f;
 			config[it.second]["Zdefaultoffset"] = 0.0f;
@@ -455,6 +479,7 @@ void loadConfig() {
 			config[it.second]["gravityBias"] = 0.0f;
 			config[it.second]["gravityCorrection"] = 0.0f;
 			config[it.second]["timetick"] = 4.0f;
+			config[it.second]["timetickRot"] = 0.0f;
 			config[it.second]["linearX"] = 0.0f;
 			config[it.second]["linearY"] = 0.0f;
 			config[it.second]["linearZ"] = 0.0f;
@@ -471,12 +496,19 @@ void loadConfig() {
 			config[it.second]["linearZrotationY"] = 0.0f;
 			config[it.second]["linearZrotationZ"] = 0.0f;
 			config[it.second]["timeStep"] = 1.0f;
+			config[it.second]["timeStepRot"] = 0.0f;
 			config[it.second]["linearXspreadforceY"] = 0.0f;
 			config[it.second]["linearXspreadforceZ"] = 0.0f;
 			config[it.second]["linearYspreadforceX"] = 0.0f;
 			config[it.second]["linearYspreadforceZ"] = 0.0f;
 			config[it.second]["linearZspreadforceX"] = 0.0f;
 			config[it.second]["linearZspreadforceY"] = 0.0f;
+			config[it.second]["rotationXspreadforceY"] = 0.0f;
+			config[it.second]["rotationXspreadforceZ"] = 0.0f;
+			config[it.second]["rotationYspreadforceX"] = 0.0f;
+			config[it.second]["rotationYspreadforceZ"] = 0.0f;
+			config[it.second]["rotationZspreadforceX"] = 0.0f;
+			config[it.second]["rotationZspreadforceY"] = 0.0f;
 			config[it.second]["forceMultipler"] = 1.0f;
 			config[it.second]["gravityInvertedCorrection"] = 0.0f;
 			config[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -501,8 +533,26 @@ void loadConfig() {
 
 			//0 weight
 			config0weight[it.second]["stiffness"] = 0.0f;
+			config0weight[it.second]["stiffnessX"] = 0.0f;
+			config0weight[it.second]["stiffnessY"] = 0.0f;
+			config0weight[it.second]["stiffnessZ"] = 0.0f;
+			config0weight[it.second]["stiffnessXRot"] = 0.0f;
+			config0weight[it.second]["stiffnessYRot"] = 0.0f;
+			config0weight[it.second]["stiffnessZRot"] = 0.0f;
 			config0weight[it.second]["stiffness2"] = 0.0f;
+			config0weight[it.second]["stiffness2X"] = 0.0f;
+			config0weight[it.second]["stiffness2Y"] = 0.0f;
+			config0weight[it.second]["stiffness2Z"] = 0.0f;
+			config0weight[it.second]["dampingXRot"] = 0.0f;
+			config0weight[it.second]["dampingYRot"] = 0.0f;
+			config0weight[it.second]["dampingZRot"] = 0.0f;
 			config0weight[it.second]["damping"] = 0.0f;
+			config0weight[it.second]["dampingX"] = 0.0f;
+			config0weight[it.second]["dampingY"] = 0.0f;
+			config0weight[it.second]["dampingZ"] = 0.0f;
+			config0weight[it.second]["dampingXRot"] = 0.0f;
+			config0weight[it.second]["dampingYRot"] = 0.0f;
+			config0weight[it.second]["dampingZRot"] = 0.0f;
 			config0weight[it.second]["maxoffset"] = 0.0f;
 			config0weight[it.second]["Xmaxoffset"] = 5.0f;
 			config0weight[it.second]["Xminoffset"] = -5.0f;
@@ -510,6 +560,12 @@ void loadConfig() {
 			config0weight[it.second]["Yminoffset"] = -5.0f;
 			config0weight[it.second]["Zmaxoffset"] = 5.0f;
 			config0weight[it.second]["Zminoffset"] = -5.0f;
+			config0weight[it.second]["XmaxoffsetRot"] = 0.0f;
+			config0weight[it.second]["XminoffsetRot"] = 0.0f;
+			config0weight[it.second]["YmaxoffsetRot"] = 0.0f;
+			config0weight[it.second]["YminoffsetRot"] = 0.0f;
+			config0weight[it.second]["ZmaxoffsetRot"] = 0.0f;
+			config0weight[it.second]["ZminoffsetRot"] = 0.0f;
 			config0weight[it.second]["Xdefaultoffset"] = 0.0f;
 			config0weight[it.second]["Ydefaultoffset"] = 0.0f;
 			config0weight[it.second]["Zdefaultoffset"] = 0.0f;
@@ -517,6 +573,7 @@ void loadConfig() {
 			config0weight[it.second]["gravityBias"] = 0.0f; 
 			config0weight[it.second]["gravityCorrection"] = 0.0f;
 			config0weight[it.second]["timetick"] = 4.0f;
+			config0weight[it.second]["timetickRot"] = 0.0f;
 			config0weight[it.second]["linearX"] = 0.0f;
 			config0weight[it.second]["linearY"] = 0.0f;
 			config0weight[it.second]["linearZ"] = 0.0f;
@@ -533,12 +590,19 @@ void loadConfig() {
 			config0weight[it.second]["linearZrotationY"] = 0.0f;
 			config0weight[it.second]["linearZrotationZ"] = 0.0f;
 			config0weight[it.second]["timeStep"] = 1.0f;
+			config0weight[it.second]["timeStepRot"] = 0.0f;
 			config0weight[it.second]["linearXspreadforceY"] = 0.0f;
 			config0weight[it.second]["linearXspreadforceZ"] = 0.0f;
 			config0weight[it.second]["linearYspreadforceX"] = 0.0f;
 			config0weight[it.second]["linearYspreadforceZ"] = 0.0f;
 			config0weight[it.second]["linearZspreadforceX"] = 0.0f;
 			config0weight[it.second]["linearZspreadforceY"] = 0.0f;
+			config0weight[it.second]["rotationXspreadforceY"] = 0.0f;
+			config0weight[it.second]["rotationXspreadforceZ"] = 0.0f;
+			config0weight[it.second]["rotationYspreadforceX"] = 0.0f;
+			config0weight[it.second]["rotationYspreadforceZ"] = 0.0f;
+			config0weight[it.second]["rotationZspreadforceX"] = 0.0f;
+			config0weight[it.second]["rotationZspreadforceY"] = 0.0f;
 			config0weight[it.second]["forceMultipler"] = 1.0f;
 			config0weight[it.second]["gravityInvertedCorrection"] = 0.0f;
 			config0weight[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -621,8 +685,26 @@ void loadConfig() {
 										{
 											//100 weight
 											newNPCBounceConfig.config[it.second]["stiffness"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffnessX"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffnessY"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffnessZ"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffnessXRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffnessYRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffnessZRot"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["stiffness2"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffness2X"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffness2Y"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffness2Z"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffness2XRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffness2YRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["stiffness2ZRot"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["damping"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["dampingX"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["dampingY"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["dampingZ"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["dampingXRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["dampingYRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["dampingZRot"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["maxoffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["Xmaxoffset"] = 5.0f;
 											newNPCBounceConfig.config[it.second]["Xminoffset"] = -5.0f;
@@ -630,6 +712,12 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["Yminoffset"] = -5.0f;
 											newNPCBounceConfig.config[it.second]["Zmaxoffset"] = 5.0f;
 											newNPCBounceConfig.config[it.second]["Zminoffset"] = -5.0f;
+											newNPCBounceConfig.config[it.second]["XmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["XminoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["YmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["YminoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["ZmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["ZminoffsetRot"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["Xdefaultoffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["Ydefaultoffset"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["Zdefaultoffset"] = 0.0f;
@@ -637,6 +725,7 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["gravityBias"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityCorrection"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["timetick"] = 4.0f;
+											newNPCBounceConfig.config[it.second]["timetickRot"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearX"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearY"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearZ"] = 0.0f;
@@ -653,12 +742,19 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["linearZrotationY"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearZrotationZ"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["timeStep"] = 1.0f;
+											newNPCBounceConfig.config[it.second]["timeStepRot"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearXspreadforceY"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearXspreadforceZ"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearYspreadforceX"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearYspreadforceZ"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearZspreadforceX"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["linearZspreadforceY"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationXspreadforceY"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationXspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationYspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationYspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationZspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["rotationZspreadforceY"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["forceMultipler"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["gravityInvertedCorrection"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -683,8 +779,26 @@ void loadConfig() {
 
 											//0 weight
 											newNPCBounceConfig.config0weight[it.second]["stiffness"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffnessX"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffnessY"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffnessZ"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffnessXRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffnessYRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffnessZRot"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["stiffness2"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffness2X"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffness2Y"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffness2Z"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffness2XRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffness2YRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["stiffness2ZRot"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["damping"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["dampingX"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["dampingY"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["dampingZ"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["dampingXRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["dampingYRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["dampingZRot"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["maxoffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["Xmaxoffset"] = 5.0f;
 											newNPCBounceConfig.config0weight[it.second]["Xminoffset"] = -5.0f;
@@ -692,6 +806,12 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["Yminoffset"] = -5.0f;
 											newNPCBounceConfig.config0weight[it.second]["Zmaxoffset"] = 5.0f;
 											newNPCBounceConfig.config0weight[it.second]["Zminoffset"] = -5.0f;
+											newNPCBounceConfig.config0weight[it.second]["XmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["XminoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["YmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["YminoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["ZmaxoffsetRot"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["ZminoffsetRot"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["Xdefaultoffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["Ydefaultoffset"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["Zdefaultoffset"] = 0.0f;
@@ -699,6 +819,7 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["gravityBias"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityCorrection"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["timetick"] = 4.0f;
+											newNPCBounceConfig.config0weight[it.second]["timetickRot"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearX"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearY"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearZ"] = 0.0f;
@@ -715,12 +836,19 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["linearZrotationY"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearZrotationZ"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["timeStep"] = 1.0f;
+											newNPCBounceConfig.config0weight[it.second]["timeStepRot"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearXspreadforceY"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearXspreadforceZ"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearYspreadforceX"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearYspreadforceZ"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearZspreadforceX"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["linearZspreadforceY"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationXspreadforceY"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationXspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationYspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationYspreadforceZ"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationZspreadforceX"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["rotationZspreadforceY"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["forceMultipler"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityInvertedCorrection"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["gravityInvertedCorrectionStart"] = 0.0f;
@@ -1242,6 +1370,7 @@ void loadCollisionConfig()
 		{
 			std::string line;
 			std::string currentSetting;
+			float scaleWeight = 1.0f;
 			while (std::getline(file, line))
 			{
 				//trim(line);
@@ -1251,8 +1380,23 @@ void loadCollisionConfig()
 				{
 					if (line.substr(0, 1) == "[")
 					{
-						//newsetting
-						currentSetting = line;
+						std::vector<std::string> maincurrentSetting = split(line, ":");
+
+						if (maincurrentSetting.size() > 1)
+						{
+							currentSetting = maincurrentSetting[0];
+							scaleWeight = strtof(maincurrentSetting[1].c_str(), 0);
+
+							if (scaleWeight > 1.0f)
+								scaleWeight = 1.0f;
+							else if (scaleWeight < 0.0f)
+								scaleWeight = 0.0f;
+						}
+						else
+						{
+							//newsetting
+							currentSetting = line;
+						}
 					}
 					else
 					{
@@ -1316,7 +1460,7 @@ void loadCollisionConfig()
 										}
 									}
 								}
-								AffectedNodesList.emplace_back(newConfigLine);
+								AffectedNodesList.push_back(newConfigLine);
 							}
 						}
 						else if (currentSetting == "[ColliderNodes]")
@@ -1324,7 +1468,7 @@ void loadCollisionConfig()
 							ColliderNodeLines.emplace_back(line);
 							ConfigLine newConfigLine;
 							newConfigLine.NodeName = line;
-							ColliderNodesList.emplace_back(newConfigLine);
+							ColliderNodesList.push_back(newConfigLine);
 						}
 						#ifdef RUNTIME_VR_VERSION_1_4_15
 						else if (currentSetting == "[PlayerNodes]")
@@ -1341,6 +1485,7 @@ void loadCollisionConfig()
 							Capsule newCapsule; //type 1
 
 							int type = 0;
+
 							std::vector<std::string> LowHighWeight = split(line, '|');
 
 							std::vector<std::string> PointSplitted;
@@ -1394,11 +1539,13 @@ void loadCollisionConfig()
 										{
 											newSphere.NodeName = AffectedNodesList[i].NodeName;
 											AffectedNodesList[i].CollisionSpheres.emplace_back(newSphere);
+											AffectedNodesList[i].scaleWeight = scaleWeight;
 										}
 										else if (type == 1)
 										{
 											newCapsule.NodeName = AffectedNodesList[i].NodeName;
 											AffectedNodesList[i].CollisionCapsules.emplace_back(newCapsule);
+											AffectedNodesList[i].scaleWeight = scaleWeight;
 										}
 										break;
 									}
@@ -1414,11 +1561,13 @@ void loadCollisionConfig()
 										{
 											newSphere.NodeName = ColliderNodesList[i].NodeName;
 											ColliderNodesList[i].CollisionSpheres.emplace_back(newSphere);
+											ColliderNodesList[i].scaleWeight = scaleWeight;
 										}
 										else if (type == 1)
 										{
 											newCapsule.NodeName = ColliderNodesList[i].NodeName;
 											ColliderNodesList[i].CollisionCapsules.emplace_back(newCapsule);
+											ColliderNodesList[i].scaleWeight = scaleWeight;
 										}
 										break;
 									}
@@ -1497,6 +1646,7 @@ void loadExtraCollisionConfig()
 				{
 					std::string line;
 					std::string currentSetting;
+					float scaleWeight = 0.0f;
 					while (std::getline(file, line))
 					{
 						//trim(line);
@@ -1506,8 +1656,23 @@ void loadExtraCollisionConfig()
 						{
 							if (line.substr(0, 1) == "[")
 							{
-								//newsetting
-								currentSetting = line;
+								std::vector<std::string> maincurrentSetting = split(line, ":");
+
+								if (maincurrentSetting.size() > 1)
+								{
+									currentSetting = maincurrentSetting[0];
+									scaleWeight = strtof(maincurrentSetting[1].c_str(), 0);
+
+									if (scaleWeight > 1.0f)
+										scaleWeight = 1.0f;
+									else if (scaleWeight < 0.0f)
+										scaleWeight = 0.0f;
+								}
+								else
+								{
+									//newsetting
+									currentSetting = line;
+								}
 							}
 							else
 							{
@@ -1619,7 +1784,7 @@ void loadExtraCollisionConfig()
 												}
 											}
 										}
-										newNPCConfig.AffectedNodesList.emplace_back(newConfigLine);
+										newNPCConfig.AffectedNodesList.push_back(newConfigLine);
 									}
 								}
 								else if (currentSetting == "[ColliderNodes]")
@@ -1627,7 +1792,7 @@ void loadExtraCollisionConfig()
 									newNPCConfig.ColliderNodeLines.emplace_back(line);
 									ConfigLine newConfigLine;
 									newConfigLine.NodeName = line;
-									newNPCConfig.ColliderNodesList.emplace_back(newConfigLine);
+									newNPCConfig.ColliderNodesList.push_back(newConfigLine);
 								}
 								else
 								{
@@ -1663,6 +1828,7 @@ void loadExtraCollisionConfig()
 										{
 											if (newNPCConfig.AffectedNodesList[i].NodeName == trimmedSetting)
 											{
+												newNPCConfig.AffectedNodesList[i].scaleWeight = scaleWeight;
 												if (type == 0)
 													newNPCConfig.AffectedNodesList[i].CollisionSpheres.emplace_back(newSphere);
 												else if (type == 1)
@@ -1677,6 +1843,7 @@ void loadExtraCollisionConfig()
 										{
 											if (newNPCConfig.ColliderNodesList[i].NodeName == trimmedSetting)
 											{
+												newNPCConfig.ColliderNodesList[i].scaleWeight = scaleWeight;
 												if (type == 0)
 													newNPCConfig.ColliderNodesList[i].CollisionSpheres.emplace_back(newSphere);
 												else if(type == 1)
@@ -2542,21 +2709,39 @@ bool GetSpecificNPCBounceConfigForActor(Actor* actor, SpecificNPCBounceConfig& s
 //If the config of that part is not set and just set to default, return false
 bool IsConfigActuallyAllocated(SpecificNPCBounceConfig snbc, std::string section)
 {
-	return (snbc.config[section]["stiffness"] >= 0.0001f) || (snbc.config0weight[section]["stiffness"] >= 0.0001f) //Doesn't set physics config?
-		|| (snbc.config[section]["stiffness2"] >= 0.0001f) || (snbc.config0weight[section]["stiffness2"] >= 0.0001f)
-		|| (snbc.config[section]["damping"] >= 0.0001f) || (snbc.config0weight[section]["damping"] >= 0.0001f)
-		|| (snbc.config[section]["collisionXmaxoffset"] >= 100.0001f) || (snbc.config[section]["collisionXmaxoffset"] <= 99.9999f) //Doesn't set collision config?
-		|| (snbc.config0weight[section]["collisionXmaxoffset"] >= 100.0001f) || (snbc.config0weight[section]["collisionXmaxoffset"] <= 99.9999f)
-		|| (snbc.config[section]["collisionXminoffset"] <= -100.0001f) || (snbc.config[section]["collisionXminoffset"] >= -99.9999f)
-		|| (snbc.config0weight[section]["collisionXminoffset"] <= -100.0001f) || (snbc.config0weight[section]["collisionXminoffset"] >= -99.9999f)
-		|| (snbc.config[section]["collisionYmaxoffset"] >= 100.0001f) || (snbc.config[section]["collisionYmaxoffset"] <= 99.9999f)
-		|| (snbc.config0weight[section]["collisionYmaxoffset"] >= 100.0001f) || (snbc.config0weight[section]["collisionYmaxoffset"] <= 99.9999f)
-		|| (snbc.config[section]["collisionYminoffset"] <= -100.0001f) || (snbc.config[section]["collisionYminoffset"] >= -99.9999f)
-		|| (snbc.config0weight[section]["collisionYminoffset"] <= -100.0001f) || (snbc.config0weight[section]["collisionYminoffset"] >= -99.9999f)
-		|| (snbc.config[section]["collisionZmaxoffset"] >= 100.0001f) || (snbc.config[section]["collisionZmaxoffset"] <= 99.9999f)
-		|| (snbc.config0weight[section]["collisionZmaxoffset"] >= 100.0001f) || (snbc.config0weight[section]["collisionZmaxoffset"] <= 99.9999f)
-		|| (snbc.config[section]["collisionZminoffset"] <= -100.0001f) || (snbc.config[section]["collisionZminoffset"] >= -99.9999f)
-		|| (snbc.config0weight[section]["collisionZminoffset"] <= -100.0001f) || (snbc.config0weight[section]["collisionZminoffset"] >= -99.9999f);
+	return (snbc.config[section]["stiffness"] >= 0.001f) || (snbc.config0weight[section]["stiffness"] >= 0.001f) //Doesn't set physics config?
+		|| (snbc.config[section]["stiffnessX"] >= 0.001f) || (snbc.config0weight[section]["stiffnessX"] >= 0.001f)
+		|| (snbc.config[section]["stiffnessY"] >= 0.001f) || (snbc.config0weight[section]["stiffnessY"] >= 0.001f)
+		|| (snbc.config[section]["stiffnessZ"] >= 0.001f) || (snbc.config0weight[section]["stiffnessZ"] >= 0.001f)
+		|| (snbc.config[section]["stiffnessXRot"] >= 0.001f) || (snbc.config0weight[section]["stiffnessXRot"] >= 0.001f)
+		|| (snbc.config[section]["stiffnessYRot"] >= 0.001f) || (snbc.config0weight[section]["stiffnessYRot"] >= 0.001f)
+		|| (snbc.config[section]["stiffnessZRot"] >= 0.001f) || (snbc.config0weight[section]["stiffnessZRot"] >= 0.001f)
+		|| (snbc.config[section]["stiffness2"] >= 0.001f) || (snbc.config0weight[section]["stiffness2"] >= 0.001f)
+		|| (snbc.config[section]["stiffness2X"] >= 0.001f) || (snbc.config0weight[section]["stiffness2X"] >= 0.001f)
+		|| (snbc.config[section]["stiffness2Y"] >= 0.001f) || (snbc.config0weight[section]["stiffness2Y"] >= 0.001f)
+		|| (snbc.config[section]["stiffness2Z"] >= 0.001f) || (snbc.config0weight[section]["stiffness2Z"] >= 0.001f)
+		|| (snbc.config[section]["stiffness2XRot"] >= 0.001f) || (snbc.config0weight[section]["stiffness2XRot"] >= 0.001f)
+		|| (snbc.config[section]["stiffness2YRot"] >= 0.001f) || (snbc.config0weight[section]["stiffness2YRot"] >= 0.001f)
+		|| (snbc.config[section]["stiffness2ZRot"] >= 0.001f) || (snbc.config0weight[section]["stiffness2ZRot"] >= 0.001f)
+		|| (snbc.config[section]["damping"] >= 0.001f) || (snbc.config0weight[section]["damping"] >= 0.001f)
+		|| (snbc.config[section]["dampingX"] >= 0.001f) || (snbc.config0weight[section]["dampingX"] >= 0.001f)
+		|| (snbc.config[section]["dampingY"] >= 0.001f) || (snbc.config0weight[section]["dampingY"] >= 0.001f)
+		|| (snbc.config[section]["dampingZ"] >= 0.001f) || (snbc.config0weight[section]["dampingZ"] >= 0.001f)
+		|| (snbc.config[section]["dampingXRot"] >= 0.001f) || (snbc.config0weight[section]["dampingXRot"] >= 0.001f)
+		|| (snbc.config[section]["dampingYRot"] >= 0.001f) || (snbc.config0weight[section]["dampingYRot"] >= 0.001f)
+		|| (snbc.config[section]["dampingZRot"] >= 0.001f) || (snbc.config0weight[section]["dampingZRot"] >= 0.001f)
+		|| (snbc.config[section]["collisionXmaxoffset"] >= 100.001f) || (snbc.config[section]["collisionXmaxoffset"] <= 99.999f) //Doesn't set collision config?
+		|| (snbc.config0weight[section]["collisionXmaxoffset"] >= 100.001f) || (snbc.config0weight[section]["collisionXmaxoffset"] <= 99.999f)
+		|| (snbc.config[section]["collisionXminoffset"] <= -100.001f) || (snbc.config[section]["collisionXminoffset"] >= -99.999f)
+		|| (snbc.config0weight[section]["collisionXminoffset"] <= -100.001f) || (snbc.config0weight[section]["collisionXminoffset"] >= -99.999f)
+		|| (snbc.config[section]["collisionYmaxoffset"] >= 100.001f) || (snbc.config[section]["collisionYmaxoffset"] <= 99.999f)
+		|| (snbc.config0weight[section]["collisionYmaxoffset"] >= 100.001f) || (snbc.config0weight[section]["collisionYmaxoffset"] <= 99.999f)
+		|| (snbc.config[section]["collisionYminoffset"] <= -100.001f) || (snbc.config[section]["collisionYminoffset"] >= -99.999f)
+		|| (snbc.config0weight[section]["collisionYminoffset"] <= -100.001f) || (snbc.config0weight[section]["collisionYminoffset"] >= -99.999f)
+		|| (snbc.config[section]["collisionZmaxoffset"] >= 100.001f) || (snbc.config[section]["collisionZmaxoffset"] <= 99.999f)
+		|| (snbc.config0weight[section]["collisionZmaxoffset"] >= 100.001f) || (snbc.config0weight[section]["collisionZmaxoffset"] <= 99.999f)
+		|| (snbc.config[section]["collisionZminoffset"] <= -100.001f) || (snbc.config[section]["collisionZminoffset"] >= -99.999f)
+		|| (snbc.config0weight[section]["collisionZminoffset"] <= -100.001f) || (snbc.config0weight[section]["collisionZminoffset"] >= -99.999f);
 }
 
 bool CheckActorForConditions(Actor* actor, Conditions &conditions)
@@ -2780,8 +2965,6 @@ void StopPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName)
 }
 
 //Initializes openvr system. Required for haptic triggers.
-
-
 bool RegisterFuncs(VMClassRegistry* registry)
 {
 #ifdef RUNTIME_VR_VERSION_1_4_15
@@ -2802,7 +2985,16 @@ bool RegisterFuncs(VMClassRegistry* registry)
 
 	registry->RegisterFunction(
 		new NativeFunction2 <StaticFunctionTag, void, Actor*, BSFixedString> ("StopPhysics", "CBPCPluginScript", StopPhysics, registry));
+	
+	registry->RegisterFunction(
+		new NativeFunction7 <StaticFunctionTag, bool, Actor*, BSFixedString, VMArray<float>, float, float, UInt32, bool> ("AttachColliderSphere", "CBPCPluginScript", AttachColliderSphere, registry));
 
+	registry->RegisterFunction(
+		new NativeFunction9 <StaticFunctionTag, bool, Actor*, BSFixedString, VMArray<float>, float, VMArray<float>, float, float, UInt32, bool> ("AttachColliderCapsule", "CBPCPluginScript", AttachColliderCapsule, registry));
+
+	registry->RegisterFunction(
+		new NativeFunction5 <StaticFunctionTag, bool, Actor*, BSFixedString, UInt32, UInt32, bool> ("DetachCollider", "CBPCPluginScript", DetachCollider, registry));
+		
 	LOG("CBPC registerFunction\n");
 	return true;
 }

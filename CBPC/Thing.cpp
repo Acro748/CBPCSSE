@@ -9,29 +9,15 @@ BSFixedString pelvis("NPC Pelvis [Pelv]");
 BSFixedString spine1("NPC Spine1 [Spn1]");
 BSFixedString highheel("NPC");
 
-//## thing_Refresh_node_lock
-// editing the node update time seems to affect the entire node tree even if without editing entire node tree
-
 //## thing_map_lock
 // Maps are sorted every edit time, so if it is parallel processing then a high probability of overloading
 
-//## thing_SetNode_lock
-// There's nothing problem with editing, but if editing once then all node world positions are updated.
-// so it seems that a high probability of overloading if it is processed by parallel processing.
-
-//## thing_ReadNode_lock
-// It seems that a read error occurs when the GetObjectByName() function is called simultaneously
-
-//## thing_config_lock
-// unordered_map is not thread safety, also just by calling [] then it'll be writing it even if there's not value, so lock is needed
-// but i think call [] for an object that already has a value is some thread safety even if parallel processing
-// so i think it would be okay to remove the lock if can put all the values in the beforehand at config.cpp
-
-std::shared_mutex thing_Refresh_node_lock, thing_map_lock, thing_SetNode_lock, thing_ReadNode_lock, thing_config_lock;
+std::shared_mutex thing_map_lock;
 
 Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	: boneName(name)
 	, velocity(NiPoint3(0, 0, 0))
+	, velocityRot(NiPoint3(0, 0, 0))
 {
 	if (actor)
 	{
@@ -59,6 +45,7 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	}
 
 	oldWorldPos = obj->m_worldTransform.pos;
+	oldWorldPosRot = obj->m_worldTransform.pos;
 	time = clock();
 
 	IsLeftBreastBone = ContainsNoCase(boneName.data, "L Breast");
@@ -86,7 +73,7 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 		auto mypair = std::make_pair(actor->baseForm->formID, name.data);
 
 		thing_map_lock.lock();
-		std::map<std::pair<UInt32, const char *>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(mypair);
+		std::map<std::pair<UInt32, const char*>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(mypair);
 
 		if (posMap == thingDefaultPosList.end())
 		{
@@ -138,7 +125,7 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 Thing::~Thing() {
 }
 
-void RefreshNode(NiAVObject* node)
+void RefreshNode(NiAVObject* node, std::shared_mutex& thing_Refresh_node_lock)
 {
 	if (node == nullptr || node->m_name == nullptr)
 		return;
@@ -161,7 +148,9 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 	
 	actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
 
-	std::vector<ConfigLine>* AffectedNodesListPtr;
+	actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
+
+	concurrency::concurrent_vector<ConfigLine>* AffectedNodesListPtr;
 
 	const char * actorrefname = "";
 	std::string actorRace = "";
@@ -209,7 +198,7 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 
 	std::vector<Sphere> spheres;
 
-	for (int i = 0; i < AffectedNodesListPtr->size(); i++)
+	concurrency::parallel_for(size_t(0), AffectedNodesListPtr->size(), [&](size_t i)
 	{
 		if (AffectedNodesListPtr->at(i).NodeName == nodeName)
 		{
@@ -217,7 +206,7 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 			IgnoredCollidersList = AffectedNodesListPtr->at(i).IgnoredColliders;
 			IgnoredSelfCollidersList = AffectedNodesListPtr->at(i).IgnoredSelfColliders;
 			IgnoreAllSelfColliders = AffectedNodesListPtr->at(i).IgnoreAllSelfColliders;
-			for(int j=0; j<spheres.size(); j++)
+			for (int j = 0; j < spheres.size(); j++)
 			{
 				spheres[j].offset0 = GetPointFromPercentage(spheres[j].offset0, spheres[j].offset100, actorWeight);
 
@@ -225,9 +214,9 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 
 				spheres[j].radius100pwr2 = spheres[j].radius0 * spheres[j].radius0;
 			}
-			break;
+			scaleWeight = AffectedNodesListPtr->at(i).scaleWeight;
 		}
-	}
+	});
 	return spheres;
 }
 
@@ -237,7 +226,9 @@ std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::stri
 
 	actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
 
-	std::vector<ConfigLine>* AffectedNodesListPtr;
+	actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
+
+	concurrency::concurrent_vector<ConfigLine>* AffectedNodesListPtr;
 
 	const char* actorrefname = "";
 	std::string actorRace = "";
@@ -285,7 +276,7 @@ std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::stri
 
 	std::vector<Capsule> capsules;
 
-	for (int i = 0; i < AffectedNodesListPtr->size(); i++)
+	concurrency::parallel_for(size_t(0), AffectedNodesListPtr->size(), [&](size_t i)
 	{
 		if (AffectedNodesListPtr->at(i).NodeName == nodeName)
 		{
@@ -304,12 +295,12 @@ std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::stri
 				capsules[j].End2_offset0 = GetPointFromPercentage(capsules[j].End2_offset0, capsules[j].End2_offset100, actorWeight);
 
 				capsules[j].End2_radius0 = GetPercentageValue(capsules[j].End2_radius0, capsules[j].End2_radius100, actorWeight);
-				
+
 				capsules[j].End2_radius100pwr2 = capsules[j].End2_radius0 * capsules[j].End2_radius0;
 			}
-			break;
+			scaleWeight = AffectedNodesListPtr->at(i).scaleWeight;
 		}
-	}
+	});
 	return capsules;
 }
 
@@ -333,26 +324,27 @@ float solveQuad(float a, float b, float c) {
 
 void Thing::updateConfigValues(Actor* actor)
 {
-	try
-	{
-		if (actor != nullptr)
-		{
-			auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
-
-			if (actorRef != nullptr)
-			{
-				actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
-			}
-		}
-	}
-	catch (...)
-	{
-
-	}
-
 	stiffness = GetPercentageValue(stiffness_0, stiffness_100, actorWeight);
+	stiffnessX = GetPercentageValue(stiffnessX_0, stiffnessX_100, actorWeight);
+	stiffnessY = GetPercentageValue(stiffnessY_0, stiffnessY_100, actorWeight);
+	stiffnessZ = GetPercentageValue(stiffnessZ_0, stiffnessZ_100, actorWeight);
+	stiffnessXRot = GetPercentageValue(stiffnessXRot_0, stiffnessXRot_100, actorWeight);
+	stiffnessYRot = GetPercentageValue(stiffnessYRot_0, stiffnessYRot_100, actorWeight);
+	stiffnessZRot = GetPercentageValue(stiffnessZRot_0, stiffnessZRot_100, actorWeight);
 	stiffness2 = GetPercentageValue(stiffness2_0, stiffness2_100, actorWeight);
+	stiffness2X = GetPercentageValue(stiffness2X_0, stiffness2X_100, actorWeight);
+	stiffness2Y = GetPercentageValue(stiffness2Y_0, stiffness2Y_100, actorWeight);
+	stiffness2Z = GetPercentageValue(stiffness2Z_0, stiffness2Z_100, actorWeight);
+	stiffness2XRot = GetPercentageValue(stiffness2XRot_0, stiffness2XRot_100, actorWeight);
+	stiffness2YRot = GetPercentageValue(stiffness2YRot_0, stiffness2YRot_100, actorWeight);
+	stiffness2ZRot = GetPercentageValue(stiffness2ZRot_0, stiffness2ZRot_100, actorWeight);
 	damping = GetPercentageValue(damping_0, damping_100, actorWeight);
+	dampingX = GetPercentageValue(dampingX_0, dampingX_100, actorWeight);
+	dampingY = GetPercentageValue(dampingY_0, dampingY_100, actorWeight);
+	dampingZ = GetPercentageValue(dampingZ_0, dampingZ_100, actorWeight);
+	dampingXRot = GetPercentageValue(dampingXRot_0, dampingXRot_100, actorWeight);
+	dampingYRot = GetPercentageValue(dampingYRot_0, dampingYRot_100, actorWeight);
+	dampingZRot = GetPercentageValue(dampingZRot_0, dampingZRot_100, actorWeight);
 
 	//maxOffset = GetPercentageValue(maxOffset_0, maxOffset_100, actorWeight);
 	XmaxOffset = GetPercentageValue(XmaxOffset_0, XmaxOffset_100, actorWeight);
@@ -361,6 +353,12 @@ void Thing::updateConfigValues(Actor* actor)
 	YminOffset = GetPercentageValue(YminOffset_0, YminOffset_100, actorWeight);
 	ZmaxOffset = GetPercentageValue(ZmaxOffset_0, ZmaxOffset_100, actorWeight);
 	ZminOffset = GetPercentageValue(ZminOffset_0, ZminOffset_100, actorWeight);
+	XmaxOffsetRot = GetPercentageValue(XmaxOffsetRot_0, XmaxOffsetRot_100, actorWeight);
+	XminOffsetRot = GetPercentageValue(XminOffsetRot_0, XminOffsetRot_100, actorWeight);
+	YmaxOffsetRot = GetPercentageValue(YmaxOffsetRot_0, YmaxOffsetRot_100, actorWeight);
+	YminOffsetRot = GetPercentageValue(YminOffsetRot_0, YminOffsetRot_100, actorWeight);
+	ZmaxOffsetRot = GetPercentageValue(ZmaxOffsetRot_0, ZmaxOffsetRot_100, actorWeight);
+	ZminOffsetRot = GetPercentageValue(ZminOffsetRot_0, ZminOffsetRot_100, actorWeight);
 	XdefaultOffset = GetPercentageValue(XdefaultOffset_0, XdefaultOffset_100, actorWeight);
 	YdefaultOffset = GetPercentageValue(YdefaultOffset_0, YdefaultOffset_100, actorWeight);
 	ZdefaultOffset = GetPercentageValue(ZdefaultOffset_0, ZdefaultOffset_100, actorWeight);
@@ -370,6 +368,7 @@ void Thing::updateConfigValues(Actor* actor)
 	varGravityCorrection = -1 * gravityCorrection;
 
 	timeTick = GetPercentageValue(timeTick_0, timeTick_100, actorWeight);
+	timeTickRot = GetPercentageValue(timeTickRot_0, timeTickRot_100, actorWeight);
 	linearX = GetPercentageValue(linearX_0, linearX_100, actorWeight);
 	linearY = GetPercentageValue(linearY_0, linearY_100, actorWeight);
 	linearZ = GetPercentageValue(linearZ_0, linearZ_100, actorWeight);
@@ -386,6 +385,7 @@ void Thing::updateConfigValues(Actor* actor)
 	linearZrotationY = GetPercentageValue(linearZrotationY_0, linearZrotationY_100, actorWeight);
 	linearZrotationZ = GetPercentageValue(linearZrotationZ_0, linearZrotationZ_100, actorWeight);
 	timeStep = GetPercentageValue(timeStep_0, timeStep_100, actorWeight);
+	timeStepRot = GetPercentageValue(timeStepRot_0, timeStepRot_100, actorWeight);
 
 	linearXspreadforceY = GetPercentageValue(linearXspreadforceY_0, linearXspreadforceY_100, actorWeight);
 	linearXspreadforceZ = GetPercentageValue(linearXspreadforceZ_0, linearXspreadforceZ_100, actorWeight);
@@ -393,6 +393,12 @@ void Thing::updateConfigValues(Actor* actor)
 	linearYspreadforceZ = GetPercentageValue(linearYspreadforceZ_0, linearYspreadforceZ_100, actorWeight);
 	linearZspreadforceX = GetPercentageValue(linearZspreadforceX_0, linearZspreadforceX_100, actorWeight);
 	linearZspreadforceY = GetPercentageValue(linearZspreadforceY_0, linearZspreadforceY_100, actorWeight);
+	rotationXspreadforceY = GetPercentageValue(rotationXspreadforceY_0, rotationXspreadforceY_100, actorWeight);
+	rotationXspreadforceZ = GetPercentageValue(rotationXspreadforceZ_0, rotationXspreadforceZ_100, actorWeight);
+	rotationYspreadforceX = GetPercentageValue(rotationYspreadforceX_0, rotationYspreadforceX_100, actorWeight);
+	rotationYspreadforceZ = GetPercentageValue(rotationYspreadforceZ_0, rotationYspreadforceZ_100, actorWeight);
+	rotationZspreadforceX = GetPercentageValue(rotationZspreadforceX_0, rotationZspreadforceX_100, actorWeight);
+	rotationZspreadforceY = GetPercentageValue(rotationZspreadforceY_0, rotationZspreadforceY_100, actorWeight);
 
 	forceMultipler = GetPercentageValue(forceMultipler_0, forceMultipler_100, actorWeight);
 
@@ -431,20 +437,70 @@ void Thing::updateConfigValues(Actor* actor)
 
 	CollisionConfig.IsElasticCollision = collisionElastic;
 
-	CollisionConfig.RotationalX = NiPoint3(linearXrotationX, linearYrotationX, linearZrotationX) * rotationalXnew;
-	CollisionConfig.RotationalY = NiPoint3(linearXrotationY, linearYrotationY, linearZrotationY) * rotationalYnew;
-	CollisionConfig.RotationalZ = NiPoint3(linearXrotationZ, linearYrotationZ, linearZrotationZ) * rotationalZnew;
-
 	CollisionConfig.CollisionMaxOffset = NiPoint3(collisionXmaxOffset, collisionYmaxOffset, collisionZmaxOffset);
 	CollisionConfig.CollisionMinOffset = NiPoint3(collisionXminOffset, collisionYminOffset, collisionZminOffset);
 }
 
 void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& centry0weight) {
 	//100 weight
-	thing_config_lock.lock();
+
 	stiffness_100 = centry["stiffness"];
+	stiffnessX_100 = centry["stiffnessX"];
+	stiffnessY_100 = centry["stiffnessY"];
+	stiffnessZ_100 = centry["stiffnessZ"];
+	if (stiffness_100 >= 0.001f && stiffnessX_100 < 0.001f && stiffnessY_100 < 0.001f && stiffnessZ_100 < 0.001f)
+	{
+		stiffnessX_100 = stiffness_100;
+		stiffnessY_100 = stiffness_100;
+		stiffnessZ_100 = stiffness_100;
+	}
+	stiffnessXRot_100 = centry["stiffnessXRot"];
+	stiffnessYRot_100 = centry["stiffnessYRot"];
+	stiffnessZRot_100 = centry["stiffnessZRot"];
+	if (stiffness_100 >= 0.001f && stiffnessXRot_100 < 0.001f && stiffnessYRot_100 < 0.001f && stiffnessZRot_100 < 0.001f)
+	{
+		stiffnessXRot_100 = stiffness_100;
+		stiffnessYRot_100 = stiffness_100;
+		stiffnessZRot_100 = stiffness_100;
+	}
 	stiffness2_100 = centry["stiffness2"];
+	stiffness2X_100 = centry["stiffness2X"];
+	stiffness2Y_100 = centry["stiffness2Y"];
+	stiffness2Z_100 = centry["stiffness2Z"];
+	if (stiffness2_100 >= 0.001f && stiffness2X_100 < 0.001f && stiffness2Y_100 < 0.001f && stiffness2Z_100 < 0.001f)
+	{
+		stiffness2X_100 = stiffness2_100;
+		stiffness2Y_100 = stiffness2_100;
+		stiffness2Z_100 = stiffness2_100;
+	}
+	stiffness2XRot_100 = centry["stiffness2XRot"];
+	stiffness2YRot_100 = centry["stiffness2YRot"];
+	stiffness2ZRot_100 = centry["stiffness2ZRot"];
+	if (stiffness2_100 >= 0.001f && stiffness2XRot_100 < 0.001f && stiffness2YRot_100 < 0.001f && stiffness2ZRot_100 < 0.001f)
+	{
+		stiffness2XRot_100 = stiffness2_100;
+		stiffness2YRot_100 = stiffness2_100;
+		stiffness2ZRot_100 = stiffness2_100;
+	}
 	damping_100 = centry["damping"];
+	dampingX_100 = centry["dampingX"];
+	dampingY_100 = centry["dampingY"];
+	dampingZ_100 = centry["dampingZ"];
+	if (damping_100 >= 0.001f && dampingX_100 < 0.001f && dampingY_100 < 0.001f && dampingZ_100 < 0.001f)
+	{
+		dampingX_100 = damping_100;
+		dampingY_100 = damping_100;
+		dampingZ_100 = damping_100;
+	}
+	dampingXRot_100 = centry["dampingXRot"];
+	dampingYRot_100 = centry["dampingYRot"];
+	dampingZRot_100 = centry["dampingZRot"];
+	if (dampingXRot_100 < 0.001f && dampingYRot_100 < 0.001f && dampingZRot_100 < 0.001f)
+	{
+		dampingXRot_100 = dampingX_100;
+		dampingYRot_100 = dampingY_100;
+		dampingZRot_100 = dampingZ_100;
+	}
 	maxOffset_100 = centry["maxoffset"];
 	if (maxOffset_100 >= 0.01f)
 	{
@@ -454,6 +510,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		YminOffset_100 = -maxOffset_100;
 		ZmaxOffset_100 = maxOffset_100;
 		ZminOffset_100 = -maxOffset_100;
+		XmaxOffsetRot_100 = maxOffset_100;
+		XminOffsetRot_100 = -maxOffset_100;
+		YmaxOffsetRot_100 = maxOffset_100;
+		YminOffsetRot_100 = -maxOffset_100;
+		ZmaxOffsetRot_100 = maxOffset_100;
+		ZminOffsetRot_100 = -maxOffset_100;
 	}
 	else
 	{
@@ -463,14 +525,35 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		YminOffset_100 = centry["Yminoffset"];
 		ZmaxOffset_100 = centry["Zmaxoffset"];
 		ZminOffset_100 = centry["Zminoffset"];
+
+		XmaxOffsetRot_100 = centry["XmaxoffsetRot"];
+		XminOffsetRot_100 = centry["XminoffsetRot"];
+		YmaxOffsetRot_100 = centry["YmaxoffsetRot"];
+		YminOffsetRot_100 = centry["YminoffsetRot"];
+		ZmaxOffsetRot_100 = centry["ZmaxoffsetRot"];
+		ZminOffsetRot_100 = centry["ZminoffsetRot"];
+
+		if (XmaxOffsetRot_100 < 0.001f && XminOffsetRot_100 < 0.001f && YmaxOffsetRot_100 < 0.001f && YminOffsetRot_100 < 0.001f && ZmaxOffsetRot_100 < 0.001f && ZminOffsetRot_100 < 0.001f)
+		{
+			XmaxOffsetRot_100 = ZmaxOffset_100;
+			XminOffsetRot_100 = ZminOffset_100;
+			YmaxOffsetRot_100 = XmaxOffset_100;
+			YminOffsetRot_100 = XminOffset_100;
+			ZmaxOffsetRot_100 = YmaxOffset_100;
+			ZminOffsetRot_100 = YminOffset_100;
+		}
 	}
-	XdefaultOffset_100 = centry0weight["Xdefaultoffset_100"];
-	YdefaultOffset_100 = centry0weight["Ydefaultoffset_100"];
-	ZdefaultOffset_100 = centry0weight["Zdefaultoffset_100"];
+	XdefaultOffset_100 = centry["Xdefaultoffset_100"];
+	YdefaultOffset_100 = centry["Ydefaultoffset_100"];
+	ZdefaultOffset_100 = centry["Zdefaultoffset_100"];
 
 	timeTick_100 = centry["timetick"];
-	if (timeTick_100 <= 1)
-		timeTick_100 = 1;
+	if (timeTick_100 <= 1.0f)
+		timeTick_100 = 1.0f;
+	timeTickRot_100 = centry["timetickRot"];
+	if (timeTickRot_100 < 1.0f)
+		timeTickRot_100 = timeTick_100;
+
 	linearX_100 = centry["linearX"];
 	linearY_100 = centry["linearY"];
 	linearZ_100 = centry["linearZ"];
@@ -493,10 +576,10 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearZrotationY_100 = centry["linearZrotationY"];
 	linearZrotationZ_100 = centry["linearZrotationZ"];
 
-	if (centry.find("timeStep") != centry.end())
-		timeStep_100 = centry["timeStep"];
-	else
-		timeStep_100 = 1.0f;
+	timeStep_100 = centry["timeStep"];
+	timeStepRot_100 = centry["timeStepRot"];
+	if (timeStepRot_100 < 0.001f)
+		timeStepRot_100 = timeStep_100;
 
 	linearXspreadforceY_100 = centry["linearXspreadforceY"];
 	linearXspreadforceZ_100 = centry["linearXspreadforceZ"];
@@ -504,6 +587,13 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearYspreadforceZ_100 = centry["linearYspreadforceZ"];
 	linearZspreadforceX_100 = centry["linearZspreadforceX"];
 	linearZspreadforceY_100 = centry["linearZspreadforceY"];
+
+	rotationXspreadforceY_100 = centry["rotationXspreadforceY"];
+	rotationXspreadforceZ_100 = centry["rotationXspreadforceZ"];
+	rotationYspreadforceX_100 = centry["rotationYspreadforceX"];
+	rotationYspreadforceZ_100 = centry["rotationYspreadforceZ"];
+	rotationZspreadforceX_100 = centry["rotationZspreadforceX"];
+	rotationZspreadforceY_100 = centry["rotationZspreadforceY"];
 
 	forceMultipler_100 = centry["forceMultipler"];
 
@@ -551,8 +641,62 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 
 	//0 weight
 	stiffness_0 = centry0weight["stiffness"];
+	stiffnessX_0 = centry0weight["stiffnessX"];
+	stiffnessY_0 = centry0weight["stiffnessY"];
+	stiffnessZ_0 = centry0weight["stiffnessZ"];
+	if (stiffness_0 >= 0.001f && stiffnessX_0 < 0.001f && stiffnessY_0 < 0.001f && stiffnessZ_0 < 0.001f)
+	{
+		stiffnessX_0 = stiffness_0;
+		stiffnessY_0 = stiffness_0;
+		stiffnessZ_0 = stiffness_0;
+	}
+	stiffnessXRot_0 = centry0weight["stiffnessXRot"];
+	stiffnessYRot_0 = centry0weight["stiffnessYRot"];
+	stiffnessZRot_0 = centry0weight["stiffnessZRot"];
+	if (stiffness_0 >= 0.001f && stiffnessXRot_0 < 0.001f && stiffnessYRot_0 < 0.001f && stiffnessZRot_0 < 0.001f)
+	{
+		stiffnessXRot_0 = stiffness_0;
+		stiffnessYRot_0 = stiffness_0;
+		stiffnessZRot_0 = stiffness_0;
+	}
 	stiffness2_0 = centry0weight["stiffness2"];
+	stiffness2X_0 = centry0weight["stiffness2X"];
+	stiffness2Y_0 = centry0weight["stiffness2Y"];
+	stiffness2Z_0 = centry0weight["stiffness2Z"];
+	if (stiffness2_0 >= 0.001f && stiffness2X_0 < 0.001f && stiffness2Y_0 < 0.001f && stiffness2Z_0 < 0.001f)
+	{
+		stiffness2X_0 = stiffness2_0;
+		stiffness2Y_0 = stiffness2_0;
+		stiffness2Z_0 = stiffness2_0;
+	}
+	stiffness2XRot_0 = centry0weight["stiffness2XRot"];
+	stiffness2YRot_0 = centry0weight["stiffness2YRot"];
+	stiffness2ZRot_0 = centry0weight["stiffness2ZRot"];
+	if (stiffness2_0 >= 0.001f && stiffness2XRot_0 < 0.001f && stiffness2YRot_0 < 0.001f && stiffness2ZRot_0 < 0.001f)
+	{
+		stiffness2XRot_0 = stiffness2_0;
+		stiffness2YRot_0 = stiffness2_0;
+		stiffness2ZRot_0 = stiffness2_0;
+	}
 	damping_0 = centry0weight["damping"];
+	dampingX_0 = centry0weight["dampingX"];
+	dampingY_0 = centry0weight["dampingY"];
+	dampingZ_0 = centry0weight["dampingZ"];
+	if (damping_0 >= 0.001f && dampingX_0 < 0.001f && dampingY_0 < 0.001f && dampingZ_0 < 0.001f)
+	{
+		dampingX_0 = damping_0;
+		dampingY_0 = damping_0;
+		dampingZ_0 = damping_0;
+	}
+	dampingXRot_0 = centry0weight["dampingXRot"];
+	dampingYRot_0 = centry0weight["dampingYRot"];
+	dampingZRot_0 = centry0weight["dampingZRot"];
+	if (damping_0 >= 0.001f && dampingXRot_0 < 0.001f && dampingYRot_0 < 0.001f && dampingZRot_0 < 0.001f)
+	{
+		dampingXRot_0 = damping_0;
+		dampingYRot_0 = damping_0;
+		dampingZRot_0 = damping_0;
+	}
 	maxOffset_0 = centry0weight["maxoffset"];
 	if (maxOffset_0 >= 0.01f)
 	{
@@ -562,6 +706,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		YminOffset_0 = -maxOffset_0;
 		ZmaxOffset_0 = maxOffset_0;
 		ZminOffset_0 = -maxOffset_0;
+		XmaxOffsetRot_0 = maxOffset_0;
+		XminOffsetRot_0 = -maxOffset_0;
+		YmaxOffsetRot_0 = maxOffset_0;
+		YminOffsetRot_0 = -maxOffset_0;
+		ZmaxOffsetRot_0 = maxOffset_0;
+		ZminOffsetRot_0 = -maxOffset_0;
 	}
 	else
 	{
@@ -571,14 +721,34 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		YminOffset_0 = centry0weight["Yminoffset"];
 		ZmaxOffset_0 = centry0weight["Zmaxoffset"];
 		ZminOffset_0 = centry0weight["Zminoffset"];
+
+		XmaxOffsetRot_0 = centry0weight["XmaxoffsetRot"];
+		XminOffsetRot_0 = centry0weight["XminoffsetRot"];
+		YmaxOffsetRot_0 = centry0weight["YmaxoffsetRot"];
+		YminOffsetRot_0 = centry0weight["YminoffsetRot"];
+		ZmaxOffsetRot_0 = centry0weight["ZmaxoffsetRot"];
+		ZminOffsetRot_0 = centry0weight["ZminoffsetRot"];
+
+		if (XmaxOffsetRot_0 < 0.001f && XminOffsetRot_0 < 0.001f && YmaxOffsetRot_0 < 0.001f && YminOffsetRot_0 < 0.001f && ZmaxOffsetRot_0 < 0.001f && ZminOffsetRot_0 < 0.001f)
+		{
+			XmaxOffsetRot_0 = ZmaxOffset_0;
+			XminOffsetRot_0 = ZminOffset_0;
+			YmaxOffsetRot_0 = XmaxOffset_0;
+			YminOffsetRot_0 = XminOffset_0;
+			ZmaxOffsetRot_0 = YmaxOffset_0;
+			ZminOffsetRot_0 = YminOffset_0;
+		}
 	}
 	XdefaultOffset_0 = centry0weight["Xdefaultoffset_0"];
 	YdefaultOffset_0 = centry0weight["Ydefaultoffset_0"];
 	ZdefaultOffset_0 = centry0weight["Zdefaultoffset_0"];
 
 	timeTick_0 = centry0weight["timetick"];
-	if (timeTick_0 <= 1)
-		timeTick_0 = 1;
+	if (timeTick_0 <= 1.0f)
+		timeTick_0 = 1.0f;
+	timeTickRot_0 = centry0weight["timetickRot"];
+	if (timeTickRot_0 < 1.0f)
+		timeTickRot_0 = timeTick_0;
 	linearX_0 = centry0weight["linearX"];
 	linearY_0 = centry0weight["linearY"];
 	linearZ_0 = centry0weight["linearZ"];
@@ -601,10 +771,10 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearZrotationY_0 = centry0weight["linearZrotationY"];
 	linearZrotationZ_0 = centry0weight["linearZrotationZ"];
 
-	if (centry0weight.find("timeStep") != centry0weight.end())
-		timeStep_0 = centry0weight["timeStep"];
-	else
-		timeStep_0 = 1.0f;
+	timeStep_0 = centry0weight["timeStep"];
+	timeStepRot_0 = centry0weight["timeStepRot"];
+	if (timeStepRot_0 < 0.001f)
+		timeStepRot_0 = timeStep_0;
 
 	linearXspreadforceY_0 = centry0weight["linearXspreadforceY"];
 	linearXspreadforceZ_0 = centry0weight["linearXspreadforceZ"];
@@ -612,6 +782,13 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearYspreadforceZ_0 = centry0weight["linearYspreadforceZ"];
 	linearZspreadforceX_0 = centry0weight["linearZspreadforceX"];
 	linearZspreadforceY_0 = centry0weight["linearZspreadforceY"];
+
+	rotationXspreadforceY_0 = centry0weight["rotationXspreadforceY"];
+	rotationXspreadforceZ_0 = centry0weight["rotationXspreadforceZ"];
+	rotationYspreadforceX_0 = centry0weight["rotationYspreadforceX"];
+	rotationYspreadforceZ_0 = centry0weight["rotationYspreadforceZ"];
+	rotationZspreadforceX_0 = centry0weight["rotationZspreadforceX"];
+	rotationZspreadforceY_0 = centry0weight["rotationZspreadforceY"];
 
 	forceMultipler_0 = centry0weight["forceMultipler"];
 
@@ -655,7 +832,6 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	collisionZmaxOffset_0 = centry0weight["collisionZmaxoffset"];
 	collisionZminOffset_0 = centry0weight["collisionZminoffset"];
 
-	thing_config_lock.unlock();
 	updateConfigValues(actor);
 
 	//zOffset = solveQuad(stiffness2, stiffness, -gravityBias);
@@ -676,7 +852,7 @@ template <typename T> int sgn(T val) {
 	return (T(0) < val) - (val < T(0));
 }
 
-void Thing::updatePelvis(Actor *actor)
+void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_Refresh_node_lock)
 {
 	if (skipFramesPelvisCount > 0)
 	{
@@ -701,7 +877,7 @@ void Thing::updatePelvis(Actor *actor)
 
 	auto loadedState = actor->loadedState;
 
-	if (!loadedState || !loadedState->node) 
+	if (!loadedState || !loadedState->node)
 	{
 		return;
 	}
@@ -724,13 +900,13 @@ void Thing::updatePelvis(Actor *actor)
 	}
 	else
 	{
-		if(updatePussyFirstRun)
+		if (updatePussyFirstRun)
 		{
 			updatePussyFirstRun = false;
-			
+
 			auto leftpair = std::make_pair(actor->baseForm->formID, leftPus.data);
 			thing_map_lock.lock();
-			std::map<std::pair<UInt32, const char *>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(leftpair);
+			std::map<std::pair<UInt32, const char*>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(leftpair);
 
 			if (posMap == thingDefaultPosList.end())
 			{
@@ -794,10 +970,11 @@ void Thing::updatePelvis(Actor *actor)
 			}
 			thing_map_lock.unlock();
 			LOG_INFO("Left pussy default pos -> %g %g %g , Right pussy default pos ->  %g %g %g , Back pussy default pos ->  %g %g %g , Front pussy default pos ->  %g %g %g", leftPussyDefaultPos.x, leftPussyDefaultPos.y, leftPussyDefaultPos.z, rightPussyDefaultPos.x, rightPussyDefaultPos.y, rightPussyDefaultPos.z, backPussyDefaultPos.x, backPussyDefaultPos.y, backPussyDefaultPos.z, frontPussyDefaultPos.x, frontPussyDefaultPos.y, frontPussyDefaultPos.z);
-		
-		//	CollisionSetUp.IsTriggerCollision = true;
+
+			CollisionConfig.CollisionMaxOffset = NiPoint3(100, 100, 100);
+			CollisionConfig.CollisionMinOffset = NiPoint3(-100, -100, -100);
 		}
-		
+
 		//There's nothing problem with editing, but if editing once then all node world positions are updated.
 		//so it seems that a high probability of overloading if it is processed by parallel processing.
 		thing_SetNode_lock.lock();
@@ -816,65 +993,66 @@ void Thing::updatePelvis(Actor *actor)
 	// Collision Stuff Start
 	NiPoint3 collisionVector = emptyPoint;
 
-	NiMatrix33 pelvisRotation;
-	NiPoint3 pelvisPosition;
-	float pelvisScale;
-
-	pelvisRotation = pelvisObj->m_worldTransform.rot;
-	pelvisPosition = pelvisObj->m_worldTransform.pos;
-	pelvisScale = pelvisObj->m_worldTransform.scale;
+	NiMatrix33 pelvisRotation = pelvisObj->m_worldTransform.rot;
+	NiPoint3 pelvisPosition = pelvisObj->m_worldTransform.pos;
+	float pelvisScale = pelvisObj->m_worldTransform.scale;
+	float pelvisInvScale = 1.0f / pelvisScale; //world transform pos to local transform pos edited by scale
 
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
+
+	float colliderNodescale = 1.0f - ((1.0f - (pelvisScale / actorBaseScale)) * scaleWeight);
 	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
-		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * pelvisScale;
+		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].worldPos = pelvisPosition + (pelvisRotation * thingCollisionSpheres[i].offset100);
-		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * pelvisScale;
+		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
-		for (int m = 0; m<hashIdList.size(); m++)
+		for (int m = 0; m < hashIdList.size(); m++)
 		{
 			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
 			{
 				thingIdList.emplace_back(hashIdList[m]);
 			}
 		}
-	}	
+	}
 	for (int i = 0; i < thingCollisionCapsules.size(); i++)
 	{
-		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * pelvisScale;
-		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End1_offset100);
-		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * pelvisScale;
+		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * actorBaseScale * colliderNodescale;
+		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation * thingCollisionCapsules[i].End1_offset100);
+		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
-		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * pelvisScale;
-		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End2_offset100);
-		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * pelvisScale;
+		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * actorBaseScale * colliderNodescale;
+		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation * thingCollisionCapsules[i].End2_offset100);
+		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
-		for (int m = 0; m<hashIdList.size(); m++)
+		for (int m = 0; m < hashIdList.size(); m++)
 		{
 			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
 			{
 				thingIdList.emplace_back(hashIdList[m]);
 			}
 		}
-	}	
+	}
 
 
 	NiPoint3 collisionDiff = emptyPoint;
 
 	CollisionConfig.maybePos = pelvisPosition;
-	CollisionConfig.cnvRot = pelvisObj->m_parent->m_worldTransform.rot;
+	CollisionConfig.origRot = pelvisObj->m_parent->m_worldTransform.rot;
 	CollisionConfig.objRot = pelvisRotation;
 	CollisionConfig.invRot = pelvisObj->m_parent->m_worldTransform.rot.Transpose();
-		
+
+	bool genitalPenetration = false;
+
 	for (int j = 0; j < thingIdList.size(); j++)
 	{
 		int id = thingIdList[j];
-		if(partitions.find(id) != partitions.end())
+		if (partitions.find(id) != partitions.end())
 		{
 			//LOG_INFO("Pelvis hashId=%d", id);
 			for (int i = 0; i < partitions[id].partitionCollisions.size(); i++)
@@ -895,43 +1073,48 @@ void Thing::updatePelvis(Actor *actor)
 				partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
 				//now not that do reach max value just by get closer and just affected by the collider size
-				partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
+				bool isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
+				if (isColliding)
+					genitalPenetration = true;
 			}
 		}
 	}
 
 	// Collision Stuff End
-	
-	NiPoint3 leftVector = collisionDiff;
-	NiPoint3 rightVector = collisionDiff;
-	NiPoint3 backVector = collisionDiff;
-	NiPoint3 frontVector = collisionDiff;
 
-	float opening = distance(collisionDiff, emptyPoint);
+	if (genitalPenetration)
+	{
+		NiPoint3 leftVector = collisionDiff;
+		NiPoint3 rightVector = collisionDiff;
+		NiPoint3 backVector = collisionDiff;
+		NiPoint3 frontVector = collisionDiff;
 
-	CalculateDiffVagina(leftVector, opening, true, true);
-	CalculateDiffVagina(rightVector, opening, true, false);
-	CalculateDiffVagina(backVector, opening, false, true);
-	CalculateDiffVagina(frontVector, opening, false, false);
+		float opening = distance(collisionDiff, emptyPoint) * pelvisInvScale;
 
-	NormalizeNiPoint(leftVector, thing_vaginaOpeningLimit*-1.0f, thing_vaginaOpeningLimit);
-	NormalizeNiPoint(rightVector, thing_vaginaOpeningLimit*-1.0f, thing_vaginaOpeningLimit);
-	backVector.y = clamp(backVector.y, thing_vaginaOpeningLimit*-0.5f, thing_vaginaOpeningLimit*0.5f);
-	backVector.z = clamp(backVector.z, thing_vaginaOpeningLimit*-0.165f, thing_vaginaOpeningLimit*0.165f);
-	frontVector.y = clamp(frontVector.y, thing_vaginaOpeningLimit*-0.125f, thing_vaginaOpeningLimit*0.125f);
-	frontVector.z = clamp(frontVector.z, thing_vaginaOpeningLimit*-0.25f, thing_vaginaOpeningLimit*0.25f);
-	
-	thing_SetNode_lock.lock();
-	leftPusObj->m_localTransform.pos = leftPussyDefaultPos + leftVector;
-	rightPusObj->m_localTransform.pos = rightPussyDefaultPos + rightVector;
-	backPusObj->m_localTransform.pos = backPussyDefaultPos + backVector;
-	frontPusObj->m_localTransform.pos = frontPussyDefaultPos + frontVector;
-	thing_SetNode_lock.unlock();
+		CalculateDiffVagina(leftVector, opening, true, true);
+		CalculateDiffVagina(rightVector, opening, true, false);
+		CalculateDiffVagina(backVector, opening, false, true);
+		CalculateDiffVagina(frontVector, opening, false, false);
 
-	RefreshNode(leftPusObj);
-	RefreshNode(rightPusObj);
-	RefreshNode(backPusObj);
-	RefreshNode(frontPusObj);
+		NormalizeNiPoint(leftVector, thing_vaginaOpeningLimit * -1.0f, thing_vaginaOpeningLimit);
+		NormalizeNiPoint(rightVector, thing_vaginaOpeningLimit * -1.0f, thing_vaginaOpeningLimit);
+		backVector.y = clamp(backVector.y, thing_vaginaOpeningLimit * -0.5f, thing_vaginaOpeningLimit * 0.5f);
+		backVector.z = clamp(backVector.z, thing_vaginaOpeningLimit * -0.165f, thing_vaginaOpeningLimit * 0.165f);
+		frontVector.y = clamp(frontVector.y, thing_vaginaOpeningLimit * -0.125f, thing_vaginaOpeningLimit * 0.125f);
+		frontVector.z = clamp(frontVector.z, thing_vaginaOpeningLimit * -0.25f, thing_vaginaOpeningLimit * 0.25f);
+
+		thing_SetNode_lock.lock();
+		leftPusObj->m_localTransform.pos = leftPussyDefaultPos + leftVector;
+		rightPusObj->m_localTransform.pos = rightPussyDefaultPos + rightVector;
+		backPusObj->m_localTransform.pos = backPussyDefaultPos + backVector;
+		frontPusObj->m_localTransform.pos = frontPussyDefaultPos + frontVector;
+		thing_SetNode_lock.unlock();
+
+		RefreshNode(leftPusObj, thing_Refresh_node_lock);
+		RefreshNode(rightPusObj, thing_Refresh_node_lock);
+		RefreshNode(backPusObj, thing_Refresh_node_lock);
+		RefreshNode(frontPusObj, thing_Refresh_node_lock);
+	}
 	/*QueryPerformanceCounter(&endingTime);
 	elapsedMicroseconds.QuadPart = endingTime.QuadPart - startingTime.QuadPart;
 	elapsedMicroseconds.QuadPart *= 1000000000LL;
@@ -939,7 +1122,7 @@ void Thing::updatePelvis(Actor *actor)
 	LOG("Thing.updatePelvis() Update Time = %lld ns\n", elapsedMicroseconds.QuadPart);*/
 }
 
-bool Thing::ApplyBellyBulge(Actor * actor)
+bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_ReadNode_lock)
 {
 	if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState || !(*g_thePlayer)->loadedState->node)
 	{
@@ -947,10 +1130,6 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	}
 
 	NiPoint3 collisionVector = emptyPoint;
-	
-	NiMatrix33 bulgenodeRotation;
-	NiPoint3 bulgenodePosition;
-	float bulgenodeScale;
 
 	thing_ReadNode_lock.lock();
 	NiAVObject* bellyObj = actor->loadedState->node->GetObjectByName(&belly.data);
@@ -995,23 +1174,29 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 		thing_map_lock.unlock();
 		LOG_INFO("Belly default pos -> %g %g %g", bellyDefaultPos.x, bellyDefaultPos.y, bellyDefaultPos.z);
 
-	//	CollisionSetUp.IsTriggerCollision = true;
+		CollisionConfig.CollisionMaxOffset = NiPoint3(100, 100, 100);
+		CollisionConfig.CollisionMinOffset = NiPoint3(-100, -100, -100);
 	}
 
-	bulgenodeRotation = bulgeObj->m_worldTransform.rot;
-	bulgenodePosition = bulgeObj->m_worldTransform.pos;
-	bulgenodeScale = bulgeObj->m_worldTransform.scale;
+	NiMatrix33 bulgenodeRotation = bulgeObj->m_worldTransform.rot;
+	NiPoint3 bulgenodePosition = bulgeObj->m_worldTransform.pos;
+	float bulgenodeScale = bulgeObj->m_worldTransform.scale;
+	float bellynodeInvScale = 1.0f;
+
+	if (bellyObj->m_parent)
+		bellynodeInvScale = 1.0f / bellyObj->m_parent->m_worldTransform.scale; //world transform pos to local transform pos edited by scale
 
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
 
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
 
+	float colliderNodescale = 1.0f - ((1.0f - (bulgenodeScale / actorBaseScale)) * scaleWeight);
 	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
-		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * bulgenodeScale;
+		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionSpheres[i].offset100);
-		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * bulgenodeScale;
+		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
 		for (int m = 0; m<hashIdList.size(); m++)
@@ -1024,13 +1209,13 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	}
 	for (int i = 0; i < thingCollisionCapsules.size(); i++)
 	{
-		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * bulgenodeScale;
+		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End1_worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionCapsules[i].End1_offset100);
-		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * bulgenodeScale;
+		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
-		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * bulgenodeScale;
+		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End2_worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionCapsules[i].End2_offset100);
-		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * bulgenodeScale;
+		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
@@ -1046,7 +1231,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	NiPoint3 collisionDiff = emptyPoint;
 
 	CollisionConfig.maybePos = bulgenodePosition;
-	CollisionConfig.cnvRot = bulgeObj->m_parent->m_worldTransform.rot;
+	CollisionConfig.origRot = bulgeObj->m_parent->m_worldTransform.rot;
 	CollisionConfig.objRot = bulgenodeRotation;
 	CollisionConfig.invRot = bulgeObj->m_parent->m_worldTransform.rot.Transpose();
 
@@ -1097,7 +1282,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 			//LOG("opening:%g", opening);
 	//		bellyBulgeCountDown = 1000;
 			
-			float horPos = opening * thing_bellybulgemultiplier;
+			float horPos = opening * thing_bellybulgemultiplier * bellynodeInvScale;
 			horPos = clamp(horPos, 0.0f, thing_bellybulgemax);
 			float lowPos = (thing_bellybulgeposlowest / thing_bellybulgemax) * horPos;
 
@@ -1122,7 +1307,7 @@ bool Thing::ApplyBellyBulge(Actor * actor)
 	return false;
 }
 
-void Thing::update(Actor* actor) {
+void Thing::update(Actor* actor, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_Refresh_node_lock) {
 
 	bool collisionsOn = true;
 
@@ -1155,18 +1340,21 @@ void Thing::update(Actor* actor) {
 	printMessageStr("Thing.update() start", boneName.data);*/
 
 	auto newTime = clock();
-	auto deltaT = newTime - time;
-
+	long deltaT = newTime - time;
 	time = newTime;
+
+	bool isSkippedmanyFrames = false;
+	if (deltaT >= 200)
+		isSkippedmanyFrames = true;
 
 	float fpsCorrection = 1.0f;
 
 	if (fpsCorrectionEnabled)
 	{
-		if (deltaT > fps60Tick * 4) deltaT = fps60Tick * 4; //edited
-		if (deltaT < fps60Tick * 0.25) deltaT = fps60Tick * 0.25; //edited
+		if (deltaT > 100) deltaT = 100; //edited
+		if (deltaT < 4) deltaT = 4; //edited
 
-		fpsCorrection = ((float)deltaT / fps60Tick); //added
+		fpsCorrection = (deltaT * 0.0625f); //added
 	}
 	else
 	{
@@ -1211,29 +1399,33 @@ void Thing::update(Actor* actor) {
 #ifdef RUNTIME_VR_VERSION_1_4_15	
 	}
 #endif
-	if (!obj)
+	if (!obj || !obj->m_parent)
+		return;
+
+	if (isSkippedmanyFrames)
 	{
+		oldWorldPos = obj->m_worldTransform.pos;
+		oldWorldPosRot = obj->m_worldTransform.pos;
 		return;
 	}
 
 	if (IsBellyBone && ActorCollisionsEnabled && thing_bellybulgemultiplier > 0)
 	{
-		if (ApplyBellyBulge(actor))
+		if (ApplyBellyBulge(actor, thing_SetNode_lock, thing_ReadNode_lock))
 		{
-			RefreshNode(obj);
+			RefreshNode(obj, thing_Refresh_node_lock);
 			return;
 		}
 	}
 
-	if (!obj->m_parent)
-		return;
-
-	nodeScale = obj->m_worldTransform.scale;
+	float nodeScale = obj->m_worldTransform.scale;
+	float nodeParentInvScale = 1.0f / obj->m_parent->m_worldTransform.scale; //world transform pos to local transform pos edited by scale
 
 	bool IsThereCollision = false;
 	bool maybeNot = false;
 	NiPoint3 collisionDiff = emptyPoint;
 	long originalDeltaT = deltaT;
+	long deltaTRot = deltaT;
 	NiPoint3 collisionVector = emptyPoint;
 
 	float varGravityBias = gravityBias;
@@ -1249,13 +1441,11 @@ void Thing::update(Actor* actor) {
 
 	int collisionCheckCount = 0;
 
-
-	std::vector<int> thingIdList;
-	std::vector<int> hashIdList;
-
 	NiPoint3 newPos = oldWorldPos;
+	NiPoint3 newPosRot = oldWorldPosRot;
 
 	NiPoint3 posDelta = emptyPoint;
+	NiPoint3 posDeltaRot = emptyPoint;
 
 	NiPoint3 target = obj->m_parent->m_worldTransform.pos;
 
@@ -1278,106 +1468,100 @@ void Thing::update(Actor* actor) {
 
 			//Calculate the resulting gravity
 			varGravityCorrection = (gravityRatio * gravityCorrection) + ((1.0 - gravityRatio) * gravityInvertedCorrection);
+		}
 
 			//Determine which armor the actor is wearing
-			if (skipArmorCheck <= 0) //This is a little heavy, check only on equip/unequip events
+		if (skipArmorCheck <= 0) //This is a little heavy, check only on equip/unequip events
+		{
+			forceAmplitude = 1.0f;
+
+			//				thing_armorKeyword_lock.lock();
+			TESForm* wornForm = papyrusActor::GetWornForm(actor, 0x00000004);
+
+			if (wornForm != nullptr)
 			{
-				forceAmplitude = 1.0f;
-
-//				thing_armorKeyword_lock.lock();
-				TESForm* wornForm = papyrusActor::GetWornForm(actor, 0x00000004);
-
-				if (wornForm != nullptr)
+				TESObjectARMO* armor = DYNAMIC_CAST(wornForm, TESForm, TESObjectARMO);
+				if (armor != nullptr)
 				{
-					TESObjectARMO* armor = DYNAMIC_CAST(wornForm, TESForm, TESObjectARMO);
-					if (armor != nullptr)
+					bool IsAsNaked = false;
+					isHeavyArmor = false;
+					isLightArmor = false;
+					isClothed = false;
+					isNoPushUp = false;
+					auto keywords = armor->keyword.keywords;
+					if (keywords)
 					{
-						bool IsAsNaked = false;
-						isHeavyArmor = false;
-						isLightArmor = false;
-						isClothed = false;
-						isNoPushUp = false;
-						auto keywords = armor->keyword.keywords;
-						if (keywords)
-						{
 						if (IsLeftBreastBone)
 						{
-								for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
+							for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
 							{
-									if (!keywords[index])
-										continue;
-									if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedL.data) == 0)
-							{
-										IsAsNaked = true;
-								}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyL.data) == 0)
-									{
-										isHeavyArmor = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightL.data) == 0)
-										{
-										isLightArmor = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingL.data) == 0)
-							{
-										isClothed = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpL.data) == 0)
+								if (!keywords[index])
+									continue;
+								if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedL.data) == 0)
 								{
-										isNoPushUp = true;
+									IsAsNaked = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyL.data) == 0)
+								{
+									isHeavyArmor = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightL.data) == 0)
+								{
+									isLightArmor = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingL.data) == 0)
+								{
+									isClothed = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpL.data) == 0)
+								{
+									isNoPushUp = true;
 								}
 
 							}
 						}
 						else if (IsRightBreastBone)
 						{
-								for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
+							for (UInt32 index = 0; index < armor->keyword.numKeywords; index++)
 							{
-									if (!keywords[index])
-										continue;
-									if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedR.data) == 0)
-							{
-										IsAsNaked = true;
-								}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyR.data) == 0)
-							{
-										isHeavyArmor = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightR.data) == 0)
-									{
-										isLightArmor = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingR.data) == 0)
+								if (!keywords[index])
+									continue;
+								if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsNakedR.data) == 0)
 								{
-										isClothed = true;
-									}
-									else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpR.data) == 0)
-										{
-										isNoPushUp = true;
-										}
-									}
+									IsAsNaked = true;
 								}
-						}
-
-						if (IsAsNaked)
-							{
-							isHeavyArmor = false;
-							isLightArmor = false;
-							isClothed = false;
-										}
-						else if (!isHeavyArmor && !isLightArmor && !isClothed)
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsHeavyR.data) == 0)
 								{
-								isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
-								isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
-								isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
-
+									isHeavyArmor = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsLightR.data) == 0)
+								{
+									isLightArmor = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameAsClothingR.data) == 0)
+								{
+									isClothed = true;
+								}
+								else if (strcmp(keywords[index]->keyword.Get(), KeywordNameNoPushUpR.data) == 0)
+								{
+									isNoPushUp = true;
+								}
+							}
 						}
 					}
-					else
+
+					if (IsAsNaked)
 					{
-						isClothed = false;
-						isLightArmor = false;
 						isHeavyArmor = false;
+						isLightArmor = false;
+						isClothed = false;
+					}
+					else if (!isHeavyArmor && !isLightArmor && !isClothed)
+					{
+						isHeavyArmor = (armor->keyword.HasKeyword(KeywordArmorHeavy));
+						isLightArmor = (armor->keyword.HasKeyword(KeywordArmorLight));
+						isClothed = (armor->keyword.HasKeyword(KeywordArmorClothing));
+
 					}
 				}
 				else
@@ -1386,10 +1570,14 @@ void Thing::update(Actor* actor) {
 					isLightArmor = false;
 					isHeavyArmor = false;
 				}
-				skipArmorCheck--;
-
-//				thing_armorKeyword_lock.unlock();
 			}
+			else
+			{
+				isClothed = false;
+				isLightArmor = false;
+				isHeavyArmor = false;
+			}
+			skipArmorCheck--;
 
 			if (isHeavyArmor)
 			{
@@ -1426,11 +1614,12 @@ void Thing::update(Actor* actor) {
 
 	//Offset to move Center of Mass make rotaional motion more significant  
 	NiPoint3 diff = (target - oldWorldPos) * forceMultipler;
+	NiPoint3 diffRot = (target - oldWorldPosRot) * forceMultipler;
 
 	//It is not recommended to use, When used, there is a high possibility that the movement will be adversely affected due to min/maxoffset
 	//diff += NiPoint3(0, 0, varGravityCorrection) * (fpsCorrectionEnabled ? fpsCorrection : 1.0f);
 
-	if (fabs(diff.x) > 100 || fabs(diff.y) > 100 || fabs(diff.z) > 100) //prevent shakes
+	if (fabs(diff.x) > 250 || fabs(diff.y) > 250 || fabs(diff.z) > 250) //prevent shakes
 	{
 		//logger.error("transform reset\n");
 		thing_SetNode_lock.lock();
@@ -1438,89 +1627,231 @@ void Thing::update(Actor* actor) {
 		obj->m_localTransform.rot = thingDefaultRot;
 		thing_SetNode_lock.unlock();
 
-		oldWorldPos = target;
+		oldWorldPos = target + thingDefaultPos;
+		oldWorldPosRot = target + thingDefaultPos;
 		velocity = emptyPoint;
+		velocityRot = emptyPoint;
 		time = clock();
 		return;
 	}
-
-	float timeMultiplier = timeTick / (float)deltaT;
-	diff *= timeMultiplier;
-
-	// Compute the "Spring" Force
-	NiPoint3 diff2(diff.x * diff.x * sgn(diff.x), diff.y * diff.y * sgn(diff.y), diff.z * diff.z * sgn(diff.z));
-	NiPoint3 force = (diff * stiffness) + (diff2 * stiffness2) - (NiPoint3(0, 0, varGravityBias) / fpsCorrection);
-	//showPos(diff);
-	//showPos(force);
-
-	do {
-		// Assume mass is 1, so Accelleration is Force, can vary mass by changinf force
-		//velocity = (velocity + (force * timeStep)) * (1 - (damping * timeStep));
-
-		velocity = velocity * Friction; //Fixes that when becomes unstable collisions during colliding at low or unstable FPS
-
-		velocity = (velocity + (force * timeStep)) - (velocity * (damping * timeStep));
-
-		posDelta += velocity * timeStep;
-
-		deltaT -= timeTick;
-	} while (deltaT >= timeTick);
-
-	newPos = newPos + posDelta * fpsCorrection;
-
-	// clamp the difference to stop the breast severely lagging at low framerates
-	NiPoint3 newdiff = newPos - target;
-
-	varLinearX = varLinearX * forceAmplitude;
-	varLinearY = varLinearY * forceAmplitude;
-	varLinearZ = varLinearZ * forceAmplitude;
-	varRotationalXnew = varRotationalXnew * forceAmplitude;
-	varRotationalYnew = varRotationalYnew * forceAmplitude;
-	varRotationalZnew = varRotationalZnew * forceAmplitude;
 
 	// move the bones based on the supplied weightings
 	// Convert the world translations into local coordinates
 	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
 
-	auto ldiff = invRot * newdiff;
-	auto beforeldiff = ldiff;
-
-	ldiff.x = clamp(ldiff.x, XminOffset, XmaxOffset);
-	ldiff.y = clamp(ldiff.y, YminOffset, YmaxOffset);
-	ldiff.z = clamp(ldiff.z, ZminOffset, ZmaxOffset);
-
-	//It can allows the force of dissipated by min/maxoffsets to be spread in different directions
-	beforeldiff = beforeldiff - ldiff;
-	ldiff.x = ldiff.x + ((beforeldiff.y * linearXspreadforceY) + (beforeldiff.z * linearXspreadforceZ));
-	ldiff.y = ldiff.y + ((beforeldiff.x * linearYspreadforceX) + (beforeldiff.z * linearYspreadforceZ));
-	ldiff.z = ldiff.z + ((beforeldiff.x * linearZspreadforceX) + (beforeldiff.y * linearZspreadforceY));
-
-	ldiff.x = clamp(ldiff.x, XminOffset, XmaxOffset);
-	ldiff.y = clamp(ldiff.y, YminOffset, YmaxOffset);
-	ldiff.z = clamp(ldiff.z, ZminOffset, ZmaxOffset);
-
-	//same the clamp(diff.z - varGravityCorrection, -maxOffset, maxOffset) + varGravityCorrection
-	//this is the reason for the endless shaking when unstable fps in v1.4.1x
-	ldiff = invRot * ((obj->m_parent->m_worldTransform.rot * ldiff) + NiPoint3(0, 0, varGravityCorrection));
-
-	auto rdiffXnew = ldiff * varRotationalXnew;
-	auto rdiffYnew = ldiff * varRotationalYnew;
-	auto rdiffZnew = ldiff * varRotationalZnew;
-
-	rdiffXnew.x *= linearXrotationX;
-	rdiffXnew.y *= linearYrotationX;
-	rdiffXnew.z *= linearZrotationX;
-
-	rdiffYnew.x *= linearXrotationY;
-	rdiffYnew.y *= linearYrotationY;
-	rdiffYnew.z *= linearZrotationY;
-
-	rdiffZnew.x *= linearXrotationZ;
-	rdiffZnew.y *= linearYrotationZ;
-	rdiffZnew.z *= linearZrotationZ;
-
+	NiPoint3 forceGravityBias = invRot * (NiPoint3(0, 0, varGravityBias) / fpsCorrection);
+	
+	NiPoint3 ldiff = emptyPoint;
+	NiPoint3 ldiffRot = emptyPoint;
 	NiMatrix33 newRot;
-	newRot.SetEulerAngles(rdiffYnew.x + rdiffYnew.y + rdiffYnew.z, rdiffZnew.x + rdiffZnew.y + rdiffZnew.z, rdiffXnew.x + rdiffXnew.y + rdiffXnew.z);
+
+	concurrency::parallel_invoke(
+		[&] { //linear calculation
+		NiPoint3 InteriaMaxOffset = emptyPoint;
+		NiPoint3 InteriaMinOffset = emptyPoint;
+
+		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
+		if (multiplerInertia >= 0.001f)
+		{
+			if (collisionInertia.x >= 0.0f)
+				InteriaMaxOffset.x = collisionInertia.x;
+			else
+				InteriaMinOffset.x = collisionInertia.x;
+
+			if (collisionInertia.y >= 0.0f)
+				InteriaMaxOffset.y = collisionInertia.y;
+			else
+				InteriaMinOffset.y = collisionInertia.y;
+
+			if (collisionInertia.z >= 0.0f)
+				InteriaMaxOffset.z = collisionInertia.z;
+			else
+				InteriaMinOffset.z = collisionInertia.z;
+
+			multiplerInertia -= (((float)originalDeltaT / timeTick) * 0.01f * timeStep);
+			if (multiplerInertia < 0.001f)
+				multiplerInertia = 0.0f;
+			collisionInertia *= multiplerInertia;
+		}
+
+
+		// Compute the "Spring" Force
+
+		float timeMultiplier = timeTick / (float)deltaT;
+		diff = invRot * (diff * timeMultiplier);
+
+		NiPoint3 stiffnessXYZ = NiPoint3(stiffnessX, stiffnessY, stiffnessZ);
+		NiPoint3 stiffness2XYZ = NiPoint3(stiffness2X, stiffness2Y, stiffness2Z);
+		NiPoint3 dampingXYZ = NiPoint3(dampingX, dampingY, dampingZ);
+
+		NiPoint3 diff2(diff.x* diff.x* sgn(diff.x), diff.y* diff.y* sgn(diff.y), diff.z* diff.z* sgn(diff.z));
+		NiPoint3 force = (NiPoint3((diff.x * stiffnessXYZ.x) + (diff2.x * stiffness2XYZ.x)
+			, (diff.y * stiffnessXYZ.y) + (diff2.y * stiffness2XYZ.y)
+			, (diff.z * stiffnessXYZ.z) + (diff2.z * stiffness2XYZ.z))
+			- forceGravityBias);
+
+		//showPos(diff);
+		//showPos(force);
+
+		velocity = invRot * velocity;
+
+		do {
+			// Assume mass is 1, so Accelleration is Force, can vary mass by changinf force
+			//velocity = (velocity + (force * timeStep)) * (1 - (damping * timeStep));
+
+			velocity = velocity * Friction; //Fixes that when becomes unstable collisions during colliding at low or unstable FPS
+
+			velocity.x = (velocity.x + (force.x * timeStep)) - (velocity.x * (dampingXYZ.x * timeStep));
+			velocity.y = (velocity.y + (force.y * timeStep)) - (velocity.y * (dampingXYZ.y * timeStep));
+			velocity.z = (velocity.z + (force.z * timeStep)) - (velocity.z * (dampingXYZ.z * timeStep));
+
+			posDelta += velocity * timeStep;
+
+			deltaT -= timeTick;
+		} while (deltaT >= timeTick);
+
+		velocity = obj->m_parent->m_worldTransform.rot * velocity;
+
+		newPos = newPos + obj->m_parent->m_worldTransform.rot * (posDelta * fpsCorrection);
+
+		// clamp the difference to stop the breast severely lagging at low framerates
+		NiPoint3 newdiff = newPos - target;
+
+		varLinearX = varLinearX * forceAmplitude;
+		varLinearY = varLinearY * forceAmplitude;
+		varLinearZ = varLinearZ * forceAmplitude;
+
+		ldiff = invRot * newdiff;
+		auto beforeldiff = ldiff;
+
+		ldiff.x = clamp(ldiff.x, XminOffset + InteriaMinOffset.x, XmaxOffset + InteriaMaxOffset.x);
+		ldiff.y = clamp(ldiff.y, YminOffset + InteriaMinOffset.y, YmaxOffset + InteriaMaxOffset.y);
+		ldiff.z = clamp(ldiff.z, ZminOffset + InteriaMinOffset.z, ZmaxOffset + InteriaMaxOffset.z);
+
+		//It can allows the force of dissipated by min/maxoffsets to be spread in different directions
+		beforeldiff = beforeldiff - ldiff;
+
+		ldiff.x = ldiff.x + ((beforeldiff.y * linearYspreadforceX) + (beforeldiff.z * linearZspreadforceX));
+		ldiff.y = ldiff.y + ((beforeldiff.x * linearXspreadforceY) + (beforeldiff.z * linearZspreadforceY));
+		ldiff.z = ldiff.z + ((beforeldiff.x * linearXspreadforceZ) + (beforeldiff.y * linearYspreadforceZ));
+
+		ldiff.x = clamp(ldiff.x, XminOffset + InteriaMinOffset.x, XmaxOffset + InteriaMaxOffset.x);
+		ldiff.y = clamp(ldiff.y, YminOffset + InteriaMinOffset.y, YmaxOffset + InteriaMaxOffset.y);
+		ldiff.z = clamp(ldiff.z, ZminOffset + InteriaMinOffset.z, ZmaxOffset + InteriaMaxOffset.z);
+
+		//same the clamp(diff.z - varGravityCorrection, -maxOffset, maxOffset) + varGravityCorrection
+		//this is the reason for the endless shaking when unstable fps in v1.4.1x
+		ldiff = ldiff + (invRot * NiPoint3(0, 0, varGravityCorrection));
+	},
+		[&] { // rotation calculation
+
+		NiPoint3 InteriaMaxOffsetRot = emptyPoint;
+		NiPoint3 InteriaMinOffsetRot = emptyPoint;
+
+		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
+		if (multiplerInertiaRot >= 0.001f)
+		{
+			if (collisionInertiaRot.x >= 0.0f)
+				InteriaMaxOffsetRot.x = collisionInertiaRot.x;
+			else
+				InteriaMinOffsetRot.x = collisionInertiaRot.x;
+
+			if (collisionInertiaRot.y >= 0.0f)
+				InteriaMaxOffsetRot.y = collisionInertiaRot.y;
+			else
+				InteriaMinOffsetRot.y = collisionInertiaRot.y;
+
+			if (collisionInertiaRot.z >= 0.0f)
+				InteriaMaxOffsetRot.z = collisionInertiaRot.z;
+			else
+				InteriaMinOffsetRot.z = collisionInertiaRot.z;
+
+			multiplerInertiaRot -= (((float)originalDeltaT / timeTickRot) * 0.01f * timeStepRot);
+			if (multiplerInertiaRot < 0.001f)
+				multiplerInertiaRot = 0.0f;
+			collisionInertiaRot *= multiplerInertiaRot;
+		}
+
+
+		float timeMultiplierRot = timeTickRot / (float)deltaTRot;
+		diffRot = invRot * (diffRot * timeMultiplierRot);
+
+		// linear X = rotation Y, linear Y = rotation Z, linear Z = rotation X
+		NiPoint3 stiffnessXYZRot = NiPoint3(stiffnessYRot, stiffnessZRot, stiffnessXRot);
+		NiPoint3 stiffness2XYZRot = NiPoint3(stiffness2YRot, stiffness2ZRot, stiffness2XRot);
+		NiPoint3 dampingXYZRot = NiPoint3(dampingYRot, dampingZRot, dampingXRot);
+
+		NiPoint3 diff2Rot(diffRot.x * diffRot.x * sgn(diffRot.x), diffRot.y * diffRot.y * sgn(diffRot.y), diffRot.z * diffRot.z * sgn(diffRot.z));
+		NiPoint3 forceRot = (NiPoint3((diffRot.x * stiffnessXYZRot.x) + (diff2Rot.x * stiffness2XYZRot.x)
+			, (diffRot.y * stiffnessXYZRot.y) + (diff2Rot.y * stiffness2XYZRot.y)
+			, (diffRot.z * stiffnessXYZRot.z) + (diff2Rot.z * stiffness2XYZRot.z))
+			- forceGravityBias);
+
+		velocityRot = invRot * velocityRot;
+
+		do {
+			// Assume mass is 1, so Accelleration is Force, can vary mass by changinf force
+			//velocity = (velocity + (force * timeStep)) * (1 - (damping * timeStep));
+
+			velocityRot = velocityRot * Friction; //Fixes that when becomes unstable collisions during colliding at low or unstable FPS
+
+			velocityRot.x = (velocityRot.x + (forceRot.x * timeStepRot)) - (velocityRot.x * (dampingXYZRot.x * timeStepRot));
+			velocityRot.y = (velocityRot.y + (forceRot.y * timeStepRot)) - (velocityRot.y * (dampingXYZRot.y * timeStepRot));
+			velocityRot.z = (velocityRot.z + (forceRot.z * timeStepRot)) - (velocityRot.z * (dampingXYZRot.z * timeStepRot));
+
+			posDeltaRot += velocityRot * timeStepRot;
+
+			deltaTRot -= timeTickRot;
+		} while (deltaTRot >= timeTickRot);
+
+		velocityRot = obj->m_parent->m_worldTransform.rot * velocityRot;
+
+		newPosRot = newPosRot + obj->m_parent->m_worldTransform.rot * (posDeltaRot * fpsCorrection);
+
+		NiPoint3 newdiffRot = newPosRot - target;
+		
+		varRotationalXnew = varRotationalXnew * forceAmplitude;
+		varRotationalYnew = varRotationalYnew * forceAmplitude;
+		varRotationalZnew = varRotationalZnew * forceAmplitude;
+
+		ldiffRot = invRot * newdiffRot;
+
+		auto beforenewrdiffRot = ldiffRot;
+
+		ldiffRot.x = clamp(ldiffRot.x, YminOffsetRot + InteriaMinOffsetRot.x, YmaxOffsetRot + InteriaMaxOffsetRot.x); //rot y
+		ldiffRot.y = clamp(ldiffRot.y, ZminOffsetRot + InteriaMinOffsetRot.y, ZmaxOffsetRot + InteriaMaxOffsetRot.y); //rot z
+		ldiffRot.z = clamp(ldiffRot.z, XminOffsetRot + InteriaMinOffsetRot.z, XmaxOffsetRot + InteriaMaxOffsetRot.z); //rot x
+
+		beforenewrdiffRot = beforenewrdiffRot - ldiffRot;
+
+		ldiffRot.x = ldiffRot.x + ((beforenewrdiffRot.z * rotationXspreadforceY) + (beforenewrdiffRot.y * rotationZspreadforceY));
+		ldiffRot.y = ldiffRot.y + ((beforenewrdiffRot.z * rotationXspreadforceZ) + (beforenewrdiffRot.x * rotationYspreadforceZ));
+		ldiffRot.z = ldiffRot.z + ((beforenewrdiffRot.x * rotationYspreadforceX) + (beforenewrdiffRot.y * rotationZspreadforceX));
+
+		ldiffRot.x = clamp(ldiffRot.x, YminOffsetRot + InteriaMinOffsetRot.x, YmaxOffsetRot + InteriaMaxOffsetRot.x); //rot y
+		ldiffRot.y = clamp(ldiffRot.y, ZminOffsetRot + InteriaMinOffsetRot.y, ZmaxOffsetRot + InteriaMaxOffsetRot.y); //rot z
+		ldiffRot.z = clamp(ldiffRot.z, XminOffsetRot + InteriaMinOffsetRot.z, XmaxOffsetRot + InteriaMaxOffsetRot.z); //rot x
+
+		ldiffRot = ldiffRot + (invRot * NiPoint3(0, 0, varGravityCorrection));
+
+		auto rdiffXnew = ldiffRot * varRotationalXnew;
+		auto rdiffYnew = ldiffRot * varRotationalYnew;
+		auto rdiffZnew = ldiffRot * varRotationalZnew;
+
+		rdiffXnew.x *= linearXrotationX;
+		rdiffXnew.y *= linearYrotationX;
+		rdiffXnew.z *= linearZrotationX; //1
+
+		rdiffYnew.x *= linearXrotationY; //1
+		rdiffYnew.y *= linearYrotationY;
+		rdiffYnew.z *= linearZrotationY;
+
+		rdiffZnew.x *= linearXrotationZ;
+		rdiffZnew.y *= linearYrotationZ; //1
+		rdiffZnew.z *= linearZrotationZ;
+
+		newRot.SetEulerAngles(rdiffYnew.x + rdiffYnew.y + rdiffYnew.z, rdiffZnew.x + rdiffZnew.y + rdiffZnew.z, rdiffXnew.x + rdiffXnew.y + rdiffXnew.z);
+	});
 
 	///#### physics calculate done
 	///#### collision calculate start
@@ -1531,6 +1862,9 @@ void Thing::update(Actor* actor) {
 
 	if (collisionsOn && ActorCollisionsEnabled)
 	{
+		std::vector<int> thingIdList;
+		std::vector<int> hashIdList;
+
 		NiPoint3 GroundCollisionVector = emptyPoint;
 
 		//The rotation of the previous frame due to collisions should not be used
@@ -1544,13 +1878,14 @@ void Thing::update(Actor* actor) {
 
 		NiPoint3 maybePos = target + (obj->m_parent->m_worldTransform.rot * (maybeldiff + (thingDefaultPos * nodeScale))); //add missing local pos
 
+		float colliderNodescale = 1.0f - ((1.0f - (nodeScale / actorBaseScale)) * scaleWeight); //Calibrate the scale gap between collider and actual mesh caused by bone weight
+		
 		//After cbp movement collision detection
-		thingIdList.clear();
 		for (int i = 0; i < thingCollisionSpheres.size(); i++)
 		{
-			thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * nodeScale;
+			thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * actorBaseScale * colliderNodescale;
 			thingCollisionSpheres[i].worldPos = maybePos + (objRotation * thingCollisionSpheres[i].offset100);
-			thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * nodeScale;
+			thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * actorBaseScale * colliderNodescale;
 			thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 			hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
 			for (int m = 0; m < hashIdList.size(); m++)
@@ -1563,13 +1898,13 @@ void Thing::update(Actor* actor) {
 		}
 		for (int i = 0; i < thingCollisionCapsules.size(); i++)
 		{
-			thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * nodeScale;
+			thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * actorBaseScale * colliderNodescale;
 			thingCollisionCapsules[i].End1_worldPos = maybePos + (objRotation * thingCollisionCapsules[i].End1_offset100);
-			thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * nodeScale;
+			thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * actorBaseScale * colliderNodescale;
 			thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
-			thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * nodeScale;
+			thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * actorBaseScale * colliderNodescale;
 			thingCollisionCapsules[i].End2_worldPos = maybePos + (objRotation * thingCollisionCapsules[i].End2_offset100);
-			thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * nodeScale;
+			thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * actorBaseScale * colliderNodescale;
 			thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 			hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End2_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 				, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
@@ -1587,7 +1922,7 @@ void Thing::update(Actor* actor) {
 		NiPoint3 lastcollisionVector = emptyPoint;
 
 		CollisionConfig.maybePos = maybePos;
-		CollisionConfig.cnvRot = obj->m_parent->m_worldTransform.rot;
+		CollisionConfig.origRot = obj->m_parent->m_worldTransform.rot;
 		CollisionConfig.objRot = objRotation;
 		CollisionConfig.invRot = invRot;
 
@@ -1698,12 +2033,7 @@ void Thing::update(Actor* actor) {
 
 					//it can allow only force up to the radius for doesn't get crushed by the ground
 					if (Scalar > bottomRadius)
-					{
-						if (Scalar < bottomRadius * 1.5f)
-							Scalar = bottomRadius;
-						else
-							Scalar = 0;
-					}
+						Scalar = 0;
 
 					GroundCollisionVector = NiPoint3(0, 0, Scalar);
 				}
@@ -1722,7 +2052,7 @@ void Thing::update(Actor* actor) {
 			//However, simply applying the multipler then changes the actual node position,so that's making the collisions out of sync
 			//Therefore to make perfect collision
 			//it seems to be pushed out as much as colliding to the naked eye, but the actual position of the colliding node must be maintained original position
-			maybeIdiffcol = (ldiffcol + ldiffGcol) * collisionMultipler;
+			maybeIdiffcol = (ldiffcol + ldiffGcol) * collisionMultipler / obj->m_parent->m_worldTransform.scale;
 
 			//add collision vector buffer of one frame to some reduce jitter and add softness by collision
 			//be particularly useful for both nodes colliding that defined in both affected and collider nodes
@@ -1786,21 +2116,28 @@ void Thing::update(Actor* actor) {
 	//### To be free from unstable FPS, have to remove the varGravityCorrection from the next frame
 	if (collisionElastic && maybeNot)
 	{
-		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol)) + target - NiPoint3(0, 0, varGravityCorrection);
+		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol + ldiffGcol)) + target - NiPoint3(0, 0, varGravityCorrection);
+		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * (ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot)) + target - NiPoint3(0, 0, varGravityCorrection);
+
+		collisionInertia += (ldiffcol + ldiffGcol);
+		collisionInertiaRot += ((ldiffcol + ldiffGcol) * collisionMultiplerRot);
+		multiplerInertia = 1.0f;
+		multiplerInertiaRot = 1.0f;
 	}
 	else
 	{
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * ldiff) + target - NiPoint3(0, 0, varGravityCorrection);
+		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * ldiffRot) + target - NiPoint3(0, 0, varGravityCorrection);
 	}
 
 	thing_SetNode_lock.lock();
-	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (ldiff.x * varLinearX) + maybeIdiffcol.x;
-	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (ldiff.y * varLinearY) + maybeIdiffcol.y;
-	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (ldiff.z * varLinearZ) + maybeIdiffcol.z;
+	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (((ldiff.x * varLinearX) + maybeIdiffcol.x) * nodeParentInvScale);
+	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (((ldiff.y * varLinearY) + maybeIdiffcol.y) * nodeParentInvScale);
+	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (((ldiff.z * varLinearZ) + maybeIdiffcol.z) * nodeParentInvScale);
 	obj->m_localTransform.rot = thingDefaultRot * newRot;
 	thing_SetNode_lock.unlock();
 
-	RefreshNode(obj);
+	RefreshNode(obj, thing_Refresh_node_lock);
 
 	//logger.error("end update()\n");
 	/*QueryPerformanceCounter(&endingTime);

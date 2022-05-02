@@ -20,13 +20,9 @@ struct CollisionConfigs {
 	NiPoint3 maybePos = emptyPoint;
 	NiMatrix33 objRot;
 
-	NiMatrix33 cnvRot;
+	NiMatrix33 origRot;
 	NiMatrix33 invRot;
-
-	NiPoint3 RotationalX = emptyPoint;
-	NiPoint3 RotationalY = emptyPoint;
-	NiPoint3 RotationalZ = emptyPoint;
-
+	
 	NiPoint3 CollisionMaxOffset = NiPoint3(100.0f, 100.0f, 100.0f);
 	NiPoint3 CollisionMinOffset = NiPoint3(-100.0f, -100.0f, -100.0f);
 };
@@ -45,6 +41,10 @@ public:
 
 	float ColliderWeight = 50;
 
+	float actorBaseScale = 1.0f;
+
+	float scaleWeight = 1.0f;
+
 	Actor* colliderActor;
 
 	NiPoint3 lastColliderPosition = emptyPoint;
@@ -53,7 +53,7 @@ public:
 	
 	bool CheckCollision(NiPoint3 &collisionDiff, std::vector<Sphere>& thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig, bool maybe);
 
-	bool CheckPelvisCollision(NiPoint3& collisionDiff, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig);
+	bool CheckPelvisCollision(NiPoint3 &collisionDiff, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, CollisionConfigs CollisionConfig);
 	std::vector<Sphere> collisionSpheres;
 	std::vector<Capsule> collisionCapsules;
 	
@@ -64,7 +64,7 @@ public:
 	NiPoint3 ClosestPointOnLineSegment(NiPoint3 lineStart, NiPoint3 lineEnd, NiPoint3 point);
 
 	#ifdef RUNTIME_VR_VERSION_1_4_15
-	bool IsItCollidingTriangleToAffectedNodes(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Triangle> &collisionTriangle, CollisionSetUpPackage CollisionSetUp, bool maybe);
+	bool IsItCollidingTriangleToAffectedNodes(NiPoint3 &collisiondif, std::vector<Sphere> &thingCollisionSpheres, std::vector<Capsule>& thingCollisionCapsules, std::vector<Triangle> &collisionTriangle, CollisionConfigs CollisionConfig, bool maybe);
 
 	std::vector<Triangle> collisionTriangles;
 	
