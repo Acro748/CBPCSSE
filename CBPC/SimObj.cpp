@@ -169,12 +169,12 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				tt.second.ActorCollisionsEnabled = CollisionsEnabled;
 				if (strcmp(tt.first, pelvis) == 0)
 				{
-					tt.second.updatePelvis(actor, thing_SetNode_lock, thing_ReadNode_lock, thing_Refresh_node_lock);
+					tt.second.updatePelvis(actor, thing_ReadNode_lock, thing_Refresh_node_lock);
 				}
 				else
 				{
 					tt.second.groundPos = groundPos;
-					tt.second.update(actor, thing_SetNode_lock, thing_ReadNode_lock, thing_Refresh_node_lock);
+					tt.second.update(actor, thing_ReadNode_lock, thing_Refresh_node_lock);
 					if (tt.second.VirtualCollisionEnabled)
 					{
 						NodeCollisionSync[tt.first] = tt.second.collisionSync;
