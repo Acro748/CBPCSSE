@@ -106,11 +106,10 @@ extern std::atomic<bool> MainMenuOpen;
 extern std::atomic<bool> consoleConfigReload;
 extern std::atomic<bool> consoleCollisionReload;
 
-extern std::string breastGravityReferenceBoneName;
 extern BSFixedString breastGravityReferenceBoneString;
 
-extern std::string GroundReferenceBoneName;
 extern BSFixedString GroundReferenceBone;
+extern BSFixedString HighheelReferenceBone;
 
 extern BGSKeyword* KeywordArmorClothing;
 extern BGSKeyword* KeywordArmorLight;
@@ -404,4 +403,4 @@ public:
 extern EventDispatcher<TESEquipEvent>* g_TESEquipEventDispatcher;
 extern TESEquipEventHandler g_TESEquipEventHandler;
 
-
+extern bool debugtimelog;

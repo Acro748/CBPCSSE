@@ -109,11 +109,10 @@ int collisionSkipFrames = 0; //0
 int collisionSkipFramesPelvis = 5; //5
 
 
-std::string breastGravityReferenceBoneName = "NPC Spine2 [Spn2]";
-BSFixedString breastGravityReferenceBoneString;
+BSFixedString breastGravityReferenceBoneString("NPC Spine2 [Spn2]");
 
-std::string GroundReferenceBoneName = "NPC Root [Root]";
-BSFixedString GroundReferenceBone;
+BSFixedString GroundReferenceBone("NPC Root [Root]");
+BSFixedString HighheelReferenceBone("NPC");
 
 UInt32 KeywordArmorLightFormId = 0x06BBD3;
 BGSKeyword* KeywordArmorLight;
@@ -1116,9 +1115,9 @@ void GameLoad()
 		}
 	}
 
-	breastGravityReferenceBoneString = ReturnUsableString(breastGravityReferenceBoneName);
+//	breastGravityReferenceBoneString = ReturnUsableString(breastGravityReferenceBoneName);
 
-	GroundReferenceBone = ReturnUsableString(GroundReferenceBoneName);
+//	GroundReferenceBone = ReturnUsableString(GroundReferenceBoneName);
 }
 
 void loadMasterConfig()

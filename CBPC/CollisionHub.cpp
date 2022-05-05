@@ -266,7 +266,7 @@ bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<s
 
 	concurrency::parallel_for (size_t(0), ColliderNodesListPtr->size(), [&](size_t j)
 	{
-		if (GroundReferenceBoneName.compare(ColliderNodesListPtr->at(j).NodeName) == 0) //detecting NPC Root [Root] node for ground collision
+		if (ColliderNodesListPtr->at(j).NodeName.compare(GroundReferenceBone.data) == 0) //detecting NPC Root [Root] node for ground collision
 		{
 			GroundCollisionEnabled = true;
 		}

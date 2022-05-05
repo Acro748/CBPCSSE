@@ -590,7 +590,9 @@ void updateActors()
 								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
 							}
 						}
-						InterlockedIncrement(&colliderSphereCount);
+
+						if (logging)
+							InterlockedIncrement(&colliderSphereCount);
 					}
 					for (int j = 0; j < collider.second.collisionCapsules.size(); j++)
 					{
@@ -605,7 +607,9 @@ void updateActors()
 								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
 							}
 						}
-						InterlockedIncrement(&colliderCapsuleCount);
+
+						if (logging)
+							InterlockedIncrement(&colliderCapsuleCount);
 					}
 #ifdef RUNTIME_VR_VERSION_1_4_15
 					for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
