@@ -62,6 +62,8 @@ public:
 	bool isBound() const { return bound; }
 
 	bool GroundCollisionEnabled = false;
+
+	float groundPos = -10000.0f;
 };
 
 bool IsActorValid(Actor *actor);

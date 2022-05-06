@@ -339,9 +339,9 @@ void UpdateColliderPositions(concurrency::concurrent_unordered_map<std::string, 
 	});
 }
 
-std::vector<int> GetHashIdsFromPos(NiPoint3 pos, float radius)
+std::vector<int> GetHashIdsFromPos(NiPoint3 pos, float radiusplus)
 {
-	float radiusplus = radius + 1.0f; //1 is enough now.
+	//float radiusplus = radius + 1.0f; //1 is enough now.
 
 	std::vector<int> hashIdList;
 	

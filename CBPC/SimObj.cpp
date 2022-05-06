@@ -126,11 +126,9 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 		return;
 	}
 
-	float groundPos = -10000.0f;
-	float gravityRatio = 1.0f;
-	if (actor->loadedState && actor->loadedState->node)
+	if (GroundCollisionEnabled && CollisionsEnabled)
 	{
-		if (GroundCollisionEnabled)
+		if (actor->loadedState && actor->loadedState->node)
 		{
 			NiAVObject* groundobj = actor->loadedState->node->GetObjectByName(&GroundReferenceBone.data);
 			if (groundobj)
@@ -145,8 +143,6 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 			}
 		}
 	}
-	else
-		return;
 
 	//## thing_Refresh_node_lock
 	// editing the node update time seems to affect the entire node tree even if without editing entire node tree
