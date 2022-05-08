@@ -76,7 +76,7 @@ bool SimObj::bind(Actor *actor, bool isMale)
 				}
 				BSFixedString cs = ReturnUsableString(affectedBones.at(i).at(j));
 				obj_read_lock.lock();
-				auto bone = loadedState->node->GetObjectByName(&cs.data);
+				NiAVObject* bone = loadedState->node->GetObjectByName(&cs.data);
 				obj_read_lock.unlock();
 				if (bone)
 				{
@@ -144,13 +144,18 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 		}
 	}
 
-	//## thing_Refresh_node_lock
-	// editing the node update time seems to affect the entire node tree even if without editing entire node tree
-
 	//## thing_ReadNode_lock
 	// It seems that a read error occurs when the GetObjectByName() function is called simultaneously
 
-	std::shared_mutex thing_ReadNode_lock, thing_Refresh_node_lock;
+	//## thing_SetNode_lock
+	// There's nothing problem with editing, but if editing once then all node world positions are updated.
+	// so it seems that a high probability of overloading if it is processed by parallel processing.
+
+	//## thing_Refresh_node_lock
+	// editing the node update time seems to affect the entire node tree even if without editing entire node tree
+
+
+	std::shared_mutex thing_ReadNode_lock, thing_SetNode_lock, thing_Refresh_node_lock;
 
 	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
 	{
@@ -165,12 +170,12 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				tt.second.ActorCollisionsEnabled = CollisionsEnabled;
 				if (strcmp(tt.first, pelvis) == 0)
 				{
-					tt.second.updatePelvis(actor, thing_ReadNode_lock, thing_Refresh_node_lock);
+					tt.second.updatePelvis(actor, thing_ReadNode_lock, thing_SetNode_lock, thing_Refresh_node_lock);
 				}
 				else
 				{
 					tt.second.groundPos = groundPos;
-					tt.second.update(actor, thing_ReadNode_lock, thing_Refresh_node_lock);
+					tt.second.update(actor, thing_ReadNode_lock, thing_SetNode_lock, thing_Refresh_node_lock);
 					if (tt.second.VirtualCollisionEnabled)
 					{
 						NodeCollisionSync[tt.first] = tt.second.collisionSync;

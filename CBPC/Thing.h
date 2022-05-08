@@ -365,9 +365,9 @@ public:
 	void updateConfig(Actor* actor, configEntry_t &centry, configEntry_t& centry0weight);
 	void dump();
 	
-	void update(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_Refresh_node_lock);
-	void updatePelvis(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_Refresh_node_lock);
-	bool ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_lock);
+	void update(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_Refresh_node_lock);
+	void updatePelvis(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_Refresh_node_lock);
+	bool ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
 	void CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback);
 	void reset();
 

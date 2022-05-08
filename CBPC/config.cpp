@@ -1144,6 +1144,7 @@ void loadMasterConfig()
 		{
 			std::string line;
 			std::string currentSetting;
+			bool isThereVaginaNode = false;
 			bool isChain = false;
 			std::vector<std::string> affectedBonesList;
 			while (std::getline(file, line))
@@ -1193,11 +1194,25 @@ void loadMasterConfig()
 								std::string conditions;
 								std::string variableValue = GetConfigSettings2StringValues(line, variableName, conditions);
 								bool isFound = false;
+								if (variableName.compare("NPC L Pussy02") == 0 || variableName.compare("NPC R Pussy02") == 0 || variableName.compare("VaginaB1") == 0 || variableName.compare("Clitoral1") == 0)
+									isThereVaginaNode = true;
+								
+								if (variableName.compare("NPC Pelvis [Pelv]") == 0 && isThereVaginaNode)
+									continue;
+
 								for (int i = 0; i < affectedBones.size(); i++)
 								{
 									if (std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), variableName) != affectedBones.at(i).end())
 									{
 										isFound = true;
+									}
+
+									auto FindPelvisNode = std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), "NPC Pelvis [Pelv]");
+									if (FindPelvisNode != affectedBones.at(i).end() && isThereVaginaNode)
+									{
+										affectedBones.at(i).erase(FindPelvisNode);
+										if (affectedBones.at(i).size() < 1)
+											affectedBones.erase(affectedBones.begin() + i);
 									}
 								}
 
@@ -1255,6 +1270,7 @@ void loadMasterConfig()
 					std::string line;
 					std::string currentSetting;
 					bool isChain = false;
+					bool isThereVaginaNode = false;
 					std::vector<std::string> affectedBonesList;
 					while (std::getline(file, line))
 					{
@@ -1300,11 +1316,25 @@ void loadMasterConfig()
 										std::string conditions;
 										std::string variableValue = GetConfigSettings2StringValues(line, variableName, conditions);
 										bool isFound = false;
+										if (variableName.compare("NPC L Pussy02") == 0 || variableName.compare("NPC R Pussy02") == 0 || variableName.compare("VaginaB1") == 0 || variableName.compare("Clitoral1") == 0)
+											isThereVaginaNode = true;
+
+										if (variableName.compare("NPC Pelvis [Pelv]") == 0 && isThereVaginaNode)
+											continue;
+
 										for (int i = 0; i < affectedBones.size(); i++)
 										{
 											if (std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), variableName) != affectedBones.at(i).end())
 											{
 												isFound = true;
+											}
+
+											auto FindPelvisNode = std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), "NPC Pelvis [Pelv]");
+											if (FindPelvisNode != affectedBones.at(i).end() && isThereVaginaNode)
+											{
+												affectedBones.at(i).erase(FindPelvisNode);
+												if (affectedBones.at(i).size() < 1)
+													affectedBones.erase(affectedBones.begin() + i);
 											}
 										}
 
