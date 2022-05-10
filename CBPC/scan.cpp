@@ -209,7 +209,7 @@ LARGE_INTEGER totaltime;
 int debugtimelog_framecount = 1;
 int totalcallcount = 0;
 
-///Average Update Time per 1000 frames in i7 4770k
+///Average Update Time per 1000 frames in i7 4770k (4 core/8 thread)
 ///
 ///#UseParallelProcessingOLD = 3
 ///Average Update Time = 702435 ns

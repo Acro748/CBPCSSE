@@ -301,44 +301,41 @@ void UpdateColliderPositions(concurrency::concurrent_unordered_map<std::string, 
 {
 	concurrency::parallel_for_each(colliderList.begin(), colliderList.end(), [&](auto& collider)
 	{
-		if (collider.second.CollisionObject)
+		NiPoint3 VirtualOffset = emptyPoint;
+
+		if (NodeCollisionSyncList.find(collider.second.colliderNodeName) != NodeCollisionSyncList.end())
+			VirtualOffset = NodeCollisionSyncList[collider.second.colliderNodeName];
+
+		float colliderNodescale = 1.0f - ((1.0f - (collider.second.CollisionObject->m_worldTransform.scale / collider.second.actorBaseScale)) * collider.second.scaleWeight);
+
+		for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
 		{
-			NiPoint3 VirtualOffset = emptyPoint;
+			collider.second.collisionSpheres[j].offset100 = collider.second.collisionSpheres[j].offset0 * collider.second.actorBaseScale * colliderNodescale;
+			collider.second.collisionSpheres[j].worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionSpheres[j].offset100) + VirtualOffset;
+			collider.second.collisionSpheres[j].radius100 = collider.second.collisionSpheres[j].radius0 * collider.second.actorBaseScale * colliderNodescale;
+			collider.second.collisionSpheres[j].radius100pwr2 = collider.second.collisionSpheres[j].radius100 * collider.second.collisionSpheres[j].radius100;
+		}
 
-			if (NodeCollisionSyncList.find(collider.second.colliderNodeName) != NodeCollisionSyncList.end())
-				VirtualOffset = NodeCollisionSyncList[collider.second.colliderNodeName];
-
-			float colliderNodescale = 1.0f - ((1.0f - (collider.second.CollisionObject->m_worldTransform.scale / collider.second.actorBaseScale)) * collider.second.scaleWeight);
-
-			for (int j = 0; j < collider.second.collisionSpheres.size(); j++)
-			{
-				collider.second.collisionSpheres[j].offset100 = collider.second.collisionSpheres[j].offset0 * collider.second.actorBaseScale * colliderNodescale;
-				collider.second.collisionSpheres[j].worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionSpheres[j].offset100) + VirtualOffset;
-				collider.second.collisionSpheres[j].radius100 = collider.second.collisionSpheres[j].radius0 * collider.second.actorBaseScale * colliderNodescale;
-				collider.second.collisionSpheres[j].radius100pwr2 = collider.second.collisionSpheres[j].radius100 * collider.second.collisionSpheres[j].radius100;
-			}
-
-			for (int k = 0; k < collider.second.collisionCapsules.size(); k++)
-			{
-				collider.second.collisionCapsules[k].End1_offset100 = collider.second.collisionCapsules[k].End1_offset0 * collider.second.actorBaseScale * colliderNodescale;
-				collider.second.collisionCapsules[k].End1_worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End1_offset100) + VirtualOffset;
-				collider.second.collisionCapsules[k].End1_radius100 = collider.second.collisionCapsules[k].End1_radius0 * collider.second.actorBaseScale * colliderNodescale;
-				collider.second.collisionCapsules[k].End1_radius100pwr2 = collider.second.collisionCapsules[k].End1_radius100 * collider.second.collisionCapsules[k].End1_radius100;
-				collider.second.collisionCapsules[k].End2_offset100 = collider.second.collisionCapsules[k].End2_offset0 * collider.second.actorBaseScale * colliderNodescale;
-				collider.second.collisionCapsules[k].End2_worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End2_offset100) + VirtualOffset;
-				collider.second.collisionCapsules[k].End2_radius100 = collider.second.collisionCapsules[k].End2_radius0 * collider.second.actorBaseScale * colliderNodescale;
-				collider.second.collisionCapsules[k].End2_radius100pwr2 = collider.second.collisionCapsules[k].End2_radius100 * collider.second.collisionCapsules[k].End2_radius100;
-			}
+		for (int k = 0; k < collider.second.collisionCapsules.size(); k++)
+		{
+			collider.second.collisionCapsules[k].End1_offset100 = collider.second.collisionCapsules[k].End1_offset0 * collider.second.actorBaseScale * colliderNodescale;
+			collider.second.collisionCapsules[k].End1_worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End1_offset100) + VirtualOffset;
+			collider.second.collisionCapsules[k].End1_radius100 = collider.second.collisionCapsules[k].End1_radius0 * collider.second.actorBaseScale * colliderNodescale;
+			collider.second.collisionCapsules[k].End1_radius100pwr2 = collider.second.collisionCapsules[k].End1_radius100 * collider.second.collisionCapsules[k].End1_radius100;
+			collider.second.collisionCapsules[k].End2_offset100 = collider.second.collisionCapsules[k].End2_offset0 * collider.second.actorBaseScale * colliderNodescale;
+			collider.second.collisionCapsules[k].End2_worldPos = collider.second.CollisionObject->m_worldTransform.pos + (collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionCapsules[k].End2_offset100) + VirtualOffset;
+			collider.second.collisionCapsules[k].End2_radius100 = collider.second.collisionCapsules[k].End2_radius0 * collider.second.actorBaseScale * colliderNodescale;
+			collider.second.collisionCapsules[k].End2_radius100pwr2 = collider.second.collisionCapsules[k].End2_radius100 * collider.second.collisionCapsules[k].End2_radius100;
+		}
 
 #ifdef RUNTIME_VR_VERSION_1_4_15
-			for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
-			{
-				collider.second.collisionTriangles[j].a = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orga * colliderNodescale;
-				collider.second.collisionTriangles[j].b = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgb * colliderNodescale;
-				collider.second.collisionTriangles[j].c = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgc * colliderNodescale;
-			}
-#endif
+		for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
+		{
+			collider.second.collisionTriangles[j].a = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orga * colliderNodescale;
+			collider.second.collisionTriangles[j].b = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgb * colliderNodescale;
+			collider.second.collisionTriangles[j].c = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgc * colliderNodescale;
 		}
+#endif
 	});
 }
 

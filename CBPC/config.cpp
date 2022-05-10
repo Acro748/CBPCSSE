@@ -1208,7 +1208,7 @@ void loadMasterConfig()
 									}
 
 									auto FindPelvisNode = std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), "NPC Pelvis [Pelv]");
-									if (FindPelvisNode != affectedBones.at(i).end() && isThereVaginaNode)
+									if (FindPelvisNode != affectedBones.at(i).end() && isThereVaginaNode) //if enabled vagina physics then auto disabling pelvis collision
 									{
 										affectedBones.at(i).erase(FindPelvisNode);
 										if (affectedBones.at(i).size() < 1)
@@ -1330,7 +1330,7 @@ void loadMasterConfig()
 											}
 
 											auto FindPelvisNode = std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), "NPC Pelvis [Pelv]");
-											if (FindPelvisNode != affectedBones.at(i).end() && isThereVaginaNode)
+											if (FindPelvisNode != affectedBones.at(i).end() && isThereVaginaNode)//if enabled vagina physics then auto disabling pelvis collision
 											{
 												affectedBones.at(i).erase(FindPelvisNode);
 												if (affectedBones.at(i).size() < 1)

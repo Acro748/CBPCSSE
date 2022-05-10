@@ -1077,6 +1077,8 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, s
 
 	if (genitalPenetration)
 	{
+		//need to convert world pos diif to local pos diff due to node scale
+		//but min/max limit follows node scale because it can cause like torn pussy in small actor
 		float opening = distance(collisionDiff, emptyPoint) * pelvisInvScale;
 
 		CalculateDiffVagina(leftVector, opening, true, true);
@@ -1169,9 +1171,7 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 	NiMatrix33 bulgenodeRotation = bulgeObj->m_worldTransform.rot;
 	NiPoint3 bulgenodePosition = bulgeObj->m_worldTransform.pos;
 	float bulgenodeScale = bulgeObj->m_worldTransform.scale;
-	float bellynodeInvScale = 1.0f;
-
-	bellynodeInvScale = 1.0f / bellyObj->m_parent->m_worldTransform.scale; //world transform pos to local transform pos edited by scale
+	float bellynodeInvScale = 1.0f / bellyObj->m_parent->m_worldTransform.scale; //world transform pos to local transform pos edited by scale
 
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
@@ -1262,34 +1262,40 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 	if (genitalPenetration)
 	{
 		const float opening = distance(collisionDiff, emptyPoint) * 2.0f;
-		if (thing_bellybulgemultiplier > 0 && genitalPenetration)
+
+		LOG("Belly bulge %f, %f, %f", collisionDiff.x, collisionDiff.y, collisionDiff.z);
+
+		//LOG("opening:%g", opening);
+//		bellyBulgeCountDown = 1000;
+
+		//need to convert world pos diif to local pos diff due to node scale
+		//but min/max limit follows node scale because it can cause like torn pussy in small actor
+		float horPos = opening * thing_bellybulgemultiplier * bellynodeInvScale;
+		horPos = clamp(horPos, 0.0f, thing_bellybulgemax);
+		float lowPos = (thing_bellybulgeposlowest / thing_bellybulgemax) * horPos;
+
+
+		if (lastMaxOffsetY < horPos)
 		{
-			LOG("Belly bulge %f, %f, %f", collisionDiff.x, collisionDiff.y, collisionDiff.z);
-
-			//LOG("opening:%g", opening);
-	//		bellyBulgeCountDown = 1000;
-			
-			float horPos = opening * thing_bellybulgemultiplier * bellynodeInvScale;
-			horPos = clamp(horPos, 0.0f, thing_bellybulgemax);
-			float lowPos = (thing_bellybulgeposlowest / thing_bellybulgemax) * horPos;
-
-
-			if (lastMaxOffsetY < horPos)
-			{
-				lastMaxOffsetY = abs(horPos);
-				lastMaxOffsetZ = abs(lowPos);
-			}
-
-			thing_SetNode_lock.lock();
-			bellyObj->m_localTransform.pos.y = bellyDefaultPos.y + horPos;
-			bellyObj->m_localTransform.pos.z = bellyDefaultPos.z + lowPos;
-			thing_SetNode_lock.unlock();
-
-			//float vertPos = opening * bellybulgeposmultiplier;
-			//vertPos = clamp(vertPos, bellybulgeposlowest, 0.0f);
-			LOG("belly bulge vert:%g horiz:%g", lowPos, horPos);
-			return true;
+			lastMaxOffsetY = abs(horPos);
+			lastMaxOffsetZ = abs(lowPos);
 		}
+
+		thing_SetNode_lock.lock();
+		bellyObj->m_localTransform.pos.y = bellyDefaultPos.y + horPos;
+		bellyObj->m_localTransform.pos.z = bellyDefaultPos.z + lowPos;
+		thing_SetNode_lock.unlock();
+
+		//need to reset physics
+		oldWorldPos = bellyObj->m_worldTransform.pos - (bellyObj->m_parent->m_worldTransform.rot * bellyDefaultPos * bulgenodeScale);
+		oldWorldPosRot = bellyObj->m_worldTransform.pos - (bellyObj->m_parent->m_worldTransform.rot * bellyDefaultPos * bulgenodeScale);
+		velocity = emptyPoint;
+		velocityRot = emptyPoint;
+
+		//float vertPos = opening * bellybulgeposmultiplier;
+		//vertPos = clamp(vertPos, bellybulgeposlowest, 0.0f);
+		LOG("belly bulge vert:%g horiz:%g", lowPos, horPos);
+		return true;
 	}
 	return false;
 }
@@ -1331,14 +1337,14 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	time = newTime;
 
 	bool isSkippedmanyFrames = false;
-	if (deltaT >= 200) // Frame blank for more than 0.2 sec
+	if (deltaT >= 200) // Frame blank for more than 0.2 sec / 5 fps
 		isSkippedmanyFrames = true;
 
 	float fpsCorrection = 1.0f;
 
 	if (fpsCorrectionEnabled)
 	{
-		if (deltaT > 100) deltaT = 100; //fps min 10
+		if (deltaT > 50) deltaT = 50; //fps min 20 //To prevent infinite shaking at very low fps, it's seems better to calibrate to a minimum of 20 fps
 		if (deltaT < 4) deltaT = 4; //fps max 240
 
 		fpsCorrection = ((float)deltaT * 0.0625f); // = deltaT / (1sec / (fps60tick = 1 / 60 * 1000 = 16))
@@ -1391,15 +1397,13 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		return;
 
 	float nodeScale = obj->m_worldTransform.scale;
-	float nodeParentInvScale = 1.0f / obj->m_parent->m_worldTransform.scale; //world transform pos to local transform pos edited by scale
+	float nodeParentInvScale = 1.0f / obj->m_parent->m_worldTransform.scale; //need to convert world transform pos to local transform pos due to node scale
 
 	if (IsBellyBone && ActorCollisionsEnabled && thing_bellybulgemultiplier > 0)
 	{
 		if (ApplyBellyBulge(actor, thing_ReadNode_lock, thing_SetNode_lock))
 		{
 			RefreshNode(obj, thing_Refresh_node_lock);
-			oldWorldPos = obj->m_worldTransform.pos - (obj->m_parent->m_worldTransform.rot * thingDefaultPos * nodeScale);
-			oldWorldPosRot = obj->m_worldTransform.pos - (obj->m_parent->m_worldTransform.rot * thingDefaultPos * nodeScale);
 			return;
 		}
 	}
@@ -1703,7 +1707,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 			deltaT -= timeTick;
 		} while (deltaT >= timeTick);
 
-		velocity = obj->m_parent->m_worldTransform.rot * velocity;
+		velocity = obj->m_parent->m_worldTransform.rot * velocity; //velocity is maintain on world transform
 
 		newPos = newPos + obj->m_parent->m_worldTransform.rot * (posDelta * fpsCorrection);
 
@@ -1797,7 +1801,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 			deltaTRot -= timeTickRot;
 		} while (deltaTRot >= timeTickRot);
 
-		velocityRot = obj->m_parent->m_worldTransform.rot * velocityRot;
+		velocityRot = obj->m_parent->m_worldTransform.rot * velocityRot; //velocity is maintain on world transform
 
 		newPosRot = newPosRot + obj->m_parent->m_worldTransform.rot * (posDeltaRot * fpsCorrection);
 
@@ -2048,14 +2052,14 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 
 			rcoldiffXnew.x *= linearXrotationX;
 			rcoldiffXnew.y *= linearYrotationX;
-			rcoldiffXnew.z *= linearZrotationX;
+			rcoldiffXnew.z *= linearZrotationX; //1
 
-			rcoldiffYnew.x *= linearXrotationY;
+			rcoldiffYnew.x *= linearXrotationY; //1
 			rcoldiffYnew.y *= linearYrotationY;
 			rcoldiffYnew.z *= linearZrotationY;
 
 			rcoldiffZnew.x *= linearXrotationZ;
-			rcoldiffZnew.y *= linearYrotationZ;
+			rcoldiffZnew.y *= linearYrotationZ; //1
 			rcoldiffZnew.z *= linearZrotationZ;
 
 			NiMatrix33 newcolRot;
