@@ -124,23 +124,6 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 Thing::~Thing() {
 }
 
-void RefreshNode(NiAVObject* node, std::shared_mutex& thing_Refresh_node_lock)
-{
-	if (node == nullptr || node->m_name == nullptr)
-		return;
-
-	if (std::find(noJitterFixNodesList.begin(), noJitterFixNodesList.end(), node->m_name) != noJitterFixNodesList.end())
-		return;
-
-	NiAVObject::ControllerUpdateContext ctx;
-	ctx.flags = 0;
-	ctx.delta = 0;
-
-	thing_Refresh_node_lock.lock();
-	node->UpdateWorldData(&ctx);
-	thing_Refresh_node_lock.unlock();
-}
-
 std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::string nodeName)
 {
 	auto actorRef = DYNAMIC_CAST(actor, Actor, TESObjectREFR);
@@ -851,7 +834,7 @@ template <typename T> int sgn(T val) {
 	return (T(0) < val) - (val < T(0));
 }
 
-void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_Refresh_node_lock)
+void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock)
 {
 	if (skipFramesPelvisCount > 0)
 	{
@@ -1099,12 +1082,11 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, s
 	rightPusObj->m_localTransform.pos = rightPussyDefaultPos + rightVector;
 	backPusObj->m_localTransform.pos = backPussyDefaultPos + backVector;
 	frontPusObj->m_localTransform.pos = frontPussyDefaultPos + frontVector;
+	RefreshNode(leftPusObj);
+	RefreshNode(rightPusObj);
+	RefreshNode(backPusObj);
+	RefreshNode(frontPusObj);
 	thing_SetNode_lock.unlock();
-
-	RefreshNode(leftPusObj, thing_Refresh_node_lock);
-	RefreshNode(rightPusObj, thing_Refresh_node_lock);
-	RefreshNode(backPusObj, thing_Refresh_node_lock);
-	RefreshNode(frontPusObj, thing_Refresh_node_lock);
 	/*QueryPerformanceCounter(&endingTime);
 	elapsedMicroseconds.QuadPart = endingTime.QuadPart - startingTime.QuadPart;
 	elapsedMicroseconds.QuadPart *= 1000000000LL;
@@ -1284,6 +1266,7 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 		thing_SetNode_lock.lock();
 		bellyObj->m_localTransform.pos.y = bellyDefaultPos.y + horPos;
 		bellyObj->m_localTransform.pos.z = bellyDefaultPos.z + lowPos;
+		RefreshNode(bellyObj);
 		thing_SetNode_lock.unlock();
 
 		//need to reset physics
@@ -1300,7 +1283,7 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 	return false;
 }
 
-void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_Refresh_node_lock) {
+void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock) {
 
 	bool collisionsOn = true;
 
@@ -1403,7 +1386,6 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	{
 		if (ApplyBellyBulge(actor, thing_ReadNode_lock, thing_SetNode_lock))
 		{
-			RefreshNode(obj, thing_Refresh_node_lock);
 			return;
 		}
 	}
@@ -2118,9 +2100,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (((ldiff.y * varLinearY) + maybeIdiffcol.y) * nodeParentInvScale);
 	obj->m_localTransform.pos.z = thingDefaultPos.z + ZdefaultOffset + (((ldiff.z * varLinearZ) + maybeIdiffcol.z) * nodeParentInvScale);
 	obj->m_localTransform.rot = thingDefaultRot * newRot;
+	RefreshNode(obj);
 	thing_SetNode_lock.unlock();
-
-	RefreshNode(obj, thing_Refresh_node_lock);
 
 	//logger.error("end update()\n");
 	/*QueryPerformanceCounter(&endingTime);

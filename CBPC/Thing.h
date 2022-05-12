@@ -14,6 +14,21 @@
 extern const char *leftPussy;
 extern const char *rightPussy;
 
+inline void RefreshNode(NiAVObject* node)
+{
+	if (node == nullptr || node->m_name == nullptr)
+		return;
+
+	if (std::find(noJitterFixNodesList.begin(), noJitterFixNodesList.end(), node->m_name) != noJitterFixNodesList.end())
+		return;
+
+	NiAVObject::ControllerUpdateContext ctx;
+	ctx.flags = 0;
+	ctx.delta = 0;
+
+	node->UpdateWorldData(&ctx);
+}
+
 class Thing {
 	BSFixedString boneName;
 	NiPoint3 oldWorldPos;
@@ -365,8 +380,8 @@ public:
 	void updateConfig(Actor* actor, configEntry_t &centry, configEntry_t& centry0weight);
 	void dump();
 	
-	void update(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_Refresh_node_lock);
-	void updatePelvis(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_Refresh_node_lock);
+	void update(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
+	void updatePelvis(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
 	bool ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
 	void CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback);
 	void reset();
@@ -444,3 +459,4 @@ public:
 
 	float varGravityCorrection = -1 * gravityCorrection;
 };
+

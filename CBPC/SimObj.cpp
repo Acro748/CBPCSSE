@@ -155,7 +155,7 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 	// editing the node update time seems to affect the entire node tree even if without editing entire node tree
 
 
-	std::shared_mutex thing_ReadNode_lock, thing_SetNode_lock, thing_Refresh_node_lock;
+	std::shared_mutex thing_ReadNode_lock, thing_SetNode_lock;
 
 	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
 	{
@@ -170,12 +170,12 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				tt.second.ActorCollisionsEnabled = CollisionsEnabled;
 				if (strcmp(tt.first, pelvis) == 0)
 				{
-					tt.second.updatePelvis(actor, thing_ReadNode_lock, thing_SetNode_lock, thing_Refresh_node_lock);
+					tt.second.updatePelvis(actor, thing_ReadNode_lock, thing_SetNode_lock);
 				}
 				else
 				{
 					tt.second.groundPos = groundPos;
-					tt.second.update(actor, thing_ReadNode_lock, thing_SetNode_lock, thing_Refresh_node_lock);
+					tt.second.update(actor, thing_ReadNode_lock, thing_SetNode_lock);
 					if (tt.second.VirtualCollisionEnabled)
 					{
 						NodeCollisionSync[tt.first] = tt.second.collisionSync;
