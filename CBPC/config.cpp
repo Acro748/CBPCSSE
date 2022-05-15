@@ -1221,6 +1221,14 @@ void loadMasterConfig()
 										if (affectedBones.at(i).size() < 1)
 											affectedBones.erase(affectedBones.begin() + i);
 									}
+
+									auto FindAnalNode = std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), "Anal");
+									if (FindAnalNode != affectedBones.at(i).end() && isThereAnusNode) //if enabled vagina physics then auto disabling pelvis collision
+									{
+										affectedBones.at(i).erase(FindAnalNode);
+										if (affectedBones.at(i).size() < 1)
+											affectedBones.erase(affectedBones.begin() + i);
+									}
 								}
 
 								if (!isFound)
@@ -1345,6 +1353,14 @@ void loadMasterConfig()
 											if (FindPelvisNode != affectedBones.at(i).end() && isThereVaginaNode)//if enabled vagina physics then auto disabling pelvis collision
 											{
 												affectedBones.at(i).erase(FindPelvisNode);
+												if (affectedBones.at(i).size() < 1)
+													affectedBones.erase(affectedBones.begin() + i);
+											}
+
+											auto FindAnalNode = std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), "Anal");
+											if (FindAnalNode != affectedBones.at(i).end() && isThereAnusNode) //if enabled vagina physics then auto disabling pelvis collision
+											{
+												affectedBones.at(i).erase(FindAnalNode);
 												if (affectedBones.at(i).size() < 1)
 													affectedBones.erase(affectedBones.begin() + i);
 											}
