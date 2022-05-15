@@ -169,7 +169,7 @@ float GetFrameIntervalTimeTick() //Frame interval time on the engine
 	RelocPtr <float*> GameStepTimer_SlowTime(0x03007708); //For SSE 1.6.353 and up
 	FrameIntervalTimeTick = *(float*)GameStepTimer_SlowTime.GetPtr();
 #elif RUNTIME_VERSION_1_6_342
-	RelocPtr <float*> GameStepTimer_SlowTime(0x03007708); //For SSE 1.6.323 and up
+	RelocPtr <float*> GameStepTimer_SlowTime(0x03007708); //For SSE 1.6.342 and up
 	FrameIntervalTimeTick = *(float*)GameStepTimer_SlowTime.GetPtr();
 #elif RUNTIME_VERSION_1_6_323
 	RelocPtr <float*> GameStepTimer_SlowTime(0x030064c8); //For SSE 1.6.323 and up

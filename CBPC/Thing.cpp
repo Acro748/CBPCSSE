@@ -1052,6 +1052,9 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, s
 				if (std::find(IgnoredCollidersList.begin(), IgnoredCollidersList.end(), partitions[id].partitionCollisions[i].colliderNodeName) != IgnoredCollidersList.end())
 					continue;
 
+				if (partitions[id].partitionCollisions[i].colliderActor == actor && std::strcmp(partitions[id].partitionCollisions[i].colliderNodeName.c_str(), boneName.data) == 0)
+					continue;
+
 				if (debugtimelog || logging)
 					InterlockedIncrement(&callCount);
 
@@ -1285,17 +1288,27 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		{
 			for (int i = 0; i < partitions[id].partitionCollisions.size(); i++)
 			{
-				if (partitions[id].partitionCollisions[i].colliderActor == actor)
+				if (partitions[id].partitionCollisions[i].colliderActor == actor && partitions[id].partitionCollisions[i].colliderNodeName.find("Genital") != std::string::npos)
 					continue;
 
-				bool isColliding = false;
+				if (IgnoreAllSelfColliders && partitions[id].partitionCollisions[i].colliderActor == actor)
+					continue;
+
+				if (partitions[id].partitionCollisions[i].colliderActor == actor && std::find(IgnoredSelfCollidersList.begin(), IgnoredSelfCollidersList.end(), partitions[id].partitionCollisions[i].colliderNodeName) != IgnoredSelfCollidersList.end())
+					continue;
+
+				if (std::find(IgnoredCollidersList.begin(), IgnoredCollidersList.end(), partitions[id].partitionCollisions[i].colliderNodeName) != IgnoredCollidersList.end())
+					continue;
+
+				if (partitions[id].partitionCollisions[i].colliderActor == actor && std::strcmp(partitions[id].partitionCollisions[i].colliderNodeName.c_str(), boneName.data) == 0)
+					continue;
 
 				if (debugtimelog || logging)
 					InterlockedIncrement(&callCount);
 
 				partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
-				isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
+				bool isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
 
 				if (isColliding)
 				{
@@ -1459,30 +1472,33 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 		{
 			for (int i = 0; i < partitions[id].partitionCollisions.size(); i++)
 			{
-				if (partitions[id].partitionCollisions[i].colliderActor == actor)
+				if (partitions[id].partitionCollisions[i].colliderActor == actor && partitions[id].partitionCollisions[i].colliderNodeName.find("Genital") != std::string::npos)
 					continue;
-				
-//				for (int m = 0; m < thing_bellybulgelist.size(); m++)
-//				{
-					bool isColliding = false;
 
-	//				if (partitions[id].partitionCollisions[i].colliderNodeName.find(thing_bellybulgelist[m]) != std::string::npos)
-	//				{
-						if (debugtimelog || logging)
-							InterlockedIncrement(&callCount);
+				if (IgnoreAllSelfColliders && partitions[id].partitionCollisions[i].colliderActor == actor)
+					continue;
 
-						partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
+				if (partitions[id].partitionCollisions[i].colliderActor == actor && std::find(IgnoredSelfCollidersList.begin(), IgnoredSelfCollidersList.end(), partitions[id].partitionCollisions[i].colliderNodeName) != IgnoredSelfCollidersList.end())
+					continue;
 
-						//now not that do reach max value just by get closer and just affected by the collider size
-						isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
+				if (std::find(IgnoredCollidersList.begin(), IgnoredCollidersList.end(), partitions[id].partitionCollisions[i].colliderNodeName) != IgnoredCollidersList.end())
+					continue;
 
-						if (isColliding)
-						{
-							genitalPenetration = true;
-						}
-	//				}
+				if (partitions[id].partitionCollisions[i].colliderActor == actor && std::strcmp(partitions[id].partitionCollisions[i].colliderNodeName.c_str(), boneName.data) == 0)
+					continue;
 
-//				}
+				if (debugtimelog || logging)
+					InterlockedIncrement(&callCount);
+
+				partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
+
+				//now not that do reach max value just by get closer and just affected by the collider size
+				bool isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
+
+				if (isColliding)
+				{
+					genitalPenetration = true;
+				}
 			}
 		}
 	}
@@ -2404,22 +2420,22 @@ void Thing::CalculateDiffAnus(NiPoint3 &collisionDiff, float opening, bool islef
 		{
 			if (leftORback)
 			{//left
-				collisionDiff = NiPoint3(0, thing_anusOpeningMultiplier * 1, 0) * (opening * 0.5f);
+				collisionDiff = NiPoint3(0, thing_anusOpeningMultiplier * 1, 0) * (opening * 2);
 			}
 			else
 			{//right
-				collisionDiff = NiPoint3(0, thing_anusOpeningMultiplier * -1, 0) * (opening * 0.5f);
+				collisionDiff = NiPoint3(0, thing_anusOpeningMultiplier * -1, 0) * (opening * 2);
 			}
 		}
 		else
 		{
 			if (leftORback)
 			{//back
-				collisionDiff = NiPoint3(thing_anusOpeningMultiplier * 0.4f, 0, thing_anusOpeningMultiplier * 0.16f) * (opening * 0.5f);
+				collisionDiff = NiPoint3(thing_anusOpeningMultiplier * 0.4f, 0, thing_anusOpeningMultiplier * 0.16f) * (opening * 2);
 			}
 			else
 			{//front
-				collisionDiff = NiPoint3(thing_anusOpeningMultiplier * -0.4f, 0, thing_anusOpeningMultiplier * -0.16f) * (opening * 0.5f);
+				collisionDiff = NiPoint3(thing_anusOpeningMultiplier * -0.4f, 0, thing_anusOpeningMultiplier * -0.16f) * (opening * 2);
 			}
 		}
 	}
