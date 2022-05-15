@@ -1147,6 +1147,7 @@ void loadMasterConfig()
 			std::string line;
 			std::string currentSetting;
 			bool isThereVaginaNode = false;
+			bool isThereAnusNode = false;
 			bool isChain = false;
 			std::vector<std::string> affectedBonesList;
 			while (std::getline(file, line))
@@ -1198,8 +1199,12 @@ void loadMasterConfig()
 								bool isFound = false;
 								if (variableName.compare("NPC L Pussy02") == 0 || variableName.compare("NPC R Pussy02") == 0 || variableName.compare("VaginaB1") == 0 || variableName.compare("Clitoral1") == 0)
 									isThereVaginaNode = true;
+								if (variableName.compare("NPC LT Anus2") == 0 || variableName.compare("NPC RT Anus2") == 0 || variableName.compare("NPC LB Anus2") == 0 || variableName.compare("NPC RB Anus2") == 0)
+									isThereAnusNode = true;
 								
 								if (variableName.compare("NPC Pelvis [Pelv]") == 0 && isThereVaginaNode)
+									continue;
+								if (variableName.compare("Anal") == 0 && isThereAnusNode)
 									continue;
 
 								for (int i = 0; i < affectedBones.size(); i++)
@@ -1273,6 +1278,7 @@ void loadMasterConfig()
 					std::string currentSetting;
 					bool isChain = false;
 					bool isThereVaginaNode = false;
+					bool isThereAnusNode = false;
 					std::vector<std::string> affectedBonesList;
 					while (std::getline(file, line))
 					{
@@ -1320,8 +1326,12 @@ void loadMasterConfig()
 										bool isFound = false;
 										if (variableName.compare("NPC L Pussy02") == 0 || variableName.compare("NPC R Pussy02") == 0 || variableName.compare("VaginaB1") == 0 || variableName.compare("Clitoral1") == 0)
 											isThereVaginaNode = true;
+										if (variableName.compare("NPC LT Anus2") == 0 || variableName.compare("NPC RT Anus2") == 0 || variableName.compare("NPC LB Anus2") == 0 || variableName.compare("NPC RB Anus2") == 0)
+											isThereAnusNode = true;
 
 										if (variableName.compare("NPC Pelvis [Pelv]") == 0 && isThereVaginaNode)
+											continue;
+										if (variableName.compare("Anal") == 0 && isThereAnusNode)
 											continue;
 
 										for (int i = 0; i < affectedBones.size(); i++)
