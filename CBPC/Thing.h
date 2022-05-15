@@ -10,6 +10,9 @@
 #include "skse64\PapyrusForm.h"
 #include "CollisionHub.h"
 
+constexpr float IntervalTime60Tick = 1.0f / 60.0f;
+extern float IntervalTimeTick;
+extern float IntervalTimeTickScale;
 
 extern const char *leftPussy;
 extern const char *rightPussy;

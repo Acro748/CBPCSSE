@@ -13,6 +13,10 @@ BSFixedString backAnus("NPC RT Anus2");
 BSFixedString leftAnus("NPC LB Anus2");
 BSFixedString rightAnus("NPC RB Anus2");
 
+
+float IntervalTimeTick = IntervalTime60Tick;
+float IntervalTimeTickScale = 1.0f;
+
 //## thing_map_lock
 // Maps are sorted every edit time, so if it is parallel processing then a high probability of overloading
 
@@ -1558,21 +1562,29 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	printMessageStr("Thing.update() start", boneName.data);*/
 
 	auto newTime = clock();
-	long deltaT = newTime - time;
+	bool isSkippedmanyFrames = false;
+	if (newTime - time >= 200) // Frame blank for more than 0.2 sec / 5 fps
+		isSkippedmanyFrames = true;
 	time = newTime;
 
-	bool isSkippedmanyFrames = false;
-	if (deltaT >= 200) // Frame blank for more than 0.2 sec / 5 fps
-		isSkippedmanyFrames = true;
+	long deltaT = IntervalTimeTick * 1000;
 
 	float fpsCorrection = 1.0f;
 
 	if (fpsCorrectionEnabled)
 	{
-		if (deltaT > 50) deltaT = 50; //fps min 20 //To prevent infinite shaking at very low fps, it's seems better to calibrate to a minimum of 20 fps
-		if (deltaT < 4) deltaT = 4; //fps max 240
-
-		fpsCorrection = ((float)deltaT * 0.0625f); // = deltaT / (1sec / (fps60tick = 1 / 60 * 1000 = 16))
+		if (deltaT > 50)
+		{
+			deltaT = 50; //fps min 20 //To prevent infinite shaking at very low fps, it's seems better to calibrate to a minimum of 20 fps
+			fpsCorrection = 3.0f;
+		}
+		else if (deltaT < 1)
+		{
+			deltaT = 1; //fps max 1000
+			fpsCorrection = 0.06f;
+		}
+		else
+			fpsCorrection = IntervalTimeTickScale; // = deltaT / (1sec / (fps60tick = 1 / 60 * 1000 = 16))
 	}
 	else
 	{
