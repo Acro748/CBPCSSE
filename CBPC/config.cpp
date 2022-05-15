@@ -75,6 +75,9 @@ std::vector<std::string> bellybulgenodesList;
 float vaginaOpeningLimit = 5.0f;
 float vaginaOpeningMultiplier = 4.0f;
 
+float anusOpeningLimit = 5.0f;
+float anusOpeningMultiplier = 4.0f;
+
 int logging = 0;
 
 int useCamera = 1;
@@ -98,7 +101,6 @@ std::atomic<bool> raceSexMenuClosed = false;
 std::atomic<bool> raceSexMenuOpen = false;
 std::atomic<bool> MainMenuOpen = false;
 std::atomic<bool> consoleConfigReload = false;
-std::atomic<bool> consoleCollisionReload = false;
 
 concurrency::concurrent_unordered_map<std::string, std::string> configMap;
 concurrency::concurrent_unordered_map<std::string, Conditions> nodeConditionsMap;
@@ -1458,6 +1460,14 @@ void loadCollisionConfig()
 							{
 								vaginaOpeningMultiplier = variableValue;
 							}
+							else if (variableName == "AnusOpeningLimit")
+							{
+								anusOpeningLimit = variableValue;
+							}
+							else if (variableName == "AnusOpeningMultiplier")
+							{
+								anusOpeningMultiplier = variableValue;
+							}
 							else if (variableName == "BellyBulgeReturnTime")
 							{
 								bellyBulgeReturnTime = variableValue;
@@ -1781,6 +1791,14 @@ void loadExtraCollisionConfig()
 									else if (variableName == "VaginaOpeningMultiplier")
 									{
 										newNPCConfig.vaginaOpeningMultiplier = variableValue;
+									}
+									else if (variableName == "AnusOpeningLimit")
+									{
+										newNPCConfig.anusOpeningLimit = variableValue;
+									}
+									else if (variableName == "AnusOpeningMultiplier")
+									{
+										newNPCConfig.anusOpeningMultiplier = variableValue;
 									}
 									else if (variableName == "BellyBulgeReturnTime")
 									{
@@ -2967,6 +2985,11 @@ BSFixedString GetVersionBeta(StaticFunctionTag* base)
 	return BSFixedString("0");
 }
 
+void ReloadConfig(StaticFunctionTag* base)
+{
+	consoleConfigReload.store(true);
+}
+
 std::string GetActorNodeString(Actor* actor, BSFixedString nodeName)
 {
 	return num2hex(actor->formID, 8) + ":" + nodeName.c_str();
@@ -3008,6 +3031,9 @@ bool RegisterFuncs(VMClassRegistry* registry)
 
 	registry->RegisterFunction(
 		new NativeFunction0<StaticFunctionTag, BSFixedString>("GetVersionBeta", "CBPCPluginScript", GetVersionBeta, registry));
+
+	registry->RegisterFunction(
+		new NativeFunction0 <StaticFunctionTag, void>("ReloadConfig", "CBPCPluginScript", ReloadConfig, registry));
 
 	registry->RegisterFunction(
 		new NativeFunction2 <StaticFunctionTag, void, Actor*, BSFixedString> ("StartPhysics", "CBPCPluginScript", StartPhysics, registry));

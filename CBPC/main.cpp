@@ -101,7 +101,7 @@ bool Debug_Execute(const ObScriptParam* paramInfo, ScriptData* scriptData, TESOb
 		if (tuningModeCollision == 0)
 		{
 			Console_Print("Reload CBPC Master / Collision / Config files");
-			consoleCollisionReload.store(true);
+			consoleConfigReload.store(true);
 		}
 	}
 	else if (_strnicmp(buffer, "sysreload", MAX_PATH) == 0)

@@ -7,6 +7,11 @@ BSFixedString frontPus("Clitoral1");
 BSFixedString belly("HDT Belly");
 BSFixedString pelvis("NPC Pelvis [Pelv]");
 BSFixedString spine1("NPC Spine1 [Spn1]");
+BSFixedString anal("Anal");
+BSFixedString frontAnus("NPC LT Anus2");
+BSFixedString backAnus("NPC RT Anus2");
+BSFixedString leftAnus("NPC LB Anus2");
+BSFixedString rightAnus("NPC RB Anus2");
 
 //## thing_map_lock
 // Maps are sorted every edit time, so if it is parallel processing then a high probability of overloading
@@ -165,6 +170,8 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 		thing_bellyBulgeReturnTime = snc.bellyBulgeReturnTime;
 		thing_vaginaOpeningLimit = snc.vaginaOpeningLimit;
 		thing_vaginaOpeningMultiplier = snc.vaginaOpeningMultiplier;
+		thing_anusOpeningLimit = snc.anusOpeningLimit;
+		thing_anusOpeningMultiplier = snc.anusOpeningMultiplier;
 	}
 	else
 	{
@@ -176,6 +183,8 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 		thing_bellyBulgeReturnTime = bellyBulgeReturnTime;
 		thing_vaginaOpeningLimit = vaginaOpeningLimit;
 		thing_vaginaOpeningMultiplier = vaginaOpeningMultiplier;
+		thing_anusOpeningLimit = anusOpeningLimit;
+		thing_anusOpeningMultiplier = anusOpeningMultiplier;
 	}
 
 	std::vector<Sphere> spheres;
@@ -1094,6 +1103,239 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, s
 	LOG("Thing.updatePelvis() Update Time = %lld ns\n", elapsedMicroseconds.QuadPart);*/
 }
 
+void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock)
+{
+	if (skipFramesPelvisCount > 0)
+	{
+		skipFramesPelvisCount--;
+		return;
+	}
+	else
+	{
+		skipFramesPelvisCount = collisionSkipFramesPelvis;
+	}
+
+	if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState || !(*g_thePlayer)->loadedState->node)
+	{
+		return;
+	}
+
+	auto loadedState = actor->loadedState;
+
+	if (!loadedState || !loadedState->node)
+	{
+		return;
+	}
+
+	thing_ReadNode_lock.lock();
+	NiAVObject* analObj = actor->loadedState->node->GetObjectByName(&anal.data);
+	NiAVObject* leftAnusObj = actor->loadedState->node->GetObjectByName(&leftAnus.data);
+	NiAVObject* rightAnusObj = actor->loadedState->node->GetObjectByName(&rightAnus.data);
+	NiAVObject* frontAnusObj = actor->loadedState->node->GetObjectByName(&frontAnus.data);
+	NiAVObject* backAnusObj = actor->loadedState->node->GetObjectByName(&backAnus.data);
+	thing_ReadNode_lock.unlock();
+
+	if (!analObj || !leftAnusObj || !rightAnusObj || !frontAnusObj || !backAnusObj)
+		return;
+
+	if (updateAnalFirstRun)
+	{
+		updateAnalFirstRun = false;
+
+		auto leftpair = std::make_pair(actor->baseForm->formID, leftAnus.data);
+		thing_map_lock.lock();
+		std::map<std::pair<UInt32, const char*>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(leftpair);
+
+		if (posMap == thingDefaultPosList.end())
+		{
+			//Add it to the list
+			leftAnusDefaultPos = leftAnusObj->m_localTransform.pos;
+			thingDefaultPosList[leftpair] = leftAnusDefaultPos;
+			LOG("Adding %s to default list for %08x -> %g %g %g", leftAnus.data, actor->baseForm->formID, leftAnusDefaultPos.x, leftAnusDefaultPos.y, leftAnusDefaultPos.z);
+
+		}
+		else
+		{
+			leftAnusDefaultPos = posMap->second;
+		}
+
+		auto rightpair = std::make_pair(actor->baseForm->formID, rightAnus.data);
+		posMap = thingDefaultPosList.find(rightpair);
+
+		if (posMap == thingDefaultPosList.end())
+		{
+			//Add it to the list
+			rightAnusDefaultPos = rightAnusObj->m_localTransform.pos;
+			thingDefaultPosList[rightpair] = rightAnusDefaultPos;
+			LOG("Adding %s to default list for %08x -> %g %g %g", rightAnus.data, actor->baseForm->formID, rightAnusDefaultPos.x, rightAnusDefaultPos.y, rightAnusDefaultPos.z);
+
+		}
+		else
+		{
+			rightAnusDefaultPos = posMap->second;
+		}
+
+		auto backpair = std::make_pair(actor->baseForm->formID, backAnus.data);
+		posMap = thingDefaultPosList.find(backpair);
+
+		if (posMap == thingDefaultPosList.end())
+		{
+			//Add it to the list
+			backAnusDefaultPos = backAnusObj->m_localTransform.pos;
+			thingDefaultPosList[backpair] = backAnusDefaultPos;
+			LOG("Adding %s to default list for %08x -> %g %g %g", backAnus.data, actor->baseForm->formID, backAnusDefaultPos.x, backAnusDefaultPos.y, backAnusDefaultPos.z);
+
+		}
+		else
+		{
+			backAnusDefaultPos = posMap->second;
+		}
+
+		auto frontpair = std::make_pair(actor->baseForm->formID, frontAnus.data);
+		posMap = thingDefaultPosList.find(frontpair);
+
+		if (posMap == thingDefaultPosList.end())
+		{
+			//Add it to the list
+			frontAnusDefaultPos = frontAnusObj->m_localTransform.pos;
+			thingDefaultPosList[frontpair] = frontAnusDefaultPos;
+			LOG("Adding %s to default list for %08x -> %g %g %g", frontAnus.data, actor->baseForm->formID, frontAnusDefaultPos.x, frontAnusDefaultPos.y, frontAnusDefaultPos.z);
+
+		}
+		else
+		{
+			frontAnusDefaultPos = posMap->second;
+		}
+		thing_map_lock.unlock();
+		LOG_INFO("Left anus default pos -> %g %g %g , Right anus default pos ->  %g %g %g , Back anus default pos ->  %g %g %g , Front anus default pos ->  %g %g %g", leftAnusDefaultPos.x, leftAnusDefaultPos.y, leftAnusDefaultPos.z, rightAnusDefaultPos.x, rightAnusDefaultPos.y, rightAnusDefaultPos.z, backAnusDefaultPos.x, backAnusDefaultPos.y, backAnusDefaultPos.z, frontAnusDefaultPos.x, frontAnusDefaultPos.y, frontAnusDefaultPos.z);
+
+		CollisionConfig.CollisionMaxOffset = NiPoint3(100, 100, 100);
+		CollisionConfig.CollisionMinOffset = NiPoint3(-100, -100, -100);
+	}
+
+	if (!ActorCollisionsEnabled)
+	{
+		return;
+	}
+
+	NiMatrix33 analnodeRotation = analObj->m_worldTransform.rot;
+	NiPoint3 analnodePosition = analObj->m_worldTransform.pos;
+	float analnodeScale = analObj->m_worldTransform.scale;
+	float analnodeInvScale = 1.0f / analObj->m_parent->m_worldTransform.scale; //world transform pos to local transform pos edited by scale
+
+	std::vector<int> thingIdList;
+	std::vector<int> hashIdList;
+
+	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
+
+	float colliderNodescale = 1.0f - ((1.0f - (analnodeScale / actorBaseScale)) * scaleWeight);
+	for (int i = 0; i < thingCollisionSpheres.size(); i++)
+	{
+		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * actorBaseScale * colliderNodescale;
+		thingCollisionSpheres[i].worldPos = analnodePosition + (analnodeRotation * thingCollisionSpheres[i].offset100);
+		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * actorBaseScale * colliderNodescale;
+		thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
+		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
+		for (int m = 0; m < hashIdList.size(); m++)
+		{
+			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
+			{
+				thingIdList.emplace_back(hashIdList[m]);
+			}
+		}
+	}
+	for (int i = 0; i < thingCollisionCapsules.size(); i++)
+	{
+		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * actorBaseScale * colliderNodescale;
+		thingCollisionCapsules[i].End1_worldPos = analnodePosition + (analnodeRotation * thingCollisionCapsules[i].End1_offset100);
+		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * actorBaseScale * colliderNodescale;
+		thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
+		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * actorBaseScale * colliderNodescale;
+		thingCollisionCapsules[i].End2_worldPos = analnodePosition + (analnodeRotation * thingCollisionCapsules[i].End2_offset100);
+		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * actorBaseScale * colliderNodescale;
+		thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
+		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
+			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
+		for (int m = 0; m < hashIdList.size(); m++)
+		{
+			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
+			{
+				thingIdList.emplace_back(hashIdList[m]);
+			}
+		}
+	}
+
+	NiPoint3 collisionDiff = emptyPoint;
+
+	CollisionConfig.maybePos = analnodePosition;
+	CollisionConfig.origRot = analObj->m_parent->m_worldTransform.rot;
+	CollisionConfig.objRot = analnodeRotation;
+	CollisionConfig.invRot = analObj->m_parent->m_worldTransform.rot.Transpose();
+
+	bool genitalPenetration = false;
+
+	for (int j = 0; j < thingIdList.size(); j++)
+	{
+		int id = thingIdList[j];
+		if (partitions.find(id) != partitions.end())
+		{
+			for (int i = 0; i < partitions[id].partitionCollisions.size(); i++)
+			{
+				if (partitions[id].partitionCollisions[i].colliderActor == actor)
+					continue;
+
+				bool isColliding = false;
+
+				if (debugtimelog || logging)
+					InterlockedIncrement(&callCount);
+
+				partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
+
+				isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
+
+				if (isColliding)
+				{
+					genitalPenetration = true;
+				}
+			}
+		}
+	}
+
+	// Collision Stuff End
+	NiPoint3 leftVector = emptyPoint;
+	NiPoint3 rightVector = emptyPoint;
+	NiPoint3 backVector = emptyPoint;
+	NiPoint3 frontVector = emptyPoint;
+
+	if (genitalPenetration)
+	{
+		float opening = distance(collisionDiff, emptyPoint) * analnodeScale;
+
+		CalculateDiffAnus(leftVector, opening, true, true);
+		CalculateDiffAnus(rightVector, opening, true, false);
+		CalculateDiffAnus(backVector, opening, false, true);
+		CalculateDiffAnus(frontVector, opening, false, false);
+
+		NormalizeNiPoint(leftVector, thing_anusOpeningLimit * -1.0f, thing_anusOpeningLimit);
+		NormalizeNiPoint(rightVector, thing_anusOpeningLimit * -1.0f, thing_anusOpeningLimit);
+		backVector.x = clamp(backVector.x, thing_anusOpeningLimit * -0.4f, thing_anusOpeningLimit * 0.4f);
+		backVector.z = clamp(backVector.z, thing_anusOpeningLimit * -0.16f, thing_anusOpeningLimit * 0.16f);
+		frontVector.x = clamp(frontVector.x, thing_anusOpeningLimit * -0.4f, thing_anusOpeningLimit * 0.4f);
+		frontVector.z = clamp(frontVector.z, thing_anusOpeningLimit * -0.16f, thing_anusOpeningLimit * 0.16f);
+	}
+
+	thing_SetNode_lock.lock();
+	leftAnusObj->m_localTransform.pos = leftAnusDefaultPos + leftVector;
+	rightAnusObj->m_localTransform.pos = rightAnusDefaultPos + rightVector;
+	backAnusObj->m_localTransform.pos = backAnusDefaultPos + backVector;
+	frontAnusObj->m_localTransform.pos = frontAnusDefaultPos + frontVector;
+	RefreshNode(leftAnusObj);
+	RefreshNode(rightAnusObj);
+	RefreshNode(backAnusObj);
+	RefreshNode(frontAnusObj);
+	thing_SetNode_lock.unlock();
+}
+
 bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock)
 {
 	if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState || !(*g_thePlayer)->loadedState->node)
@@ -1216,8 +1458,8 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 				if (partitions[id].partitionCollisions[i].colliderActor == actor)
 					continue;
 				
-				for (int m = 0; m < thing_bellybulgelist.size(); m++)
-				{
+//				for (int m = 0; m < thing_bellybulgelist.size(); m++)
+//				{
 					bool isColliding = false;
 
 	//				if (partitions[id].partitionCollisions[i].colliderNodeName.find(thing_bellybulgelist[m]) != std::string::npos)
@@ -1236,7 +1478,7 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 						}
 	//				}
 
-				}
+//				}
 			}
 		}
 	}
@@ -2057,11 +2299,9 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 
 		//LOG("After Maybe Collision Stuff End");
 	}
-	//Now the collision accuracy is completely
-	//But can't easy to resolve the cause for the collisions to become unstable when low or unstable FPS if applied the "collisionElastic"
-	//Maybe the best answer is dividing one frame by the missing frame count then need to additional repeat calculations
-	//e.g) if fps is 30 then need to maintained 60 calculations like in 60 fps, therefore It guarantees 60 fps of calculation by performing calculations twice per frame
-	//But rather than this, maybe there's a better way to do it like way that actual results is not perfect but pefomance is better or way that tricks... like edit velocity...
+	//the collision accuracy is now almost perfect except for the rotation
+	//well, I don't have an idea to be performance-friendly about the accuracy of collisions rotation
+	//
 
 
 	//Logging
@@ -2118,23 +2358,56 @@ void Thing::CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool isl
 		if (isleftandright)
 		{
 			if (leftORback)
-			{
+			{//left
 				collisionDiff = NiPoint3(thing_vaginaOpeningMultiplier * -1, 0, 0) * (opening * 0.5f);
 			}
 			else
-			{
+			{//right
 				collisionDiff = NiPoint3(thing_vaginaOpeningMultiplier, 0, 0) * (opening * 0.5f);
 			}
 		}
 		else
 		{
 			if (leftORback)
-			{
+			{//Back
 				collisionDiff = NiPoint3(0, thing_vaginaOpeningMultiplier * -0.75f, thing_vaginaOpeningMultiplier * 0.25f) * (opening * 0.5f);
 			}
 			else
-			{
+			{//front
 				collisionDiff = NiPoint3(0, thing_vaginaOpeningMultiplier * 0.125f, thing_vaginaOpeningMultiplier * -0.25f) * (opening * 0.5f);
+			}
+		}
+	}
+	else
+	{
+		collisionDiff = emptyPoint;
+	}
+}
+
+void Thing::CalculateDiffAnus(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback)
+{
+	if (opening > 0)
+	{
+		if (isleftandright)
+		{
+			if (leftORback)
+			{//left
+				collisionDiff = NiPoint3(0, thing_anusOpeningMultiplier * 1, 0) * (opening * 0.5f);
+			}
+			else
+			{//right
+				collisionDiff = NiPoint3(0, thing_anusOpeningMultiplier * -1, 0) * (opening * 0.5f);
+			}
+		}
+		else
+		{
+			if (leftORback)
+			{//back
+				collisionDiff = NiPoint3(thing_anusOpeningMultiplier * 0.4f, 0, thing_anusOpeningMultiplier * 0.16f) * (opening * 0.5f);
+			}
+			else
+			{//front
+				collisionDiff = NiPoint3(thing_anusOpeningMultiplier * -0.4f, 0, thing_anusOpeningMultiplier * -0.16f) * (opening * 0.5f);
 			}
 		}
 	}

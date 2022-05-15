@@ -288,11 +288,11 @@ void updateActors()
 	if ((mm->IsGamePaused()) && !raceSexMenuOpen.load())
 		return;
 
-	if (tuningModeCollision != 0 || consoleCollisionReload.load())
+	if (tuningModeCollision != 0 || consoleConfigReload.load())
 	{
-		if (consoleCollisionReload.load())
+		if (consoleConfigReload.load())
 		{
-			consoleCollisionReload.store(false);
+			consoleConfigReload.store(false);
 
 			loadMasterConfig();
 			loadConfig();

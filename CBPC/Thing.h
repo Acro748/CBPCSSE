@@ -370,6 +370,8 @@ public:
 	float thing_bellyBulgeReturnTime = 1.5f;
 	float thing_vaginaOpeningLimit = 5.0f;
 	float thing_vaginaOpeningMultiplier = 4.0f;
+	float thing_anusOpeningLimit = 5.0f;
+	float thing_anusOpeningMultiplier = 4.0f;
 
 	std::vector<std::string> IgnoredCollidersList;
 	std::vector<std::string> IgnoredSelfCollidersList;
@@ -382,8 +384,10 @@ public:
 	
 	void update(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
 	void updatePelvis(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
+	void updateAnal(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
 	bool ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
 	void CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback);
+	void CalculateDiffAnus(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback);
 	void reset();
 
 	static float remap(float value, float start1, float stop1, float start2, float stop2) 
@@ -420,6 +424,12 @@ public:
 	NiPoint3 rightPussyDefaultPos;
 	NiPoint3 backPussyDefaultPos;
 	NiPoint3 frontPussyDefaultPos;
+
+	bool updateAnalFirstRun = true;
+	NiPoint3 leftAnusDefaultPos;
+	NiPoint3 rightAnusDefaultPos;
+	NiPoint3 backAnusDefaultPos;
+	NiPoint3 frontAnusDefaultPos;
 
 	bool updateBellyFirstRun = true;
 	NiPoint3 bellyDefaultPos;

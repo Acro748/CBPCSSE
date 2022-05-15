@@ -104,7 +104,6 @@ extern std::atomic<bool> raceSexMenuClosed;
 extern std::atomic<bool> raceSexMenuOpen;
 extern std::atomic<bool> MainMenuOpen;
 extern std::atomic<bool> consoleConfigReload;
-extern std::atomic<bool> consoleCollisionReload;
 
 extern BSFixedString breastGravityReferenceBoneString;
 
@@ -262,6 +261,8 @@ struct SpecificNPCConfig
 
 	float vaginaOpeningLimit = 5.0f;
 	float vaginaOpeningMultiplier = 4.0f;
+	float anusOpeningLimit = 5.0f;
+	float anusOpeningMultiplier = 4.0f;
 };
 
 extern std::vector<SpecificNPCConfig> specificNPCConfigList;
@@ -284,7 +285,6 @@ bool compareBounceConfigs(const SpecificNPCBounceConfig& config1, const Specific
 bool GetSpecificNPCBounceConfigForActor(Actor* actor, SpecificNPCBounceConfig& snbc);
 bool IsConfigActuallyAllocated(SpecificNPCBounceConfig snbc, std::string section); //If the config of that part is not set and just set to default, return false
 
-std::vector<BGSKeyword*> GetKeywordListByString(BSFixedString keyword);
 #ifdef RUNTIME_VR_VERSION_1_4_15
 extern std::vector<std::string> PlayerNodeLines;
 extern std::vector<ConfigLine> PlayerNodesList;   //Player nodes that can collide nodes
@@ -383,6 +383,7 @@ bool RegisterFuncs(VMClassRegistry* registry);
 BSFixedString GetVersion(StaticFunctionTag* base);
 BSFixedString GetVersionMinor(StaticFunctionTag* base);
 BSFixedString GetVersionBeta(StaticFunctionTag* base);
+void ReloadConfig(StaticFunctionTag* base);
 void StartPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName);
 void StopPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName);
 bool AttachColliderSphere(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName, VMArray<float> position, float radius, float scaleWeight, UInt32 index, bool IsAffectedNodes);

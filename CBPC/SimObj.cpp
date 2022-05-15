@@ -18,6 +18,7 @@ const char *bellyName2 = "NPC Belly";
 const char *leftPussy = "NPC L Pussy02";
 const char *rightPussy = "NPC R Pussy02";
 const char *pelvis = "NPC Pelvis [Pelv]";
+const char *anal = "Anal";
 
 //const char *scrotumName = "NPC GenitalsScrotum [GenScrot]";
 //const char *leftScrotumName = "NPC L GenitalsScrotum [LGenScrot]";
@@ -151,10 +152,6 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 	// There's nothing problem with editing, but if editing once then all node world positions are updated.
 	// so it seems that a high probability of overloading if it is processed by parallel processing.
 
-	//## thing_Refresh_node_lock
-	// editing the node update time seems to affect the entire node tree even if without editing entire node tree
-
-
 	std::shared_mutex thing_ReadNode_lock, thing_SetNode_lock;
 
 	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
@@ -171,6 +168,10 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				if (strcmp(tt.first, pelvis) == 0)
 				{
 					tt.second.updatePelvis(actor, thing_ReadNode_lock, thing_SetNode_lock);
+				}
+				else if (strcmp(tt.first, anal) == 0)
+				{
+					tt.second.updateAnal(actor, thing_ReadNode_lock, thing_SetNode_lock);
 				}
 				else
 				{
