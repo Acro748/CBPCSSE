@@ -1156,7 +1156,8 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		if (posMap == thingDefaultPosList.end())
 		{
 			//Add it to the list
-			leftAnusDefaultPos = leftAnusObj->m_localTransform.pos;
+			//leftAnusDefaultPos = leftAnusObj->m_localTransform.pos;
+			leftAnusDefaultPos = NiPoint3(-0.753204f, -0.059860f, 0.431540f);
 			thingDefaultPosList[leftpair] = leftAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", leftAnus.data, actor->baseForm->formID, leftAnusDefaultPos.x, leftAnusDefaultPos.y, leftAnusDefaultPos.z);
 
@@ -1172,7 +1173,8 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		if (posMap == thingDefaultPosList.end())
 		{
 			//Add it to the list
-			rightAnusDefaultPos = rightAnusObj->m_localTransform.pos;
+			//rightAnusDefaultPos = rightAnusObj->m_localTransform.pos;
+			rightAnusDefaultPos = NiPoint3(-0.753204f, 0.059856f, 0.431471f);
 			thingDefaultPosList[rightpair] = rightAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", rightAnus.data, actor->baseForm->formID, rightAnusDefaultPos.x, rightAnusDefaultPos.y, rightAnusDefaultPos.z);
 
@@ -1188,7 +1190,8 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		if (posMap == thingDefaultPosList.end())
 		{
 			//Add it to the list
-			backAnusDefaultPos = backAnusObj->m_localTransform.pos;
+			//backAnusDefaultPos = backAnusObj->m_localTransform.pos;
+			backAnusDefaultPos = NiPoint3(-0.753212f, 0.048635f, 0.432867f);
 			thingDefaultPosList[backpair] = backAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", backAnus.data, actor->baseForm->formID, backAnusDefaultPos.x, backAnusDefaultPos.y, backAnusDefaultPos.z);
 
@@ -1204,7 +1207,8 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		if (posMap == thingDefaultPosList.end())
 		{
 			//Add it to the list
-			frontAnusDefaultPos = frontAnusObj->m_localTransform.pos;
+			//frontAnusDefaultPos = frontAnusObj->m_localTransform.pos;
+			frontAnusDefaultPos = NiPoint3(-0.753235f, -0.048630f, 0.432873f);
 			thingDefaultPosList[frontpair] = frontAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", frontAnus.data, actor->baseForm->formID, frontAnusDefaultPos.x, frontAnusDefaultPos.y, frontAnusDefaultPos.z);
 
@@ -1335,10 +1339,10 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 
 		NormalizeNiPoint(leftVector, thing_anusOpeningLimit * -1.0f, thing_anusOpeningLimit);
 		NormalizeNiPoint(rightVector, thing_anusOpeningLimit * -1.0f, thing_anusOpeningLimit);
-		backVector.x = clamp(backVector.x, thing_anusOpeningLimit * -0.4f, thing_anusOpeningLimit * 0.4f);
-		backVector.z = clamp(backVector.z, thing_anusOpeningLimit * -0.16f, thing_anusOpeningLimit * 0.16f);
-		frontVector.x = clamp(frontVector.x, thing_anusOpeningLimit * -0.4f, thing_anusOpeningLimit * 0.4f);
-		frontVector.z = clamp(frontVector.z, thing_anusOpeningLimit * -0.16f, thing_anusOpeningLimit * 0.16f);
+		backVector.x = clamp(backVector.x, thing_anusOpeningLimit * -0.8f, thing_anusOpeningLimit * 0.8f);
+		backVector.z = clamp(backVector.z, thing_anusOpeningLimit * -0.32f, thing_anusOpeningLimit * 0.32f);
+		frontVector.x = clamp(frontVector.x, thing_anusOpeningLimit * -0.8f, thing_anusOpeningLimit * 0.8f);
+		frontVector.z = clamp(frontVector.z, thing_anusOpeningLimit * -0.32f, thing_anusOpeningLimit * 0.32f);
 	}
 
 	thing_SetNode_lock.lock();
@@ -1662,8 +1666,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 
 	if (isSkippedmanyFrames) //prevents many bounce when fps gaps
 	{
-		oldWorldPos = obj->m_worldTransform.pos - (obj->m_parent->m_worldTransform.rot * thingDefaultPos * nodeScale);
-		oldWorldPosRot = obj->m_worldTransform.pos - (obj->m_parent->m_worldTransform.rot * thingDefaultPos * nodeScale);
+		oldWorldPos = obj->m_parent->m_worldTransform.pos + obj->m_parent->m_worldTransform.rot * oldLocalPos;
+		oldWorldPosRot = obj->m_parent->m_worldTransform.pos + obj->m_parent->m_worldTransform.rot * oldLocalPosRot;
 		return;
 	}
 
@@ -2352,6 +2356,10 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol + ldiffGcol)) + target - NiPoint3(0, 0, varGravityCorrection);
 		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * (ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot)) + target - NiPoint3(0, 0, varGravityCorrection);
 
+		//for update oldWorldPos&Rot when frame gap
+		oldLocalPos = ldiff + ldiffcol + ldiffGcol - (invRot * NiPoint3(0, 0, varGravityCorrection));
+		oldLocalPosRot = (ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot) - (invRot * NiPoint3(0, 0, varGravityCorrection));
+
 		collisionInertia += (ldiffcol + ldiffGcol);
 		collisionInertiaRot += ((ldiffcol + ldiffGcol) * collisionMultiplerRot);
 		multiplerInertia = 1.0f;
@@ -2361,6 +2369,10 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	{
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * ldiff) + target - NiPoint3(0, 0, varGravityCorrection);
 		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * ldiffRot) + target - NiPoint3(0, 0, varGravityCorrection);
+
+		//for update oldWorldPos&Rot when frame gap
+		oldLocalPos = ldiff - (invRot * NiPoint3(0, 0, varGravityCorrection));
+		oldLocalPosRot = ldiffRot - (invRot * NiPoint3(0, 0, varGravityCorrection));
 	}
 
 	thing_SetNode_lock.lock();
@@ -2431,11 +2443,11 @@ void Thing::CalculateDiffAnus(NiPoint3 &collisionDiff, float opening, bool islef
 		{
 			if (leftORback)
 			{//back
-				collisionDiff = NiPoint3(thing_anusOpeningMultiplier * 0.4f, 0, thing_anusOpeningMultiplier * 0.16f) * (opening * 2);
+				collisionDiff = NiPoint3(thing_anusOpeningMultiplier * 0.8f, 0, thing_anusOpeningMultiplier * 0.32f) * (opening * 2);
 			}
 			else
 			{//front
-				collisionDiff = NiPoint3(thing_anusOpeningMultiplier * -0.4f, 0, thing_anusOpeningMultiplier * -0.16f) * (opening * 2);
+				collisionDiff = NiPoint3(thing_anusOpeningMultiplier * -0.8f, 0, thing_anusOpeningMultiplier * -0.32f) * (opening * 2);
 			}
 		}
 	}

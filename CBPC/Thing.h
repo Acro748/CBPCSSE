@@ -441,6 +441,10 @@ public:
 	NiPoint3 thingDefaultPos;
 	NiMatrix33 thingDefaultRot;
 
+	//for update oldWorldPos&Rot when frame gap
+	NiPoint3 oldLocalPos;
+	NiPoint3 oldLocalPosRot;
+
 	float actorBaseScale = 1.0f;
 
 	//Extra variables
