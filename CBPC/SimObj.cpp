@@ -18,6 +18,7 @@ const char *bellyName2 = "NPC Belly";
 const char *leftPussy = "NPC L Pussy02";
 const char *rightPussy = "NPC R Pussy02";
 const char *pelvis = "NPC Pelvis [Pelv]";
+const char *anal = "Anal";
 
 //const char *scrotumName = "NPC GenitalsScrotum [GenScrot]";
 //const char *leftScrotumName = "NPC L GenitalsScrotum [LGenScrot]";
@@ -76,7 +77,7 @@ bool SimObj::bind(Actor *actor, bool isMale)
 				}
 				BSFixedString cs = ReturnUsableString(affectedBones.at(i).at(j));
 				obj_read_lock.lock();
-				auto bone = loadedState->node->GetObjectByName(&cs.data);
+				NiAVObject* bone = loadedState->node->GetObjectByName(&cs.data);
 				obj_read_lock.unlock();
 				if (bone)
 				{
@@ -121,17 +122,37 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 		return;
 	//logger.error("update\n");
 
-//## thing_Refresh_node_lock
-// editing the node update time seems to affect the entire node tree even if without editing entire node tree
+	if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState || !(*g_thePlayer)->loadedState->node)
+	{
+		return;
+	}
 
-//## thing_SetNode_lock
-// There's nothing problem with editing, but if editing once then all node world positions are updated.
-// so it seems that a high probability of overloading if it is processed by parallel processing.
+	if (GroundCollisionEnabled && CollisionsEnabled)
+	{
+		if (actor->loadedState && actor->loadedState->node)
+		{
+			NiAVObject* groundobj = actor->loadedState->node->GetObjectByName(&GroundReferenceBone.data);
+			if (groundobj)
+			{
+				groundPos = groundobj->m_worldTransform.pos.z; //Get ground by NPC Root [Root] node
 
-//## thing_ReadNode_lock
-// It seems that a read error occurs when the GetObjectByName() function is called simultaneously
+				NiAVObject* highheelobj = actor->loadedState->node->GetObjectByName(&HighheelReferenceBone.data);
+				if (highheelobj)
+				{
+					groundPos -= highheelobj->m_localTransform.pos.z; //Get highheel offset by NPC node
+				}
+			}
+		}
+	}
 
-	std::shared_mutex thing_SetNode_lock, thing_ReadNode_lock, thing_Refresh_node_lock;
+	//## thing_ReadNode_lock
+	// It seems that a read error occurs when the GetObjectByName() function is called simultaneously
+
+	//## thing_SetNode_lock
+	// There's nothing problem with editing, but if editing once then all node world positions are updated.
+	// so it seems that a high probability of overloading if it is processed by parallel processing.
+
+	std::shared_mutex thing_ReadNode_lock, thing_SetNode_lock;
 
 	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
 	{
@@ -146,11 +167,16 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 				tt.second.ActorCollisionsEnabled = CollisionsEnabled;
 				if (strcmp(tt.first, pelvis) == 0)
 				{
-					tt.second.updatePelvis(actor, thing_SetNode_lock, thing_ReadNode_lock, thing_Refresh_node_lock);
+					tt.second.updatePelvis(actor, thing_ReadNode_lock, thing_SetNode_lock);
+				}
+				else if (strcmp(tt.first, anal) == 0)
+				{
+					tt.second.updateAnal(actor, thing_ReadNode_lock, thing_SetNode_lock);
 				}
 				else
 				{
-					tt.second.update(actor, thing_SetNode_lock, thing_ReadNode_lock, thing_Refresh_node_lock);
+					tt.second.groundPos = groundPos;
+					tt.second.update(actor, thing_ReadNode_lock, thing_SetNode_lock);
 					if (tt.second.VirtualCollisionEnabled)
 					{
 						NodeCollisionSync[tt.first] = tt.second.collisionSync;

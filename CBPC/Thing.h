@@ -10,9 +10,27 @@
 #include "skse64\PapyrusForm.h"
 #include "CollisionHub.h"
 
+constexpr float IntervalTime60Tick = 1.0f / 60.0f;
+extern float IntervalTimeTick;
+extern float IntervalTimeTickScale;
 
 extern const char *leftPussy;
 extern const char *rightPussy;
+
+inline void RefreshNode(NiAVObject* node)
+{
+	if (node == nullptr || node->m_name == nullptr)
+		return;
+
+	if (std::find(noJitterFixNodesList.begin(), noJitterFixNodesList.end(), node->m_name) != noJitterFixNodesList.end())
+		return;
+
+	NiAVObject::ControllerUpdateContext ctx;
+	ctx.flags = 0;
+	ctx.delta = 0;
+
+	node->UpdateWorldData(&ctx);
+}
 
 class Thing {
 	BSFixedString boneName;
@@ -355,6 +373,8 @@ public:
 	float thing_bellyBulgeReturnTime = 1.5f;
 	float thing_vaginaOpeningLimit = 5.0f;
 	float thing_vaginaOpeningMultiplier = 4.0f;
+	float thing_anusOpeningLimit = 5.0f;
+	float thing_anusOpeningMultiplier = 4.0f;
 
 	std::vector<std::string> IgnoredCollidersList;
 	std::vector<std::string> IgnoredSelfCollidersList;
@@ -365,10 +385,12 @@ public:
 	void updateConfig(Actor* actor, configEntry_t &centry, configEntry_t& centry0weight);
 	void dump();
 	
-	void update(Actor *actor, std::shared_mutex &thing_SetNode_lock, std::shared_mutex &thing_ReadNode_lock, std::shared_mutex &thing_Refresh_node_lock);
-	void updatePelvis(Actor *actor, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_Refresh_node_lock);
-	bool ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_SetNode_lock, std::shared_mutex& thing_ReadNode_lock);
+	void update(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
+	void updatePelvis(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
+	void updateAnal(Actor *actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
+	bool ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock);
 	void CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback);
+	void CalculateDiffAnus(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback);
 	void reset();
 
 	static float remap(float value, float start1, float stop1, float start2, float stop2) 
@@ -406,6 +428,12 @@ public:
 	NiPoint3 backPussyDefaultPos;
 	NiPoint3 frontPussyDefaultPos;
 
+	bool updateAnalFirstRun = true;
+	NiPoint3 leftAnusDefaultPos;
+	NiPoint3 rightAnusDefaultPos;
+	NiPoint3 backAnusDefaultPos;
+	NiPoint3 frontAnusDefaultPos;
+
 	bool updateBellyFirstRun = true;
 	NiPoint3 bellyDefaultPos;
 
@@ -413,9 +441,15 @@ public:
 	NiPoint3 thingDefaultPos;
 	NiMatrix33 thingDefaultRot;
 
+	//for update oldWorldPos&Rot when frame gap
+	NiPoint3 oldLocalPos;
+	NiPoint3 oldLocalPosRot;
+
 	float actorBaseScale = 1.0f;
 
 	//Extra variables
+	float groundPos = -10000.0f;
+
 	NiPoint3 collisionBuffer = emptyPoint;
 	NiPoint3 collisionSync = emptyPoint;
 
@@ -442,3 +476,4 @@ public:
 
 	float varGravityCorrection = -1 * gravityCorrection;
 };
+

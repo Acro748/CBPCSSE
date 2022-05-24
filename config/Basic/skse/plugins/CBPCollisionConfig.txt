@@ -15,11 +15,13 @@ BellyBulgePosLowest=-8.0     #This is the vertical position of the belly bulge
 
 BellyBulgeReturnTime = 2.0   #This is the duration takes in seconds for belly bulge to return to its original position.
 
-BellyBulgeNodes=Genitals01   #These are the node names to match for belly bulge collision with pelvis node. You can add more than one separated with ","
-
 VaginaOpeningMultiplier=3.0  #This is the multiplier for vagina opening.
 
 VaginaOpeningLimit=5.0  #This is the limit for vagina opening.
+
+AnusOpeningMultiplier=3.0		#This is the multiplier for anus opening.
+
+AnusOpeningLimit=20.0	  #This is the limit for anus opening.
 ##############################################################################
 # Node Lists
 ##############################################################################
@@ -35,6 +37,7 @@ NPC L Butt
 NPC R Butt
 NPC Pelvis [Pelv]
 NPC Spine1 [Spn1]
+#Anal	#Except for 3BA, BHUNP, COCOBODY, there is no body to open anal, so it's commented out by default
 
 [ColliderNodes] #Define nodes here first, then set the collision spheres down
 NPC L UpperArm [LUar]
@@ -73,16 +76,16 @@ NPC Genitals01 [Gen01]
 ##############################################################################
 # Affected Nodes
 
-[NPC L Breast]
+[NPC L Breast] : 0.3
 0.0,4.0,-4.0,3.4 | 0.0,5.0,-4.5,4.0
 
-[NPC R Breast]
+[NPC R Breast] : 0.3
 0.0,4.0,-4.0,3.4 | 0.0,5.0,-4.5,4.0
 
-[NPC L Butt]
+[NPC L Butt] : 0.3
 -2.5,3.8,-3.0,5.2 | -3.0,2.5,-3.0,5.0
 
-[NPC R Butt]
+[NPC R Butt] : 0.3
 2.5,3.8,-3.0,5.2 | 3.0,2.5,-3.0,5.0
 
 [HDT Belly]
@@ -93,6 +96,9 @@ NPC Genitals01 [Gen01]
 
 [NPC Spine1 [Spn1]] #For Female Belly
 0.0,3.0,-5.0,6.0 | 0.0,3.0,-5.0,6.0
+
+[Anal] #For Female Anus
+0,-6,-2,1.75 | 0,-6,-2,1.75
 
 ##############################################################################
 # Collider Nodes

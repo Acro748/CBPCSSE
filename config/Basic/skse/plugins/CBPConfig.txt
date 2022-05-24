@@ -13,13 +13,28 @@
 ##############################################################################
 
 # Linear spring stiffness, higher is more jiggly
-Breast.stiffness 0.05
+Breast.stiffnessX 0.05
+Breast.stiffnessY 0.05
+Breast.stiffnessZ 0.05
+Breast.stiffnessXRot 0.05
+Breast.stiffnessYRot 0.05
+Breast.stiffnessZRot 0.05
 
 # Quadratic Spring stiffness, higher is more jiggly
-Breast.stiffness2 0.01
+Breast.stiffness2X 0.01
+Breast.stiffness2Y 0.01
+Breast.stiffness2Z 0.01
+Breast.stiffness2XRot 0.01
+Breast.stiffness2YRot 0.01
+Breast.stiffness2ZRot 0.01
 
 # Velocity removed/tick 1.0 would be all velocity removed 
-Breast.damping 0.08
+Breast.dampingX 0.08
+Breast.dampingY 0.08
+Breast.dampingZ 0.08
+Breast.dampingXRot 0.08
+Breast.dampingYRot 0.08
+Breast.dampingZRot 0.08
 
 # Maximum and Minimum number of units position can diverge from target
 Breast.Xmaxoffset 5
@@ -28,10 +43,17 @@ Breast.Ymaxoffset 5
 Breast.Yminoffset -5
 Breast.Zmaxoffset 5
 Breast.Zminoffset -5
+Breast.XmaxoffsetRot 5
+Breast.XminoffsetRot -5
+Breast.YmaxoffsetRot 5
+Breast.YminoffsetRot -5
+Breast.ZmaxoffsetRot 5
+Breast.ZminoffsetRot -5
 
 # Time Quanta for the physics in ms 4 means that a 16ms frame would be broken down into 4 4ms steps
 # Acts like inertia. Higher values make it keep its original position longer while moving.
 Breast.timetick 15
+Breast.timetickRot 15
 
 # Scale of the motion in X/Y/Z - Y is front to back, Z up and down and X side to side
 Breast.linearX 2.6
@@ -45,6 +67,12 @@ Breast.linearYspreadforceX 0.0
 Breast.linearYspreadforceZ 0.0
 Breast.linearZspreadforceX 0.0
 Breast.linearZspreadforceY 0.0
+Breast.rotationXspreadforceY 0.0
+Breast.rotationXspreadforceZ 0.0
+Breast.rotationYspreadforceX 0.0
+Breast.rotationYspreadforceZ 0.0
+Breast.rotationZspreadforceX 0.0
+Breast.rotationZspreadforceY 0.0
 
 # Scale of the bones rotation around the X/Y/Z axis
 Breast.rotationalX 0.13
@@ -64,6 +92,7 @@ Breast.linearZrotationZ 0.0
 
 # General physics speed. Increasing this makes all of the motion faster.
 Breast.timeStep 0.80
+Breast.timeStepRot 0.80
 
 
 # Physics deceleration by friction in collision
@@ -91,16 +120,38 @@ Breast.collisionZminOffset -100
 
 
 
-Butt.stiffness 0.03
-Butt.stiffness2 0.01
-Butt.damping 0.05
+Butt.stiffnessX 0.03
+Butt.stiffnessY 0.03
+Butt.stiffnessZ 0.03
+Butt.stiffnessXRot 0.03
+Butt.stiffnessYRot 0.03
+Butt.stiffnessZRot 0.03
+Butt.stiffness2X 0.01
+Butt.stiffness2Y 0.01
+Butt.stiffness2Z 0.01
+Butt.stiffness2XRot 0.01
+Butt.stiffness2YRot 0.01
+Butt.stiffness2ZRot 0.01
+Butt.dampingX 0.05
+Butt.dampingY 0.05
+Butt.dampingZ 0.05
+Butt.dampingXRot 0.05
+Butt.dampingYRot 0.05
+Butt.dampingZRot 0.05
 Butt.Xmaxoffset 3
 Butt.Xminoffset -3
 Butt.Ymaxoffset 3
 Butt.Yminoffset -3
 Butt.Zmaxoffset 3
 Butt.Zminoffset -3
+Butt.XmaxoffsetRot 3
+Butt.XminoffsetRot -3
+Butt.YmaxoffsetRot 3
+Butt.YminoffsetRot -3
+Butt.ZmaxoffsetRot 3
+Butt.ZminoffsetRot -3
 Butt.timetick 15
+Butt.timetickRot 15
 Butt.linearX 1.6
 Butt.linearY 1.0
 Butt.linearZ 0.7
@@ -110,6 +161,12 @@ Butt.linearYspreadforceX 0.0
 Butt.linearYspreadforceZ 0.0
 Butt.linearZspreadforceX 0.0
 Butt.linearZspreadforceY 0.0
+Butt.rotationXspreadforceY 0.0
+Butt.rotationXspreadforceZ 0.0
+Butt.rotationYspreadforceX 0.0
+Butt.rotationYspreadforceZ 0.0
+Butt.rotationZspreadforceX 0.0
+Butt.rotationZspreadforceY 0.0
 Butt.rotationalX 0.15
 Butt.rotationalY 0.0
 Butt.rotationalZ 0.0
@@ -123,6 +180,7 @@ Butt.linearZrotationX 1.0
 Butt.linearZrotationY 0.0
 Butt.linearZrotationZ 0.0
 Butt.timeStep 0.80
+Butt.timeStepRot 0.80
 Butt.collisionFriction 0.2
 Butt.collisionPenetration 0.0
 Butt.collisionMultipler 1.0
@@ -135,16 +193,38 @@ Butt.collisionYminOffset -100
 Butt.collisionZmaxOffset 100
 Butt.collisionZminOffset -100
 
-Belly.stiffness 0.01
-Belly.stiffness2 0.02
-Belly.damping 0.05
+Belly.stiffnessX 0.01
+Belly.stiffnessY 0.01
+Belly.stiffnessZ 0.01
+Belly.stiffnessXRot 0.01
+Belly.stiffnessYRot 0.01
+Belly.stiffnessZRot 0.01
+Belly.stiffness2X 0.02
+Belly.stiffness2Y 0.02
+Belly.stiffness2Z 0.02
+Belly.stiffness2XRot 0.02
+Belly.stiffness2YRot 0.02
+Belly.stiffness2ZRot 0.02
+Belly.dampingX 0.05
+Belly.dampingY 0.05
+Belly.dampingZ 0.05
+Belly.dampingXRot 0.05
+Belly.dampingYRot 0.05
+Belly.dampingZRot 0.05
 Belly.maxoffset 3
 Belly.Xminoffset -3
 Belly.Ymaxoffset 3
 Belly.Yminoffset -3
 Belly.Zmaxoffset 3
 Belly.Zminoffset -3
+Belly.maxoffsetRot 3
+Belly.XminoffsetRot -3
+Belly.YmaxoffsetRot 3
+Belly.YminoffsetRot -3
+Belly.ZmaxoffsetRot 3
+Belly.ZminoffsetRot -3
 Belly.timetick 15
+Belly.timetickRot 15
 Belly.linearX 1.6
 Belly.linearY 0.13
 Belly.linearZ 0.08
@@ -154,6 +234,12 @@ Belly.linearYspreadforceX 0.0
 Belly.linearYspreadforceZ 0.0
 Belly.linearZspreadforceX 0.0
 Belly.linearZspreadforceY 0.0
+Belly.rotationXspreadforceY 0.0
+Belly.rotationXspreadforceZ 0.0
+Belly.rotationYspreadforceX 0.0
+Belly.rotationYspreadforceZ 0.0
+Belly.rotationZspreadforceX 0.0
+Belly.rotationZspreadforceY 0.0
 Belly.rotationalX 0.03
 Belly.rotationalY 0.0
 Belly.rotationalZ 0.0
@@ -167,6 +253,7 @@ Belly.linearZrotationX 1.0
 Belly.linearZrotationY 0.0
 Belly.linearZrotationZ 0.0
 Belly.timeStep 0.80
+Belly.timeStepRot 0.80
 Belly.collisionFriction 0.2
 Belly.collisionPenetration 0.0
 Belly.collisionMultipler 1.0

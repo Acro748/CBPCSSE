@@ -159,6 +159,37 @@ AIProcessManager* AIProcessManager::GetSingleton()
 	return *singleton;
 }
 
+float GetFrameIntervalTimeTick() //Frame interval time on the engine
+{
+	float FrameIntervalTimeTick = IntervalTime60Tick;
+#ifdef RUNTIME_VR_VERSION_1_4_15
+	RelocPtr <float*> GameStepTimer_SlowTime(0x030C3A08); //For VR 1.4.15
+	FrameIntervalTimeTick = *(float*)GameStepTimer_SlowTime.GetPtr();
+#elif RUNTIME_VERSION_1_6_353
+	RelocPtr <float*> GameStepTimer_SlowTime(0x03007708); //For SSE 1.6.353 and up
+	FrameIntervalTimeTick = *(float*)GameStepTimer_SlowTime.GetPtr();
+#elif RUNTIME_VERSION_1_6_342
+	RelocPtr <float*> GameStepTimer_SlowTime(0x03007708); //For SSE 1.6.342 and up
+	FrameIntervalTimeTick = *(float*)GameStepTimer_SlowTime.GetPtr();
+#elif RUNTIME_VERSION_1_6_323
+	RelocPtr <float*> GameStepTimer_SlowTime(0x030064c8); //For SSE 1.6.323 and up
+	FrameIntervalTimeTick = *(float*)GameStepTimer_SlowTime.GetPtr();
+#elif RUNTIME_VERSION_1_6_318
+	RelocPtr <float*> GameStepTimer_SlowTime(0x030064C8); //For SSE 1.6.318 and up
+	FrameIntervalTimeTick = *(float*)GameStepTimer_SlowTime.GetPtr();
+#elif RUNTIME_VERSION_1_5_97 || RUNTIME_VERSION_1_5_80 || RUNTIME_VERSION_1_5_73
+	RelocPtr <float*> GameStepTimer_SlowTime(0x02F6B948); //For SSE 1.5.73 and up
+	FrameIntervalTimeTick = *(float*)GameStepTimer_SlowTime.GetPtr();
+#else
+	static time_t BeforeFrameTime = clock();
+	FrameIntervalTimeTick = (float)(clock() - BeforeFrameTime) * 0.001f;
+	BeforeFrameTime = clock();
+#endif
+
+	return FrameIntervalTimeTick;
+}
+
+
 bool compareActorEntries(const ActorEntry& entry1, const ActorEntry& entry2)
 {
 	return entry1.actorDistSqr < entry2.actorDistSqr;
@@ -209,7 +240,7 @@ LARGE_INTEGER totaltime;
 int debugtimelog_framecount = 1;
 int totalcallcount = 0;
 
-///Average Update Time per 1000 frames
+///Average Update Time per 1000 frames in i7 4770k (4 core/8 thread)
 ///
 ///#UseParallelProcessingOLD = 3
 ///Average Update Time = 702435 ns
@@ -264,7 +295,10 @@ int totalcallcount = 0;
 /// Collider Check Call Count : 310.38 - Average Update Time in 1000 frame = 1249355 ns
 /// 
 
-void updateActors() 
+int GameStepTimerCount = 0;
+float GameStepTimerHap = 0.0f;
+
+void updateActors(bool gamePaused)
 {	
 	if (debugtimelog || logging)
 	{
@@ -285,14 +319,14 @@ void updateActors()
 
 	auto mm = MenuManager::GetSingleton();
 
-	if ((mm->IsGamePaused()) && !raceSexMenuOpen.load())
+	if (((mm->IsGamePaused()) || gamePaused) && !raceSexMenuOpen.load())
 		return;
 
-	if (tuningModeCollision != 0 || consoleCollisionReload.load())
+	if (tuningModeCollision != 0 || consoleConfigReload.load())
 	{
-		if (consoleCollisionReload.load())
+		if (consoleConfigReload.load())
 		{
-			consoleCollisionReload.store(false);
+			consoleConfigReload.store(false);
 
 			loadMasterConfig();
 			loadConfig();
@@ -590,7 +624,9 @@ void updateActors()
 								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
 							}
 						}
-						InterlockedIncrement(&colliderSphereCount);
+
+						if (logging)
+							InterlockedIncrement(&colliderSphereCount);
 					}
 					for (int j = 0; j < collider.second.collisionCapsules.size(); j++)
 					{
@@ -605,7 +641,9 @@ void updateActors()
 								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
 							}
 						}
-						InterlockedIncrement(&colliderCapsuleCount);
+
+						if (logging)
+							InterlockedIncrement(&colliderCapsuleCount);
 					}
 #ifdef RUNTIME_VR_VERSION_1_4_15
 					for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
@@ -730,6 +768,10 @@ void updateActors()
 
 	}
 	//logger.error("Updating %d entites\n", actorEntries.size());
+
+	//Get DeltaT by engine
+	IntervalTimeTick = GetFrameIntervalTimeTick();
+	IntervalTimeTickScale = IntervalTimeTick / IntervalTime60Tick;
 
 	concurrency::parallel_for_each(actorEntries.begin(), actorEntries.end(), [&](const auto& a)
 	{

@@ -30,7 +30,7 @@ extern PartitionMap partitions;
 
 int GetHashIdFromPos(NiPoint3 pos);
 
-std::vector<int> GetHashIdsFromPos(NiPoint3 pos, float radius);
+std::vector<int> GetHashIdsFromPos(NiPoint3 pos, float radiusplus);
 
 bool CheckPelvisArmor(Actor* actor);
 

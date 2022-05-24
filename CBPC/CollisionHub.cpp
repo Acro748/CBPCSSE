@@ -266,7 +266,7 @@ bool CreateActorColliders(Actor * actor, concurrency::concurrent_unordered_map<s
 
 	concurrency::parallel_for (size_t(0), ColliderNodesListPtr->size(), [&](size_t j)
 	{
-		if (GroundReferenceBoneName.compare(ColliderNodesListPtr->at(j).NodeName) == 0) //detecting NPC Root [Root] node for ground collision
+		if (ColliderNodesListPtr->at(j).NodeName.compare(GroundReferenceBone.data) == 0) //detecting NPC Root [Root] node for ground collision
 		{
 			GroundCollisionEnabled = true;
 		}
@@ -328,20 +328,20 @@ void UpdateColliderPositions(concurrency::concurrent_unordered_map<std::string, 
 			collider.second.collisionCapsules[k].End2_radius100pwr2 = collider.second.collisionCapsules[k].End2_radius100 * collider.second.collisionCapsules[k].End2_radius100;
 		}
 
-		#ifdef RUNTIME_VR_VERSION_1_4_15
+#ifdef RUNTIME_VR_VERSION_1_4_15
 		for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
 		{
-			collider.second.collisionTriangles[j].a = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orga;
-			collider.second.collisionTriangles[j].b = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgb;
-			collider.second.collisionTriangles[j].c = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgc;
+			collider.second.collisionTriangles[j].a = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orga * colliderNodescale;
+			collider.second.collisionTriangles[j].b = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgb * colliderNodescale;
+			collider.second.collisionTriangles[j].c = collider.second.CollisionObject->m_worldTransform.pos + collider.second.CollisionObject->m_worldTransform.rot * collider.second.collisionTriangles[j].orgc * colliderNodescale;
 		}
-		#endif
+#endif
 	});
 }
 
-std::vector<int> GetHashIdsFromPos(NiPoint3 pos, float radius)
+std::vector<int> GetHashIdsFromPos(NiPoint3 pos, float radiusplus)
 {
-	float radiusplus = radius + 1.0f; //1 is enough now.
+	//float radiusplus = radius + 1.0f; //1 is enough now.
 
 	std::vector<int> hashIdList;
 	

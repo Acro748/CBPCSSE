@@ -17,20 +17,24 @@ Priority = 20
 ##############################################################################
 [ExtraOptions]
 
-BellyBulge=3.0	   			#This is the multiplier for the new special belly bulge for vagina penetration. Higher values would cause a bigger lump on the belly. 0 would disable this special setting.
+BellyBulge=2.0	   			#This is the multiplier for the new special belly bulge for vagina penetration. Higher values would cause a bigger lump on the belly. 0 would disable this special setting.
 
 BellyBulgeMax=20.0          #This is the horizontal max position of the belly bulge
 
-BellyBulgePosLowest=4.0    #This is the vertical position of the belly bulge
+BellyBulgePosLowest=-10.0    #This is the vertical position of the belly bulge
 
 BellyBulgeReturnTime=2.0 #This is the duration takes in seconds for belly bulge to return to its original position.
 
 BellyBulgeNodes=AH 2,AH 3,AH 4,AH Egg01,AH Egg02,AH Egg03,AH Egg04,AnimObjectB,BearD 4,BearD 5,BearD 6,BearTongue 1,BearTongue 2,BearTongue 3,BoarDick03,BoarDick04,Boar_Tongue1,Boar_Tongue2,Boar_Tongue3,CDPenis 2,CO 3,CO 4,CO 5,COEgg 1,COEgg 2,COEgg 3,COEgg 4,COEgg 5,DD 2,DwarvenBattery01,DwarvenBattery02,DwarvenInjector,DwarvenSpiderDildo01,DwarvenSpiderDildo02,DwarvenSpiderDildo03,DwarvenTool[Right],ElkD03,ElkD04,FD 3,GD 3,GS 3,GS 4,Genitals01,GiantTongue 1,GiantTongue 2,GiantTongue 3,HS 3,HS 4,HS 5,Head Tongue 3,Head Tongue 4,Head Tongue 5,LTentacleLeft06,LTentacleLeft07,LTentacleLeft08,Lurker Egg 01,Lurker Egg 02,Lurker Egg 03,Lurker Egg 04,Lurker Egg 05,Lurker Egg 06,NP 14,NPB 14,NPC IceGenital03,NPC IcePenis01,NPC Torso Rock 1,NPC Torso Rock 2,RD 2,RD Base,RTentacleLeft06,RTentacleLeft07,RTentacleLeft08,SAIO01,SAIO02,SAIO03,SAIO04,SAIO05,SAIO06,SAIO07,SCD 2,SCD 3,SkeeverD 02,SkeeverD 03,TD 3,TD 4,TailStinger,TailStinger 2,TentacleLeft06,TentacleLeft07,TentacleLeft08,Torso Rock 1,Torso Rock 2,VLDick02,VLDick03,WWD 3,WWD 4,WWTongue 2,Worm Base
 #These are the node names to match for belly bulge collision with pelvis node. You can add more than one separated with ","
 
-VaginaOpeningMultiplier=6  	#This is the multiplier for vagina opening.
+VaginaOpeningMultiplier=3  	#This is the multiplier for vagina opening.
 
 VaginaOpeningLimit=20.0	  #This is the limit for vagina opening.
+
+AnusOpeningMultiplier=3		#This is the multiplier for anus opening.
+
+AnusOpeningLimit=20.0	  #This is the limit for anus opening.
 
 ##############################################################################
 # Node Lists
@@ -46,8 +50,10 @@ NPC R Breast (@L Breast01,@L Breast02,@L Breast03,@R Breast01,@R Breast02,@R Bre
 NPC L Butt (@NPC L Butt,@NPC R Butt,@NPC L Thigh [LThg],@NPC R Thigh [RThg],@NPC Genitals01 [Gen01],@L Breast01,@L Breast02,@L Breast03,@R Breast01,@R Breast02,@R Breast03)
 NPC R Butt (@NPC L Butt,@NPC R Butt,@NPC L Thigh [LThg],@NPC R Thigh [RThg],@NPC Genitals01 [Gen01],@L Breast01,@L Breast02,@L Breast03,@R Breast01,@R Breast02,@R Breast03)
 #HDT Belly
-NPC Pelvis [Pelv] (@NPC L Butt,@NPC R Butt,@NPC L Thigh [LThg],@NPC R Thigh [RThg],@L Breast01,@R Breast01,@L Breast02,@R Breast02,@L Breast03,@R Breast03)
-NPC Spine1 [Spn1] (@L Breast01,@L Breast02,@L Breast03,@R Breast01,@R Breast02,@R Breast03,@NPC L Butt,@NPC R Butt,@NPC Genitals01 [Gen01])
+#NPC Belly (@L Breast01,@L Breast02,@L Breast03,@R Breast01,@R Breast02,@R Breast03,@NPC L Butt,@NPC R Butt,@NPC Genitals01 [Gen01],@NPC L Thigh [LThg],@NPC R Thigh [RThg])
+#NPC Pelvis [Pelv] (@NPC L Butt,@NPC R Butt,@NPC L Thigh [LThg],@NPC R Thigh [RThg],@L Breast01,@R Breast01,@L Breast02,@R Breast02,@L Breast03,@R Breast03)
+Anal (@NPC L Butt,@NPC R Butt,,@NPC L Thigh [LThg],@NPC R Thigh [RThg],@L Breast01,@R Breast01,@L Breast02,@R Breast02,@L Breast03,@R Breast03)
+NPC Spine1 [Spn1] (@NPC L Butt,@NPC R Butt,@NPC L Thigh [LThg],@NPC R Thigh [RThg],@L Breast01,@R Breast01,@L Breast02,@R Breast02,@L Breast03,@R Breast03)
 
 L Breast01 (@L Breast01,@L Breast02,@L Breast03,@R Breast01,@R Breast02,@R Breast03)
 R Breast01 (@L Breast01,@L Breast02,@L Breast03,@R Breast01,@R Breast02,@R Breast03)
@@ -61,10 +67,10 @@ R Breast03 (@L Breast01,@L Breast02,@L Breast03,@R Breast01,@R Breast02,@R Breas
 NPC L RearThigh (@NPC L Butt,@NPC R Butt,@NPC L Thigh [LThg],@NPC R Thigh [RThg],@NPC L Calf [RClf],@NPC R Calf [RClf],@NPC Genitals01 [Gen01])
 NPC R RearThigh (@NPC L Butt,@NPC R Butt,@NPC L Thigh [LThg],@NPC R Thigh [RThg],@NPC L Calf [RClf],@NPC R Calf [RClf],@NPC Genitals01 [Gen01])
 
-#NPC L Pussy02 (@NPC L Butt,@NPC R Butt,@NPC Genitals01 [Gen01],@NPC L Thigh [LThg],@NPC R Thigh [RThg])
-#NPC R Pussy02 (@NPC L Butt,@NPC R Butt,@NPC Genitals01 [Gen01],@NPC L Thigh [LThg],@NPC R Thigh [RThg])
-#Clitoral1 (@NPC L Butt,@NPC R Butt,@NPC Genitals01 [Gen01],NPC L Thigh [LThg],NPC R Thigh [RThg])
-#VaginaB1 (@NPC L Butt,@NPC R Butt,@NPC Genitals01 [Gen01],NPC L Thigh [LThg],NPC R Thigh [RThg])
+NPC L Pussy02 (@NPC L Butt,@NPC R Butt,@NPC Genitals01 [Gen01],@NPC L Thigh [LThg],@NPC R Thigh [RThg])
+NPC R Pussy02 (@NPC L Butt,@NPC R Butt,@NPC Genitals01 [Gen01],@NPC L Thigh [LThg],@NPC R Thigh [RThg])
+Clitoral1 (@NPC L Butt,@NPC R Butt,@NPC Genitals01 [Gen01],NPC L Thigh [LThg],NPC R Thigh [RThg])
+VaginaB1 (@NPC L Butt,@NPC R Butt,@NPC Genitals01 [Gen01],NPC L Thigh [LThg],NPC R Thigh [RThg])
 
 [ColliderNodes] #Define nodes here first, then set the collision spheres down
 
@@ -93,14 +99,16 @@ NPC R Forearm [RLar]
 NPC L Hand [LHnd]
 NPC R Hand [RHnd]
 
-NPC L Finger22 [LF22]
-NPC R Finger22 [RF22]
+NPC L Finger12 [LF12]
+NPC R Finger12 [RF12]
+NPC L Finger42 [LF42]
+NPC R Finger42 [RF42]
 
-NPC Genitals01 [Gen01]
-#NPC Genitals02 [Gen02]
+NPC Genitals06 [Gen06]
 
 NPC L Thigh [LThg]
 NPC R Thigh [RThg]
+
 
 ##############################################################################
 # Collision spheres
@@ -130,43 +138,49 @@ NPC R Thigh [RThg]
 [NPC R Butt]
 3.25,2.5,-3.5,7.5 | 3.25,2.5,-3.5,7.5
 
-[NPC Belly]
-0,3,-2.5,6.0 | 0,3,-2.5,6.0
+#[HDT Belly]
+#0,2.25,-1.5,4 | 0,2.25,-1.5,5
 
-[NPC Pelvis [Pelv]] #For Female Genitals
-0,-1,-3.5,2.5 | 0,-1,-3.5,2.5
+#[NPC Belly]
+#0,0,-2.5,4.0 | 0,0,-2.5,4.0
+
+#[NPC Pelvis [Pelv]] #For Female Genitals
+#0,-1,-3.5,2.5 | 0,-1,-3.5,2.5
+
+[Anal] #For Female Anal
+0,-6,-2,1.75 | 0,-6,-2,1.75
 
 [NPC Spine1 [Spn1]] #For Female Belly
-0.0,3.0,-5.0,6.0 | 0.0,3.0,-5.0,6.0
+0,3,-5,7 | 0,3,-5,7
 
-[L Breast01]
+[L Breast01] : 0.5
 -1.0,2.25,-1,6.5 | -1.0,2.25,-1,6.5
-[R Breast01]
+[R Breast01] : 0.5
 1.0,2.25,-1,6.5 | 1.0,2.25,-1,6.5
 
-[L Breast02]
+[L Breast02] : 0.5
 0.25,0.25,-1,6.5 | 0.25,0.25,-1,6.5
-[R Breast02]
+[R Breast02] : 0.5
 -0.25,0.25,-1,6.5 | -0.25,0.25,-1,6.5
 
-[L Breast03]
+[L Breast03] : 0.5
 0.75,-2,-1.75,5.5 | 0.75,-2,-1.75,5.5
-[R Breast03]
+[R Breast03] : 0.5
 -0.75,-2,-1.75,5.5 | -0.75,-2,-1.75,5.5
 
-#[NPC L Pussy02]
-#1,-3.25,0,2.0 & 1,1.5,0.5,2 | 1,-3.25,0,2.0 & 1,1.5,0.5,2
-#[NPC R Pussy02]
-#-1,-3.25,0,2.0 & -1,1.5,0.5,2 | -1,-3.25,0,2.0 & -1,1.5,0.5,2
-#[VaginaB1]
-#0,1.0,0,2.0 | 0,1.0,0,2.0
-#[Clitoral1]
-#0,1,0.5,2.0 | 0,1,0.5,2.0
+[NPC L Pussy02]
+1,-3.25,0,2.0 & 1,1.5,0.5,2 | 1,-3.25,0,2.0 & 1,1.5,0.5,2
+[NPC R Pussy02]
+-1,-3.25,0,2.0 & -1,1.5,0.5,2 | -1,-3.25,0,2.0 & -1,1.5,0.5,2
+[VaginaB1]
+0,1.0,0,2.0 | 0,1.0,0,2.0
+[Clitoral1]
+0,1,0.5,2.0 | 0,1,0.5,2.0
 
 [NPC L RearThigh]
-2.5,-1,-14,6.5 & 0,3.5,6,4.5 | 2.5,-1,-14,6.5 & 0,3.5,6,4.5
+2.5,-1,-14,7 & 0,3.5,6,5 | 2.5,-1,-14,7 & 0,3.5,6,5
 [NPC R RearThigh]
--2.5,-1,-14,6.5 & 0,3.5,6,4.5 | -2.5,-1,-14,6.5 & 0,3.5,6,4.5
+-2.5,-1,-14,7 & 0,3.5,6,5 | -2.5,-1,-14,7 & 0,3.5,6,5
 
 ##############################################################################
 # Collider Nodes
@@ -181,22 +195,23 @@ NPC R Thigh [RThg]
 0.0,3.0,2.0,7.0 | 0.0,3.0,2.0,7.0
 
 [NPC L Hand [LHnd]]
--0.75,-0.5,-0.5,2.25 | -0.75,-0.5,-0.5,2.25
+-0.75,-0.5,-0.5,2 | -0.75,-0.5,-0.5,2
 -0.75,-1,5,2 | -0.75,-1,5,2
 [NPC R Hand [RHnd]]
-0.75,-0.5,-0.5,2.0 | 0.75,-0.5,-0.5,2.0
+0.75,-0.5,-0.5,2 | 0.75,-0.5,-0.5,2
 0.75,-1,5,2 | 0.75,-1,5,2
 
-[NPC L Finger22 [LF22]]
--0.2,0.25,2,2 | -0.2,0.25,2,2
-[NPC R Finger22 [RF22]]
-0.2,0.25,2,2 | 0.2,0.25,2,2
+[NPC L Finger12 [LF12]]
+-0.2,0.25,2,1.5 | -0.2,0.25,2,1.5
+[NPC R Finger12 [RF12]]
+0.2,0.25,2,1.5 | 0.2,0.25,2,1.5
+[NPC L Finger42 [LF42]]
+-0.2,0.25,2,1.5 | -0.2,0.25,2,1.5
+[NPC R Finger42 [RF42]]
+0.2,0.25,2,1.5 | 0.2,0.25,2,1.5
 
-[NPC Genitals01 [Gen01]]
-0,0,0,1.75 & 0,7.5,0,1.5 | 0,0,0,1.75 & 0,7.5,0,1.5
-#0,0,0,3 | 0,0,0,3
-#[NPC Genitals02 [Gen02]]
-#0,-1.75,0,1.75 & 0,5.75,0,1.5 | 0,-1.75,0,1.75 & 0,5.75,0,1.5
+[NPC Genitals06 [Gen06]] : 0.6
+0,0.5,0.1,1.5 & 0,-9,0.1,1.75 | 0,0.5,0.1,1.5 & 0,-9,0.1,1.75
 
 [NPC L Thigh [LThg]]
 1.5,-2,11,8 & -0.5,-0.25,30,4 | 1.5,-2,11,8 & -0.5,-0.25,30,4

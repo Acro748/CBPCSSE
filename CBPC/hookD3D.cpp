@@ -147,47 +147,53 @@ typedef UINT64 (__cdecl *renderHook) (void* This, UINT64 arg);
 
 renderHook orender = nullptr;
 
-void updateActors();
-UINT64 __cdecl Render(void *This, UINT64 arg)
+struct UnkEngine
 {
-	updateActors();
+	char unk[0x16];
+	bool gamePaused; // 16
+};
+
+void updateActors(bool gamePaused);
+UINT64 __cdecl Render(UnkEngine *This, UINT64 arg)
+{
+	updateActors(This->gamePaused);
 	return orender(This, arg);
 }
 
 #ifdef RUNTIME_VR_VERSION_1_4_15
 
-RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005BAB10); //For VR 1.4.15
+RelocPtr <UnkEngine*> ProcessTasks_HookTarget_Enter(0x005BAB10); //For VR 1.4.15
 
 #elif RUNTIME_VERSION_1_6_353
-RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005DACE0); //For SSE 1.6.353 and up
+RelocPtr <UnkEngine*> ProcessTasks_HookTarget_Enter(0x005DACE0); //For SSE 1.6.353 and up
 #elif RUNTIME_VERSION_1_6_342
 
-RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005DAE80); //For SSE 1.6.323 and up
+RelocPtr <UnkEngine*> ProcessTasks_HookTarget_Enter(0x005DAE80); //For SSE 1.6.342 and up
 
 
 #elif RUNTIME_VERSION_1_6_323
 
-RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005D9CC0); //For SSE 1.6.323 and up
+RelocPtr <UnkEngine*> ProcessTasks_HookTarget_Enter(0x005D9CC0); //For SSE 1.6.323 and up
 
 #elif RUNTIME_VERSION_1_6_318
 
-RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005D9F50); //For SSE 1.6.318 and up
+RelocPtr <UnkEngine*> ProcessTasks_HookTarget_Enter(0x005D9F50); //For SSE 1.6.318 and up
 
 #elif RUNTIME_VERSION_1_5_97 || RUNTIME_VERSION_1_5_80 || RUNTIME_VERSION_1_5_73
 
-RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005B2FF0); //For SSE 1.5.73 and up
+RelocPtr <UnkEngine*> ProcessTasks_HookTarget_Enter(0x005B2FF0); //For SSE 1.5.73 and up
 
 #elif RUNTIME_VERSION_1_5_62 || RUNTIME_VERSION_1_5_53 || RUNTIME_VERSION_1_5_50
 
-RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005B31E0); //For SSE 1.5.50 - 1.5.62
+RelocPtr <UnkEngine*> ProcessTasks_HookTarget_Enter(0x005B31E0); //For SSE 1.5.50 - 1.5.62
 
 #elif RUNTIME_VERSION_1_5_39
 
-RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005B34A0);  //For SSE 1.5.39
+RelocPtr <UnkEngine*> ProcessTasks_HookTarget_Enter(0x005B34A0);  //For SSE 1.5.39
 
 #elif RUNTIME_VERSION_1_5_23
 
-RelocPtr <void*> ProcessTasks_HookTarget_Enter(0x005B2EF0); //For SSE 1.5.23
+RelocPtr <UnkEngine*> ProcessTasks_HookTarget_Enter(0x005B2EF0); //For SSE 1.5.23
 
 #endif
 
@@ -238,7 +244,7 @@ RelocPtr <_BSTaskPool_ProcessTaskQueue> BSTaskPool_ProcessTaskQueue(0x005C1A20);
 void hk_BSTaskPool_ProcessTaskQueue(void* thisPtr)
 {
 	orig_BSTaskPool_ProcessTaskQueue(thisPtr);
-	updateActors();
+	updateActors(false);
 }
 
 void DoHookNEW() 
