@@ -34,6 +34,10 @@ BellyBulgeNodes=Genitals01   #These are the node names to match for belly bulge 
 VaginaOpeningMultiplier=3.0  #This is the multiplier for vagina opening.
 
 VaginaOpeningLimit=5.0  #This is the limit for vagina opening.
+
+AnusOpeningMultiplier=3.0		#This is the multiplier for anus opening.
+
+AnusOpeningLimit=20.0	  #This is the limit for anus opening.
 ##############################################################################
 # Node Lists
 ##############################################################################
@@ -44,6 +48,7 @@ NPC L Butt
 NPC R Butt
 NPC Pelvis [Pelv]
 NPC Spine1 [Spn1]
+#Anal	#Except for 3BA, BHUNP, COCOBODY, there is no body to open anal, so it's commented out by default
 
 [ColliderNodes] #Define nodes here first, then set the collision spheres down
 NPC L UpperArm [LUar]
@@ -91,6 +96,9 @@ NPC Genitals01 [Gen01]
 
 [NPC Spine1 [Spn1]] #For Female Belly
 0.0,3.0,-5.0,6.0 | 0.0,3.0,-5.0,6.0
+
+[Anal] #For Female Anus
+0,-6,-2,1.75 | 0,-6,-2,1.75
 
 ##############################################################################
 # Collider Nodes

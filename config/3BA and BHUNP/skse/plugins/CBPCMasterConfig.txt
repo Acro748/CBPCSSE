@@ -29,33 +29,10 @@ NoJitterFixNodes = NPC Genitals01 [Gen01],NPC Genitals02 [Gen02],NPC Genitals03 
 # IsFemale() AND IsRaceFormId(13745) OR IsRaceFormId(13740)
 #
 ##############################################################################
-# Configuration some nodes to be sequenced
-#
-# In the case of physics chain nodes like 3 breast bones and SOS penis and etc, jitter may occur due to parallel processing
-# 
-# You can use < and > to load those parts in order from top to bottom
-#
-# Examples:
-# <
-# L Breast01=ExtraBreast1L=IsFemale()
-# L Breast02=ExtraBreast2L=IsFemale()
-# L Breast03=ExtraBreast3L=IsFemale()
-# >
-# <
-# R Breast01=ExtraBreast1R=IsFemale()
-# R Breast02=ExtraBreast2R=IsFemale()
-# R Breast03=ExtraBreast3R=IsFemale()
-# >
-# 
-# then L Breast01 and R Breast01 will be loaded at the same time and when done that node then the node in next line of that node will be loaded
-# Don't try to put too many nodes between < and >, It will compromise the performance benefits of parallel processing
-# 
-##############################################################################
 [ConfigMap]                   #You can create multiple CBPCMasterConfig***.txt files to include more configmap lines.
 NPC L Breast=Breast=IsFemale()
 NPC R Breast=Breast=IsFemale()
 NPC L Butt=Butt=IsFemale()
 NPC R Butt=Butt=IsFemale()
 HDT Belly=Belly=IsFemale()
-NPC Pelvis [Pelv]
-#Anal	#Except for 3BA, BHUNP, COCOBODY, there is no body to open anal, so it's commented out by default
+#NPC Pelvis [Pelv]

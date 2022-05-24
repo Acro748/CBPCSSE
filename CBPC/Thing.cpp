@@ -1157,7 +1157,7 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		{
 			//Add it to the list
 			//leftAnusDefaultPos = leftAnusObj->m_localTransform.pos;
-			leftAnusDefaultPos = NiPoint3(-0.753204f, -0.059860f, 0.431540f);
+			leftAnusDefaultPos = NiPoint3(-0.753204f, -0.059860f, 0.431540f); //rig file of XPMSSE 4.6 or higher version has often anus bone torsion, so I hardcoded bone location
 			thingDefaultPosList[leftpair] = leftAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", leftAnus.data, actor->baseForm->formID, leftAnusDefaultPos.x, leftAnusDefaultPos.y, leftAnusDefaultPos.z);
 
@@ -1174,7 +1174,7 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		{
 			//Add it to the list
 			//rightAnusDefaultPos = rightAnusObj->m_localTransform.pos;
-			rightAnusDefaultPos = NiPoint3(-0.753204f, 0.059856f, 0.431471f);
+			rightAnusDefaultPos = NiPoint3(-0.753204f, 0.059856f, 0.431471f); //rig file of XPMSSE 4.6 or higher version has often anus bone torsion, so I hardcoded bone location
 			thingDefaultPosList[rightpair] = rightAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", rightAnus.data, actor->baseForm->formID, rightAnusDefaultPos.x, rightAnusDefaultPos.y, rightAnusDefaultPos.z);
 
@@ -1191,7 +1191,7 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		{
 			//Add it to the list
 			//backAnusDefaultPos = backAnusObj->m_localTransform.pos;
-			backAnusDefaultPos = NiPoint3(-0.753212f, 0.048635f, 0.432867f);
+			backAnusDefaultPos = NiPoint3(-0.753212f, 0.048635f, 0.432867f); //rig file of XPMSSE 4.6 or higher version has often anus bone torsion, so I hardcoded bone location
 			thingDefaultPosList[backpair] = backAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", backAnus.data, actor->baseForm->formID, backAnusDefaultPos.x, backAnusDefaultPos.y, backAnusDefaultPos.z);
 
@@ -1208,7 +1208,7 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		{
 			//Add it to the list
 			//frontAnusDefaultPos = frontAnusObj->m_localTransform.pos;
-			frontAnusDefaultPos = NiPoint3(-0.753235f, -0.048630f, 0.432873f);
+			frontAnusDefaultPos = NiPoint3(-0.753235f, -0.048630f, 0.432873f); //rig file of XPMSSE 4.6 or higher version has often anus bone torsion, so I hardcoded bone location
 			thingDefaultPosList[frontpair] = frontAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", frontAnus.data, actor->baseForm->formID, frontAnusDefaultPos.x, frontAnusDefaultPos.y, frontAnusDefaultPos.z);
 

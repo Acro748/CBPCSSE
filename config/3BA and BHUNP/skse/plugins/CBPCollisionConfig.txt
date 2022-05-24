@@ -14,9 +14,9 @@ BellyBulgeReturnTime=2.0   #This is the duration takes in seconds for belly bulg
 BellyBulgeNodes=Genitals01,AnimObWWD 3,VLDick02,VLDick03,SkeeverD 02,SkeeverD 03,TentacleLeft06,TentacleLeft07,TentacleLeft08,LTentacleLeft06,LTentacleLeft07,LTentacleLeft08,RTentacleLeft06,RTentacleLeft07,RTentacleLeft08,TailStinger,TailStinger 2,SCD 2,SCD 3,NP 14,NPB 14,HS 3,HS 4,HS 5,GS 3,GS 4,GiantTongue 1,GiantTongue 2,GiantTongue 3,Lurker Egg 01,Lurker Egg 02,Lurker Egg 03,Lurker Egg 04,Lurker Egg 05,Lurker Egg 06,GD 3,COEgg 1,COEgg 2,COEgg 3,COEgg 4,COEgg 5,NPC IceGenital03,FD 3,DwarvenSpiderDildo01,DwarvenSpiderDildo02,DwarvenSpiderDildo03,DD 2,ElkD03,ElkD04,CO 3,CO 4,CO 5,Worm Base,CDPenis 2,BoarDick03,Boar_Tongue1,Boar_Tongue2,Boar_Tongue3,BearD 4,BearD 5,BearD 6,BearTongue 1,BearTongue 2,BearTongue 3,BearTongue 4,RD Base,RD 2,WWD 3,WWD 4,WWTongue 2,CO 3,COEgg 1,COEgg 2,COEgg 3,COEgg 4,COEgg 5,ElkD03,DwarvenSpiderDeldo03,NPC IcePenis01,WWTongue 2
 #These are the node names to match for belly bulge collision with pelvis node. You can add more than one separated with ","
 
-VaginaOpeningMultiplier=6  #This is the multiplier for vagina opening.
+VaginaOpeningMultiplier=3  #This is the multiplier for vagina opening.
 
-VaginaOpeningLimit=20.0  #This is the limit for vagina opening.
+VaginaOpeningLimit=8.0  #This is the limit for vagina opening.
 
 ##############################################################################
 # Node Lists
@@ -40,17 +40,25 @@ NPC R Forearm [RLar]
 NPC L Hand [LHnd]
 NPC R Hand [RHnd]
 
-NPC L Finger22 [LF22]
-NPC R Finger22 [RF22]
+NPC L Finger12 [LF12]
+NPC L Finger42 [LF42]
+NPC R Finger12 [RF12]
+NPC R Finger42 [RF42]
 
-NPC Genitals01 [Gen01]
-#NPC Genitals02 [Gen02]
+NPC Spine2 [Spn2]
+NPC Spine1 [Spn1]
+NPC Pelvis [Pelv]
+
+NPC Genitals06 [Gen06]
 
 NPC L Thigh [LThg]
 NPC R Thigh [RThg]
 
 NPC L Calf [LClf]
 NPC R Calf [RClf]
+
+NPC L Foot [Lft ]
+NPC R Foot [Rft ]
 
 ##############################################################################
 # Collision spheres
@@ -83,37 +91,54 @@ NPC R Calf [RClf]
 0.0,3.0,2.0,7.0 | 0.0,3.0,2.0,7.0
 
 [NPC L UpperArm [LUar]]
-0.5,0.25,8,4 & 0.5,0.25,18,3.6 | 0.5,0.25,8,4 & 0.5,0.25,18,3.6
+-1,1,3,4 & 0.5,0.5,15.5,3 | 0,0,3,5 & 0.5,0.5,15,4
 [NPC R UpperArm [RUar]]
--0.5,0.25,8,4 & -0.5,0.25,18,3.6 | -0.5,0.25,8,4 & -0.5,0.25,18,3.6
+1,1,3,4 & -0.5,0.5,15.5,3 | 0,0,3,5 & -0.5,0.5,15,4
 
 [NPC L Forearm [LLar]]
-0.5,1.25,0.0,3.4 & 0.0,0.75,12.0,2.8 | 0.5,1.25,0.0,3.4 & 0.0,0.75,12.0,2.8
+0.5,1.5,-0.5,3 & 0.0,0.75,11.5,2.25 | 1,1.5,0,4 & 0,0.75,11.5,2.25
 [NPC R Forearm [RLar]]
--0.5,1.25,0.0,3.4 & 0.0,0.75,12.0,2.8 | -0.5,1.25,0.0,3.4 & 0.0,0.75,12.0,2.8
+-0.5,1.5,-0.5,3 & 0.0,0.75,11.5,2.25 | -1,1.5,0,4 & 0,0.75,11.5,2.25
 
 [NPC L Hand [LHnd]]
 -0.75,-1,5,4 | -0.75,-1,5,4
 [NPC R Hand [RHnd]]
 0.75,-1,5,4 | 0.75,-1,5,4
 
-[NPC L Finger22 [LF22]]
--0.2,0.25,2,2 | -0.2,0.25,2,2
-[NPC R Finger22 [RF22]]
-0.2,0.25,2,2 | 0.2,0.25,2,2
+[NPC L Finger12 [LF12]]
+-0.2,0.25,2,1.5 | -0.2,0.25,2,1.5
+[NPC L Finger42 [LF42]]
+-0.2,0.25,2,1.5 | -0.2,0.25,2,1.5
+[NPC R Finger12 [RF12]]
+0.2,0.25,2,1.5 | 0.2,0.25,2,1.5
+[NPC R Finger42 [RF42]]
+0.2,0.25,2,1.5 | 0.2,0.25,2,1.5
 
-[NPC Genitals01 [Gen01]]
-0,0,0,1.75 & 0,7.5,0,1.5 | 0,0,0,1.75 & 0,7.5,0,1.5
-#0,0,0,3 | 0,0,0,3
-#[NPC Genitals02 [Gen02]]
-#0,-1.75,0,1.75 & 0,5.75,0,1.5 | 0,-1.75,0,1.75 & 0,5.75,0,1.5
+[NPC Spine2 [Spn2]]
+5,3.5,8,8.5 & -5,3.5,8,8.5 | 4,3,8,11 & -4,3,8,11
+
+[NPC Spine1 [Spn1]]
+2,5.5,2,7.5 & -2,5.5,2,7.5 | 4,5.5,2,8 & -4,5.5,2,8
+
+[NPC Pelvis [Pelv]]
+5,-2,0,7 & -5,-2,0,7 | 6,-2,0,7.5 & -6,-2,0,7.5
+
+[NPC Genitals06 [Gen06]] : 0.6
+0,0.5,0.1,1.5 & 0,-9,0.1,1.75 | 0,0.5,0.1,1.5 & 0,-9,0.1,1.75
 
 [NPC L Thigh [LThg]]
-1.5,-2,11,8 & -0.5,-0.25,30,4 | 1.5,-2,11,8 & -0.5,-0.25,30,4
+0.25,0.5,11,6 & 0.25,0.5,30,4.25 | 1,0.5,11,7 & 0.25,0.5,30,5
 [NPC R Thigh [RThg]]
--1.5,-2,11,8 & 0.5,-0.25,30,4 | -1.5,-2,11,8 & 0.5,-0.25,30,4
+-0.25,0.5,11,6 & -0.25,0.5,30,4.25 | -1,0.5,11,7 & -0.25,0.5,30,5
 
 [NPC L Calf [LClf]]
--0.5,-1.25,0,4 & 0,-0.5,20,3 | -0.5,-1.25,0,4 & 0,-0.5,20,3
+0,-1,2.5,4 & 0,0,25,3 | -0.5,-2,2.5,4 & 0,0,25,3
 [NPC R Calf [RClf]]
-0.5,-1.25,0,4 & 0,-0.5,20,3 | 0.5,-1.25,0,4 & 0,-0.5,20,3
+0,-1,2.5,4 & 0,0,25,3 | 0.5,-2,2.5,4 & 0,0,25,3
+
+[NPC L Foot [Lft ]]
+0.0,-3,1,2.5 & 0.25,2.0,11,2.5 | 0.0,-3,1,2.5 & 0.25,2.0,11,2.5
+[NPC R Foot [Rft ]]
+0.0,-3,1,2.5 & -0.25,2.0,11,2.5 | 0.0,-3,1,2.5 & -0.25,2.0,11,2.5
+
+

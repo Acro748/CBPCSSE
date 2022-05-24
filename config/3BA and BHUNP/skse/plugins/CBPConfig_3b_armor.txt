@@ -1,0 +1,52 @@
+# START #ExtraBreast
+
+# Clothes
+ExtraBreast1L.breastClothedPushup 0.8 0.8
+ExtraBreast2L.breastClothedPushup 0.8 0.8
+ExtraBreast3L.breastClothedPushup 0.8 0.8
+
+ExtraBreast1L.breastLightArmoredPushup 0.8 0.8
+ExtraBreast2L.breastLightArmoredPushup 0.8 0.8
+ExtraBreast3L.breastLightArmoredPushup 0.8 0.8
+
+ExtraBreast1L.breastHeavyArmoredPushup 0.8 0.8
+ExtraBreast2L.breastHeavyArmoredPushup 0.8 0.8
+ExtraBreast3L.breastHeavyArmoredPushup 0.8 0.8
+
+ExtraBreast1L.breastClothedAmplitude 0.8 0.8
+ExtraBreast2L.breastClothedAmplitude 0.8 0.8
+ExtraBreast3L.breastClothedAmplitude 0.8 0.8
+
+ExtraBreast1L.breastLightArmoredAmplitude 0.8 0.8
+ExtraBreast2L.breastLightArmoredAmplitude 0.8 0.8
+ExtraBreast3L.breastLightArmoredAmplitude 0.8 0.8
+
+ExtraBreast1L.breastHeavyArmoredAmplitude 0.8 0.8
+ExtraBreast2L.breastHeavyArmoredAmplitude 0.8 0.8
+ExtraBreast3L.breastHeavyArmoredAmplitude 0.8 0.8
+
+ExtraBreast1R.breastClothedPushup 0.8 0.8
+ExtraBreast2R.breastClothedPushup 0.8 0.8
+ExtraBreast3R.breastClothedPushup 0.8 0.8
+
+ExtraBreast1R.breastLightArmoredPushup 0.8 0.8
+ExtraBreast2R.breastLightArmoredPushup 0.8 0.8
+ExtraBreast3R.breastLightArmoredPushup 0.8 0.8
+
+ExtraBreast1R.breastHeavyArmoredPushup 0.8 0.8
+ExtraBreast2R.breastHeavyArmoredPushup 0.8 0.8
+ExtraBreast3R.breastHeavyArmoredPushup 0.8 0.8
+
+ExtraBreast1R.breastClothedAmplitude 0.8 0.8
+ExtraBreast2R.breastClothedAmplitude 0.8 0.8
+ExtraBreast3R.breastClothedAmplitude 0.8 0.8
+
+ExtraBreast1R.breastLightArmoredAmplitude 0.8 0.8
+ExtraBreast2R.breastLightArmoredAmplitude 0.8 0.8
+ExtraBreast3R.breastLightArmoredAmplitude 0.8 0.8
+
+ExtraBreast1R.breastHeavyArmoredAmplitude 0.8 0.8
+ExtraBreast2R.breastHeavyArmoredAmplitude 0.8 0.8
+ExtraBreast3R.breastHeavyArmoredAmplitude 0.8 0.8
+
+#Tuning.rate 300

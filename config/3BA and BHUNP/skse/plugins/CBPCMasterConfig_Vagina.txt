@@ -1,0 +1,5 @@
+[ConfigMap]                   
+VaginaB1=VaginaB=IsFemale()
+Clitoral1=Clit=IsFemale()
+NPC L Pussy02=LLabia=IsFemale()
+NPC R Pussy02=RLabia=IsFemale()
