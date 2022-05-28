@@ -2054,7 +2054,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		NiPoint3 maybePos = target + (obj->m_parent->m_worldTransform.rot * (maybeldiff + (thingDefaultPos * nodeScale))); //add missing local pos
 
 		float colliderNodescale = 1.0f - ((1.0f - (nodeScale / actorBaseScale)) * scaleWeight); //Calibrate the scale gap between collider and actual mesh caused by bone weight
-		
+
 		//After cbp movement collision detection
 		for (int i = 0; i < thingCollisionSpheres.size(); i++)
 		{
@@ -2100,29 +2100,26 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		CollisionConfig.objRot = objRotation;
 		CollisionConfig.invRot = invRot;
 
-		if (collisionElastic)
-		{
-			NiPoint3 AveragelDiff = ((ldiff + ldiffRot) * 0.5f) - lvarGravityCorrection;
-			CollisionConfig.CollisionMaxOffset.x = collisionXmaxOffset - AveragelDiff.x;
-			CollisionConfig.CollisionMinOffset.x = collisionXminOffset - AveragelDiff.x;
-			CollisionConfig.CollisionMaxOffset.y = collisionYmaxOffset - AveragelDiff.y;
-			CollisionConfig.CollisionMinOffset.y = collisionYminOffset - AveragelDiff.y;
-			CollisionConfig.CollisionMaxOffset.z = collisionZmaxOffset - AveragelDiff.z;
-			CollisionConfig.CollisionMinOffset.z = collisionZminOffset - AveragelDiff.z;
+		NiPoint3 AveragelDiff = ((ldiff + ldiffRot) * 0.5f) - lvarGravityCorrection;
+		CollisionConfig.CollisionMaxOffset.x = collisionXmaxOffset - AveragelDiff.x;
+		CollisionConfig.CollisionMinOffset.x = collisionXminOffset - AveragelDiff.x;
+		CollisionConfig.CollisionMaxOffset.y = collisionYmaxOffset - AveragelDiff.y;
+		CollisionConfig.CollisionMinOffset.y = collisionYminOffset - AveragelDiff.y;
+		CollisionConfig.CollisionMaxOffset.z = collisionZmaxOffset - AveragelDiff.z;
+		CollisionConfig.CollisionMinOffset.z = collisionZminOffset - AveragelDiff.z;
 
-			if (CollisionConfig.CollisionMaxOffset.x < 0.0f)
-				CollisionConfig.CollisionMaxOffset.x = 0.0f;
-			if (CollisionConfig.CollisionMinOffset.x > 0.0f)
-				CollisionConfig.CollisionMinOffset.x = 0.0f;
-			if (CollisionConfig.CollisionMaxOffset.y < 0.0f)
-				CollisionConfig.CollisionMaxOffset.y = 0.0f;
-			if (CollisionConfig.CollisionMinOffset.y > 0.0f)
-				CollisionConfig.CollisionMinOffset.y = 0.0f;
-			if (CollisionConfig.CollisionMaxOffset.z < 0.0f)
-				CollisionConfig.CollisionMaxOffset.z = 0.0f;
-			if (CollisionConfig.CollisionMinOffset.z > 0.0f)
-				CollisionConfig.CollisionMinOffset.z = 0.0f;
-		}
+		if (CollisionConfig.CollisionMaxOffset.x < 0.0f)
+			CollisionConfig.CollisionMaxOffset.x = 0.0f;
+		if (CollisionConfig.CollisionMinOffset.x > 0.0f)
+			CollisionConfig.CollisionMinOffset.x = 0.0f;
+		if (CollisionConfig.CollisionMaxOffset.y < 0.0f)
+			CollisionConfig.CollisionMaxOffset.y = 0.0f;
+		if (CollisionConfig.CollisionMinOffset.y > 0.0f)
+			CollisionConfig.CollisionMinOffset.y = 0.0f;
+		if (CollisionConfig.CollisionMaxOffset.z < 0.0f)
+			CollisionConfig.CollisionMaxOffset.z = 0.0f;
+		if (CollisionConfig.CollisionMinOffset.z > 0.0f)
+			CollisionConfig.CollisionMinOffset.z = 0.0f;
 
 		for (int j = 0; j < thingIdList.size(); j++)
 		{
