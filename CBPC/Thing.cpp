@@ -7,6 +7,7 @@ BSFixedString frontPus("Clitoral1");
 BSFixedString belly("HDT Belly");
 BSFixedString pelvis("NPC Pelvis [Pelv]");
 BSFixedString spine1("NPC Spine1 [Spn1]");
+
 BSFixedString anal("Anal");
 BSFixedString frontAnus("NPC LT Anus2");
 BSFixedString backAnus("NPC RT Anus2");
@@ -19,8 +20,8 @@ float IntervalTimeTickScale = 1.0f;
 
 //## thing_map_lock
 // Maps are sorted every edit time, so if it is parallel processing then a high probability of overloading
-
 std::shared_mutex thing_map_lock;
+
 
 Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	: boneName(name)
@@ -61,6 +62,8 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 	IsBreastBone = ContainsNoCase(boneName.data, "Breast");
 	IsBellyBone = strcmp(boneName.data, belly.data) == 0;
 
+	actorNodeString = GetActorNodeString(actor, boneName);
+
 	if (IsBellyBone)
 	{
 		//thingCollisionSpheres = CreateThingCollisionSpheres(actor, pelvis.data);
@@ -81,7 +84,7 @@ Thing::Thing(Actor * actor, NiAVObject *obj, BSFixedString &name)
 		auto mypair = std::make_pair(actor->baseForm->formID, name.data);
 
 		thing_map_lock.lock();
-		std::map<std::pair<UInt32, const char*>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(mypair);
+		std::map<std::pair<UInt32, const char *>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(mypair);
 
 		if (posMap == thingDefaultPosList.end())
 		{
@@ -140,7 +143,6 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 	actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
 
 	actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
-
 	concurrency::concurrent_vector<ConfigLine>* AffectedNodesListPtr;
 
 	const char * actorrefname = "";
@@ -201,7 +203,7 @@ std::vector<Sphere> Thing::CreateThingCollisionSpheres(Actor * actor, std::strin
 			IgnoredCollidersList = AffectedNodesListPtr->at(i).IgnoredColliders;
 			IgnoredSelfCollidersList = AffectedNodesListPtr->at(i).IgnoredSelfColliders;
 			IgnoreAllSelfColliders = AffectedNodesListPtr->at(i).IgnoreAllSelfColliders;
-			for (int j = 0; j < spheres.size(); j++)
+			for(int j=0; j<spheres.size(); j++)
 			{
 				spheres[j].offset0 = GetPointFromPercentage(spheres[j].offset0, spheres[j].offset100, actorWeight);
 
@@ -222,7 +224,6 @@ std::vector<Capsule> Thing::CreateThingCollisionCapsules(Actor* actor, std::stri
 	actorWeight = CALL_MEMBER_FN(actorRef, GetWeight)();
 
 	actorBaseScale = CALL_MEMBER_FN(actorRef, GetBaseScale)();
-
 	concurrency::concurrent_vector<ConfigLine>* AffectedNodesListPtr;
 
 	const char* actorrefname = "";
@@ -319,6 +320,9 @@ float solveQuad(float a, float b, float c) {
 
 void Thing::updateConfigValues(Actor* actor)
 {
+
+
+
 	stiffness = GetPercentageValue(stiffness_0, stiffness_100, actorWeight);
 	stiffnessX = GetPercentageValue(stiffnessX_0, stiffnessX_100, actorWeight);
 	stiffnessY = GetPercentageValue(stiffnessY_0, stiffnessY_100, actorWeight);
@@ -429,11 +433,13 @@ void Thing::updateConfigValues(Actor* actor)
 	collisionZmaxOffset = GetPercentageValue(collisionZmaxOffset_0, collisionZmaxOffset_100, actorWeight);
 	collisionZminOffset = GetPercentageValue(collisionZminOffset_0, collisionZminOffset_100, actorWeight);
 
-
+	amplitude = GetPercentageValue(amplitude_0, amplitude_100, actorWeight);
+	
 	CollisionConfig.IsElasticCollision = collisionElastic;
 
 	CollisionConfig.CollisionMaxOffset = NiPoint3(collisionXmaxOffset, collisionYmaxOffset, collisionZmaxOffset);
 	CollisionConfig.CollisionMinOffset = NiPoint3(collisionXminOffset, collisionYminOffset, collisionZminOffset);
+
 }
 
 void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& centry0weight) {
@@ -520,14 +526,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		YminOffset_100 = centry["Yminoffset"];
 		ZmaxOffset_100 = centry["Zmaxoffset"];
 		ZminOffset_100 = centry["Zminoffset"];
-
 		XmaxOffsetRot_100 = centry["XmaxoffsetRot"];
 		XminOffsetRot_100 = centry["XminoffsetRot"];
 		YmaxOffsetRot_100 = centry["YmaxoffsetRot"];
 		YminOffsetRot_100 = centry["YminoffsetRot"];
 		ZmaxOffsetRot_100 = centry["ZmaxoffsetRot"];
 		ZminOffsetRot_100 = centry["ZminoffsetRot"];
-
 		if (XmaxOffsetRot_100 < 0.001f && XminOffsetRot_100 < 0.001f && YmaxOffsetRot_100 < 0.001f && YminOffsetRot_100 < 0.001f && ZmaxOffsetRot_100 < 0.001f && ZminOffsetRot_100 < 0.001f)
 		{
 			XmaxOffsetRot_100 = ZmaxOffset_100;
@@ -548,7 +552,6 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	timeTickRot_100 = centry["timetickRot"];
 	if (timeTickRot_100 < 1.0f)
 		timeTickRot_100 = timeTick_100;
-
 	linearX_100 = centry["linearX"];
 	linearY_100 = centry["linearY"];
 	linearZ_100 = centry["linearZ"];
@@ -582,7 +585,6 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearYspreadforceZ_100 = centry["linearYspreadforceZ"];
 	linearZspreadforceX_100 = centry["linearZspreadforceX"];
 	linearZspreadforceY_100 = centry["linearZspreadforceY"];
-
 	rotationXspreadforceY_100 = centry["rotationXspreadforceY"];
 	rotationXspreadforceZ_100 = centry["rotationXspreadforceZ"];
 	rotationYspreadforceX_100 = centry["rotationYspreadforceX"];
@@ -632,6 +634,7 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	collisionZmaxOffset_100 = centry["collisionZmaxoffset"];
 	collisionZminOffset_100 = centry["collisionZminoffset"];
 
+	amplitude_100 = centry["amplitude"];
 
 
 	//0 weight
@@ -716,14 +719,12 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 		YminOffset_0 = centry0weight["Yminoffset"];
 		ZmaxOffset_0 = centry0weight["Zmaxoffset"];
 		ZminOffset_0 = centry0weight["Zminoffset"];
-
 		XmaxOffsetRot_0 = centry0weight["XmaxoffsetRot"];
 		XminOffsetRot_0 = centry0weight["XminoffsetRot"];
 		YmaxOffsetRot_0 = centry0weight["YmaxoffsetRot"];
 		YminOffsetRot_0 = centry0weight["YminoffsetRot"];
 		ZmaxOffsetRot_0 = centry0weight["ZmaxoffsetRot"];
 		ZminOffsetRot_0 = centry0weight["ZminoffsetRot"];
-
 		if (XmaxOffsetRot_0 < 0.001f && XminOffsetRot_0 < 0.001f && YmaxOffsetRot_0 < 0.001f && YminOffsetRot_0 < 0.001f && ZmaxOffsetRot_0 < 0.001f && ZminOffsetRot_0 < 0.001f)
 		{
 			XmaxOffsetRot_0 = ZmaxOffset_0;
@@ -777,7 +778,6 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	linearYspreadforceZ_0 = centry0weight["linearYspreadforceZ"];
 	linearZspreadforceX_0 = centry0weight["linearZspreadforceX"];
 	linearZspreadforceY_0 = centry0weight["linearZspreadforceY"];
-
 	rotationXspreadforceY_0 = centry0weight["rotationXspreadforceY"];
 	rotationXspreadforceZ_0 = centry0weight["rotationXspreadforceZ"];
 	rotationYspreadforceX_0 = centry0weight["rotationYspreadforceX"];
@@ -826,6 +826,8 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	collisionYminOffset_0 = centry0weight["collisionYminoffset"];
 	collisionZmaxOffset_0 = centry0weight["collisionZmaxoffset"];
 	collisionZminOffset_0 = centry0weight["collisionZminoffset"];
+
+	amplitude_0 = centry0weight["amplitude"];
 
 	updateConfigValues(actor);
 
@@ -876,7 +878,6 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, s
 	}
 
 	auto loadedState = actor->loadedState;
-
 	if (!loadedState || !loadedState->node)
 	{
 		return;
@@ -893,13 +894,13 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, s
 	if (!leftPusObj || !rightPusObj || !backPusObj || !frontPusObj || !pelvisObj)
 		return;
 
-	if (updatePussyFirstRun)
+	if(updatePussyFirstRun)
 	{
 		updatePussyFirstRun = false;
 
 		auto leftpair = std::make_pair(actor->baseForm->formID, leftPus.data);
 		thing_map_lock.lock();
-		std::map<std::pair<UInt32, const char*>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(leftpair);
+		std::map<std::pair<UInt32, const char *>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(leftpair);
 
 		if (posMap == thingDefaultPosList.end())
 		{
@@ -984,43 +985,42 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, s
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
-
 	float colliderNodescale = 1.0f - ((1.0f - (pelvisScale / actorBaseScale)) * scaleWeight);
 	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
 		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * actorBaseScale * colliderNodescale;
-		thingCollisionSpheres[i].worldPos = pelvisPosition + (pelvisRotation * thingCollisionSpheres[i].offset100);
+		thingCollisionSpheres[i].worldPos = pelvisPosition + (pelvisRotation*thingCollisionSpheres[i].offset100);
 		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
-		for (int m = 0; m < hashIdList.size(); m++)
+		for (int m = 0; m<hashIdList.size(); m++)
 		{
 			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
 			{
 				thingIdList.emplace_back(hashIdList[m]);
 			}
 		}
-	}
+	}	
 	for (int i = 0; i < thingCollisionCapsules.size(); i++)
 	{
 		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * actorBaseScale * colliderNodescale;
-		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation * thingCollisionCapsules[i].End1_offset100);
+		thingCollisionCapsules[i].End1_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End1_offset100);
 		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
 		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * actorBaseScale * colliderNodescale;
-		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation * thingCollisionCapsules[i].End2_offset100);
+		thingCollisionCapsules[i].End2_worldPos = pelvisPosition + (pelvisRotation* thingCollisionCapsules[i].End2_offset100);
 		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
 			, (thingCollisionCapsules[i].End1_radius100 + thingCollisionCapsules[i].End2_radius100) * 0.5f);
-		for (int m = 0; m < hashIdList.size(); m++)
+		for (int m = 0; m<hashIdList.size(); m++)
 		{
 			if (!(std::find(thingIdList.begin(), thingIdList.end(), hashIdList[m]) != thingIdList.end()))
 			{
 				thingIdList.emplace_back(hashIdList[m]);
 			}
 		}
-	}
+	}	
 
 
 	NiPoint3 collisionDiff = emptyPoint;
@@ -1029,13 +1029,11 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, s
 	CollisionConfig.origRot = pelvisObj->m_parent->m_worldTransform.rot;
 	CollisionConfig.objRot = pelvisRotation;
 	CollisionConfig.invRot = pelvisObj->m_parent->m_worldTransform.rot.Transpose();
-
 	bool genitalPenetration = false;
-
 	for (int j = 0; j < thingIdList.size(); j++)
 	{
 		int id = thingIdList[j];
-		if (partitions.find(id) != partitions.end())
+		if(partitions.find(id) != partitions.end())
 		{
 			//LOG_INFO("Pelvis hashId=%d", id);
 			for (int i = 0; i < partitions[id].partitionCollisions.size(); i++)
@@ -1054,16 +1052,21 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, s
 
 				if (partitions[id].partitionCollisions[i].colliderActor == actor && std::strcmp(partitions[id].partitionCollisions[i].colliderNodeName.c_str(), boneName.data) == 0)
 					continue;
-
 				if (debugtimelog || logging)
 					InterlockedIncrement(&callCount);
-
 				partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
 
 				//now not that do reach max value just by get closer and just affected by the collider size
 				bool isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
 				if (isColliding)
+				{
 					genitalPenetration = true;
+
+					if (partitions[id].partitionCollisions[i].colliderActor == (*g_thePlayer) && std::find(PlayerCollisionEventNodes.begin(), PlayerCollisionEventNodes.end(), partitions[id].partitionCollisions[i].colliderNodeName) != PlayerCollisionEventNodes.end())
+					{
+						ActorNodePlayerCollisionEventMap[actorNodeString].collisionInThisCycle = true;
+					}
+				}
 			}
 		}
 	}
@@ -1085,19 +1088,19 @@ void Thing::updatePelvis(Actor* actor, std::shared_mutex& thing_ReadNode_lock, s
 		CalculateDiffVagina(backVector, opening, false, true);
 		CalculateDiffVagina(frontVector, opening, false, false);
 
-		NormalizeNiPoint(leftVector, thing_vaginaOpeningLimit * -1.0f, thing_vaginaOpeningLimit);
-		NormalizeNiPoint(rightVector, thing_vaginaOpeningLimit * -1.0f, thing_vaginaOpeningLimit);
-		backVector.y = clamp(backVector.y, thing_vaginaOpeningLimit * -0.5f, thing_vaginaOpeningLimit * 0.5f);
-		backVector.z = clamp(backVector.z, thing_vaginaOpeningLimit * -0.165f, thing_vaginaOpeningLimit * 0.165f);
-		frontVector.y = clamp(frontVector.y, thing_vaginaOpeningLimit * -0.125f, thing_vaginaOpeningLimit * 0.125f);
-		frontVector.z = clamp(frontVector.z, thing_vaginaOpeningLimit * -0.25f, thing_vaginaOpeningLimit * 0.25f);
+		NormalizeNiPoint(leftVector, thing_vaginaOpeningLimit*-1.0f, thing_vaginaOpeningLimit);
+		NormalizeNiPoint(rightVector, thing_vaginaOpeningLimit*-1.0f, thing_vaginaOpeningLimit);
+		backVector.y = clamp(backVector.y, thing_vaginaOpeningLimit*-0.5f, thing_vaginaOpeningLimit*0.5f);
+		backVector.z = clamp(backVector.z, thing_vaginaOpeningLimit*-0.165f, thing_vaginaOpeningLimit*0.165f);
+		frontVector.y = clamp(frontVector.y, thing_vaginaOpeningLimit*-0.125f, thing_vaginaOpeningLimit*0.125f);
+		frontVector.z = clamp(frontVector.z, thing_vaginaOpeningLimit*-0.25f, thing_vaginaOpeningLimit*0.25f);
 	}
-
 	thing_SetNode_lock.lock();
 	leftPusObj->m_localTransform.pos = leftPussyDefaultPos + leftVector;
 	rightPusObj->m_localTransform.pos = rightPussyDefaultPos + rightVector;
 	backPusObj->m_localTransform.pos = backPussyDefaultPos + backVector;
 	frontPusObj->m_localTransform.pos = frontPussyDefaultPos + frontVector;
+
 	RefreshNode(leftPusObj);
 	RefreshNode(rightPusObj);
 	RefreshNode(backPusObj);
@@ -1126,14 +1129,11 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 	{
 		return;
 	}
-
 	auto loadedState = actor->loadedState;
-
 	if (!loadedState || !loadedState->node)
 	{
 		return;
 	}
-
 	thing_ReadNode_lock.lock();
 	NiAVObject* analObj = actor->loadedState->node->GetObjectByName(&anal.data);
 	NiAVObject* leftAnusObj = actor->loadedState->node->GetObjectByName(&leftAnus.data);
@@ -1141,18 +1141,14 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 	NiAVObject* frontAnusObj = actor->loadedState->node->GetObjectByName(&frontAnus.data);
 	NiAVObject* backAnusObj = actor->loadedState->node->GetObjectByName(&backAnus.data);
 	thing_ReadNode_lock.unlock();
-
 	if (!analObj || !leftAnusObj || !rightAnusObj || !frontAnusObj || !backAnusObj)
 		return;
-
 	if (updateAnalFirstRun)
 	{
 		updateAnalFirstRun = false;
-
 		auto leftpair = std::make_pair(actor->baseForm->formID, leftAnus.data);
 		thing_map_lock.lock();
 		std::map<std::pair<UInt32, const char*>, NiPoint3>::const_iterator posMap = thingDefaultPosList.find(leftpair);
-
 		if (posMap == thingDefaultPosList.end())
 		{
 			//Add it to the list
@@ -1160,16 +1156,13 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 			leftAnusDefaultPos = NiPoint3(-0.753204f, -0.059860f, 0.431540f); //rig file of XPMSSE 4.6 or higher version has often anus bone torsion, so I hardcoded bone location
 			thingDefaultPosList[leftpair] = leftAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", leftAnus.data, actor->baseForm->formID, leftAnusDefaultPos.x, leftAnusDefaultPos.y, leftAnusDefaultPos.z);
-
 		}
 		else
 		{
 			leftAnusDefaultPos = posMap->second;
 		}
-
 		auto rightpair = std::make_pair(actor->baseForm->formID, rightAnus.data);
 		posMap = thingDefaultPosList.find(rightpair);
-
 		if (posMap == thingDefaultPosList.end())
 		{
 			//Add it to the list
@@ -1177,16 +1170,13 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 			rightAnusDefaultPos = NiPoint3(-0.753204f, 0.059856f, 0.431471f); //rig file of XPMSSE 4.6 or higher version has often anus bone torsion, so I hardcoded bone location
 			thingDefaultPosList[rightpair] = rightAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", rightAnus.data, actor->baseForm->formID, rightAnusDefaultPos.x, rightAnusDefaultPos.y, rightAnusDefaultPos.z);
-
 		}
 		else
 		{
 			rightAnusDefaultPos = posMap->second;
 		}
-
 		auto backpair = std::make_pair(actor->baseForm->formID, backAnus.data);
 		posMap = thingDefaultPosList.find(backpair);
-
 		if (posMap == thingDefaultPosList.end())
 		{
 			//Add it to the list
@@ -1194,16 +1184,13 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 			backAnusDefaultPos = NiPoint3(-0.753212f, 0.048635f, 0.432867f); //rig file of XPMSSE 4.6 or higher version has often anus bone torsion, so I hardcoded bone location
 			thingDefaultPosList[backpair] = backAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", backAnus.data, actor->baseForm->formID, backAnusDefaultPos.x, backAnusDefaultPos.y, backAnusDefaultPos.z);
-
 		}
 		else
 		{
 			backAnusDefaultPos = posMap->second;
 		}
-
 		auto frontpair = std::make_pair(actor->baseForm->formID, frontAnus.data);
 		posMap = thingDefaultPosList.find(frontpair);
-
 		if (posMap == thingDefaultPosList.end())
 		{
 			//Add it to the list
@@ -1211,7 +1198,6 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 			frontAnusDefaultPos = NiPoint3(-0.753235f, -0.048630f, 0.432873f); //rig file of XPMSSE 4.6 or higher version has often anus bone torsion, so I hardcoded bone location
 			thingDefaultPosList[frontpair] = frontAnusDefaultPos;
 			LOG("Adding %s to default list for %08x -> %g %g %g", frontAnus.data, actor->baseForm->formID, frontAnusDefaultPos.x, frontAnusDefaultPos.y, frontAnusDefaultPos.z);
-
 		}
 		else
 		{
@@ -1219,26 +1205,20 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		}
 		thing_map_lock.unlock();
 		LOG_INFO("Left anus default pos -> %g %g %g , Right anus default pos ->  %g %g %g , Back anus default pos ->  %g %g %g , Front anus default pos ->  %g %g %g", leftAnusDefaultPos.x, leftAnusDefaultPos.y, leftAnusDefaultPos.z, rightAnusDefaultPos.x, rightAnusDefaultPos.y, rightAnusDefaultPos.z, backAnusDefaultPos.x, backAnusDefaultPos.y, backAnusDefaultPos.z, frontAnusDefaultPos.x, frontAnusDefaultPos.y, frontAnusDefaultPos.z);
-
 		CollisionConfig.CollisionMaxOffset = NiPoint3(100, 100, 100);
 		CollisionConfig.CollisionMinOffset = NiPoint3(-100, -100, -100);
 	}
-
 	if (!ActorCollisionsEnabled)
 	{
 		return;
 	}
-
 	NiMatrix33 analnodeRotation = analObj->m_worldTransform.rot;
 	NiPoint3 analnodePosition = analObj->m_worldTransform.pos;
 	float analnodeScale = analObj->m_worldTransform.scale;
 	float analnodeInvScale = 1.0f / analObj->m_parent->m_worldTransform.scale; //world transform pos to local transform pos edited by scale
-
 	std::vector<int> thingIdList;
 	std::vector<int> hashIdList;
-
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
-
 	float colliderNodescale = 1.0f - ((1.0f - (analnodeScale / actorBaseScale)) * scaleWeight);
 	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
@@ -1275,16 +1255,12 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 			}
 		}
 	}
-
 	NiPoint3 collisionDiff = emptyPoint;
-
 	CollisionConfig.maybePos = analnodePosition;
 	CollisionConfig.origRot = analObj->m_parent->m_worldTransform.rot;
 	CollisionConfig.objRot = analnodeRotation;
 	CollisionConfig.invRot = analObj->m_parent->m_worldTransform.rot.Transpose();
-
 	bool genitalPenetration = false;
-
 	for (int j = 0; j < thingIdList.size(); j++)
 	{
 		int id = thingIdList[j];
@@ -1294,49 +1270,42 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 			{
 				if (partitions[id].partitionCollisions[i].colliderActor == actor && partitions[id].partitionCollisions[i].colliderNodeName.find("Genital") != std::string::npos)
 					continue;
-
 				if (IgnoreAllSelfColliders && partitions[id].partitionCollisions[i].colliderActor == actor)
 					continue;
-
 				if (partitions[id].partitionCollisions[i].colliderActor == actor && std::find(IgnoredSelfCollidersList.begin(), IgnoredSelfCollidersList.end(), partitions[id].partitionCollisions[i].colliderNodeName) != IgnoredSelfCollidersList.end())
 					continue;
-
 				if (std::find(IgnoredCollidersList.begin(), IgnoredCollidersList.end(), partitions[id].partitionCollisions[i].colliderNodeName) != IgnoredCollidersList.end())
 					continue;
-
 				if (partitions[id].partitionCollisions[i].colliderActor == actor && std::strcmp(partitions[id].partitionCollisions[i].colliderNodeName.c_str(), boneName.data) == 0)
 					continue;
-
 				if (debugtimelog || logging)
 					InterlockedIncrement(&callCount);
-
 				partitions[id].partitionCollisions[i].CollidedWeight = actorWeight;
-
 				bool isColliding = partitions[id].partitionCollisions[i].CheckPelvisCollision(collisionDiff, thingCollisionSpheres, thingCollisionCapsules, CollisionConfig);
-
 				if (isColliding)
 				{
 					genitalPenetration = true;
+
+					if (partitions[id].partitionCollisions[i].colliderActor == (*g_thePlayer) && std::find(PlayerCollisionEventNodes.begin(), PlayerCollisionEventNodes.end(), partitions[id].partitionCollisions[i].colliderNodeName) != PlayerCollisionEventNodes.end())
+					{
+						ActorNodePlayerCollisionEventMap[actorNodeString].collisionInThisCycle = true;
+					}
 				}
 			}
 		}
 	}
-
 	// Collision Stuff End
 	NiPoint3 leftVector = emptyPoint;
 	NiPoint3 rightVector = emptyPoint;
 	NiPoint3 backVector = emptyPoint;
 	NiPoint3 frontVector = emptyPoint;
-
 	if (genitalPenetration)
 	{
 		float opening = distance(collisionDiff, emptyPoint) * analnodeScale;
-
 		CalculateDiffAnus(leftVector, opening, true, true);
 		CalculateDiffAnus(rightVector, opening, true, false);
 		CalculateDiffAnus(backVector, opening, false, true);
 		CalculateDiffAnus(frontVector, opening, false, false);
-
 		NormalizeNiPoint(leftVector, thing_anusOpeningLimit * -1.0f, thing_anusOpeningLimit);
 		NormalizeNiPoint(rightVector, thing_anusOpeningLimit * -1.0f, thing_anusOpeningLimit);
 		backVector.x = clamp(backVector.x, thing_anusOpeningLimit * -0.8f, thing_anusOpeningLimit * 0.8f);
@@ -1344,7 +1313,6 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 		frontVector.x = clamp(frontVector.x, thing_anusOpeningLimit * -0.8f, thing_anusOpeningLimit * 0.8f);
 		frontVector.z = clamp(frontVector.z, thing_anusOpeningLimit * -0.32f, thing_anusOpeningLimit * 0.32f);
 	}
-
 	thing_SetNode_lock.lock();
 	leftAnusObj->m_localTransform.pos = leftAnusDefaultPos + leftVector;
 	rightAnusObj->m_localTransform.pos = rightAnusDefaultPos + rightVector;
@@ -1356,7 +1324,6 @@ void Thing::updateAnal(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std
 	RefreshNode(frontAnusObj);
 	thing_SetNode_lock.unlock();
 }
-
 bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock)
 {
 	if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState || !(*g_thePlayer)->loadedState->node)
@@ -1408,7 +1375,6 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 		}
 		thing_map_lock.unlock();
 		LOG_INFO("Belly default pos -> %g %g %g", bellyDefaultPos.x, bellyDefaultPos.y, bellyDefaultPos.z);
-
 		CollisionConfig.CollisionMaxOffset = NiPoint3(100, 100, 100);
 		CollisionConfig.CollisionMinOffset = NiPoint3(-100, -100, -100);
 	}
@@ -1427,7 +1393,7 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 	for (int i = 0; i < thingCollisionSpheres.size(); i++)
 	{
 		thingCollisionSpheres[i].offset100 = thingCollisionSpheres[i].offset0 * actorBaseScale * colliderNodescale;
-		thingCollisionSpheres[i].worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionSpheres[i].offset100);
+		thingCollisionSpheres[i].worldPos = bulgenodePosition + (bulgenodeRotation* thingCollisionSpheres[i].offset100);
 		thingCollisionSpheres[i].radius100 = thingCollisionSpheres[i].radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionSpheres[i].radius100pwr2 = thingCollisionSpheres[i].radius100 * thingCollisionSpheres[i].radius100;
 		hashIdList = GetHashIdsFromPos(thingCollisionSpheres[i].worldPos - playerPos, thingCollisionSpheres[i].radius100);
@@ -1442,11 +1408,11 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 	for (int i = 0; i < thingCollisionCapsules.size(); i++)
 	{
 		thingCollisionCapsules[i].End1_offset100 = thingCollisionCapsules[i].End1_offset0 * actorBaseScale * colliderNodescale;
-		thingCollisionCapsules[i].End1_worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionCapsules[i].End1_offset100);
+		thingCollisionCapsules[i].End1_worldPos = bulgenodePosition + (bulgenodeRotation* thingCollisionCapsules[i].End1_offset100);
 		thingCollisionCapsules[i].End1_radius100 = thingCollisionCapsules[i].End1_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End1_radius100pwr2 = thingCollisionCapsules[i].End1_radius100 * thingCollisionCapsules[i].End1_radius100;
 		thingCollisionCapsules[i].End2_offset100 = thingCollisionCapsules[i].End2_offset0 * actorBaseScale * colliderNodescale;
-		thingCollisionCapsules[i].End2_worldPos = bulgenodePosition + (bulgenodeRotation * thingCollisionCapsules[i].End2_offset100);
+		thingCollisionCapsules[i].End2_worldPos = bulgenodePosition + (bulgenodeRotation* thingCollisionCapsules[i].End2_offset100);
 		thingCollisionCapsules[i].End2_radius100 = thingCollisionCapsules[i].End2_radius0 * actorBaseScale * colliderNodescale;
 		thingCollisionCapsules[i].End2_radius100pwr2 = thingCollisionCapsules[i].End2_radius100 * thingCollisionCapsules[i].End2_radius100;
 		hashIdList = GetHashIdsFromPos((thingCollisionCapsules[i].End1_worldPos + thingCollisionCapsules[i].End2_worldPos) * 0.5f - playerPos
@@ -1466,7 +1432,6 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 	CollisionConfig.origRot = bulgeObj->m_parent->m_worldTransform.rot;
 	CollisionConfig.objRot = bulgenodeRotation;
 	CollisionConfig.invRot = bulgeObj->m_parent->m_worldTransform.rot.Transpose();
-
 	bool genitalPenetration = false;
 
 	for (int j = 0; j < thingIdList.size(); j++)
@@ -1478,7 +1443,6 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 			{
 				if (partitions[id].partitionCollisions[i].colliderActor == actor && partitions[id].partitionCollisions[i].colliderNodeName.find("Genital") != std::string::npos)
 					continue;
-
 				if (IgnoreAllSelfColliders && partitions[id].partitionCollisions[i].colliderActor == actor)
 					continue;
 
@@ -1514,8 +1478,8 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 		LOG("Belly bulge %f, %f, %f", collisionDiff.x, collisionDiff.y, collisionDiff.z);
 
 		//LOG("opening:%g", opening);
-//		bellyBulgeCountDown = 1000;
-
+		//bellyBulgeCountDown = 1000;
+					
 		//need to convert world pos diif to local pos diff due to node scale
 		//but min/max limit follows node scale because it can cause like torn pussy in small actor
 		float horPos = opening * thing_bellybulgemultiplier * bellynodeInvScale;
@@ -1540,7 +1504,6 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 		oldWorldPosRot = bellyObj->m_worldTransform.pos - (bellyObj->m_parent->m_worldTransform.rot * bellyDefaultPos * bulgenodeScale);
 		velocity = emptyPoint;
 		velocityRot = emptyPoint;
-
 		//float vertPos = opening * bellybulgeposmultiplier;
 		//vertPos = clamp(vertPos, bellybulgeposlowest, 0.0f);
 		LOG("belly bulge vert:%g horiz:%g", lowPos, horPos);
@@ -1552,13 +1515,11 @@ bool Thing::ApplyBellyBulge(Actor * actor, std::shared_mutex& thing_ReadNode_loc
 void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::shared_mutex& thing_SetNode_lock) {
 
 	bool collisionsOn = true;
-
 	float Friction = 1.0f;
 	if (collisionOnLastFrame)
 	{
 		Friction = collisionFriction;
 	}
-
 	if (skipFramesCount > 0)
 	{
 		skipFramesCount--;
@@ -1588,9 +1549,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	time = newTime;
 
 	long deltaT = IntervalTimeTick * 1000;
-
 	float fpsCorrection = 1.0f;
-
 	if (fpsCorrectionEnabled)
 	{
 		if (deltaT > 50)
@@ -1642,7 +1601,6 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 			LOG("No loaded state for actor %08x\n", actor->formID);
 			return;
 		}
-
 		thing_ReadNode_lock.lock();
 		obj = loadedState->node->GetObjectByName(&boneName.data);
 		thing_ReadNode_lock.unlock();
@@ -1687,7 +1645,10 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	float varRotationalYnew = rotationalYnew;
 	float varRotationalZnew = rotationalZnew;
 
+
 	int collisionCheckCount = 0;
+
+
 
 	NiPoint3 newPos = oldWorldPos;
 	NiPoint3 newPosRot = oldWorldPosRot;
@@ -1728,7 +1689,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		{
 			forceAmplitude = 1.0f;
 
-			//				thing_armorKeyword_lock.lock();
+			//thing_armorKeyword_lock.lock();
 			TESForm* wornForm = papyrusActor::GetWornForm(actor, 0x00000004);
 
 			if (wornForm != nullptr)
@@ -1891,18 +1852,15 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	// move the bones based on the supplied weightings
 	// Convert the world translations into local coordinates
 	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
-
 	NiPoint3 forceGravityBias = invRot * (NiPoint3(0, 0, varGravityBias) / fpsCorrection);
 	
 	NiPoint3 ldiff = emptyPoint;
 	NiPoint3 ldiffRot = emptyPoint;
 	NiMatrix33 newRot;
-
 	concurrency::parallel_invoke(
 		[&] { //linear calculation
 		NiPoint3 InteriaMaxOffset = emptyPoint;
 		NiPoint3 InteriaMinOffset = emptyPoint;
-
 		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
 		if (multiplerInertia >= 0.001f)
 		{
@@ -1910,34 +1868,27 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 				InteriaMaxOffset.x = collisionInertia.x;
 			else
 				InteriaMinOffset.x = collisionInertia.x;
-
 			if (collisionInertia.y >= 0.0f)
 				InteriaMaxOffset.y = collisionInertia.y;
 			else
 				InteriaMinOffset.y = collisionInertia.y;
-
 			if (collisionInertia.z >= 0.0f)
 				InteriaMaxOffset.z = collisionInertia.z;
 			else
 				InteriaMinOffset.z = collisionInertia.z;
-
 			multiplerInertia -= (((float)originalDeltaT / timeTick) * 0.01f * timeStep);
 			if (multiplerInertia < 0.001f)
 				multiplerInertia = 0.0f;
 			collisionInertia *= multiplerInertia;
 		}
 
-
 		// Compute the "Spring" Force
-
 		float timeMultiplier = timeTick / (float)deltaT;
 		diff = invRot * (diff * timeMultiplier);
-
 		NiPoint3 stiffnessXYZ(stiffnessX, stiffnessY, stiffnessZ);
 		NiPoint3 stiffness2XYZ (stiffness2X, stiffness2Y, stiffness2Z);
 		NiPoint3 dampingXYZ(dampingX, dampingY, dampingZ);
-
-		NiPoint3 diff2(diff.x* diff.x* sgn(diff.x), diff.y* diff.y* sgn(diff.y), diff.z* diff.z* sgn(diff.z));
+		NiPoint3 diff2(diff.x * diff.x * sgn(diff.x), diff.y * diff.y * sgn(diff.y), diff.z * diff.z * sgn(diff.z));
 		NiPoint3 force = (NiPoint3((diff.x * stiffnessXYZ.x) + (diff2.x * stiffness2XYZ.x)
 			, (diff.y * stiffnessXYZ.y) + (diff2.y * stiffness2XYZ.y)
 			, (diff.z * stiffnessXYZ.z) + (diff2.z * stiffness2XYZ.z))
@@ -1947,13 +1898,10 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		//showPos(force);
 
 		velocity = invRot * velocity;
-
 		do {
 			// Assume mass is 1, so Accelleration is Force, can vary mass by changinf force
 			//velocity = (velocity + (force * timeStep)) * (1 - (damping * timeStep));
-
 			velocity = velocity * Friction; //Fixes that when becomes unstable collisions during colliding at low or unstable FPS
-
 			velocity.x = (velocity.x + (force.x * timeStep)) - (velocity.x * (dampingXYZ.x * timeStep));
 			velocity.y = (velocity.y + (force.y * timeStep)) - (velocity.y * (dampingXYZ.y * timeStep));
 			velocity.z = (velocity.z + (force.z * timeStep)) - (velocity.z * (dampingXYZ.z * timeStep));
@@ -1970,9 +1918,10 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		// clamp the difference to stop the breast severely lagging at low framerates
 		NiPoint3 newdiff = newPos - target;
 
-		varLinearX = varLinearX * forceAmplitude;
-		varLinearY = varLinearY * forceAmplitude;
-		varLinearZ = varLinearZ * forceAmplitude;
+		varLinearX = varLinearX * forceAmplitude * amplitude;
+		varLinearY = varLinearY * forceAmplitude * amplitude;
+		varLinearZ = varLinearZ * forceAmplitude * amplitude;
+
 
 		ldiff = invRot * newdiff;
 		auto beforeldiff = ldiff;
@@ -1983,7 +1932,6 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 
 		//It can allows the force of dissipated by min/maxoffsets to be spread in different directions
 		beforeldiff = beforeldiff - ldiff;
-
 		ldiff.x = ldiff.x + ((beforeldiff.y * linearYspreadforceX) + (beforeldiff.z * linearZspreadforceX));
 		ldiff.y = ldiff.y + ((beforeldiff.x * linearXspreadforceY) + (beforeldiff.z * linearZspreadforceY));
 		ldiff.z = ldiff.z + ((beforeldiff.x * linearXspreadforceZ) + (beforeldiff.y * linearYspreadforceZ));
@@ -1991,16 +1939,13 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		ldiff.x = clamp(ldiff.x, XminOffset + InteriaMinOffset.x, XmaxOffset + InteriaMaxOffset.x);
 		ldiff.y = clamp(ldiff.y, YminOffset + InteriaMinOffset.y, YmaxOffset + InteriaMaxOffset.y);
 		ldiff.z = clamp(ldiff.z, ZminOffset + InteriaMinOffset.z, ZmaxOffset + InteriaMaxOffset.z);
-
 		//same the clamp(diff.z - varGravityCorrection, -maxOffset, maxOffset) + varGravityCorrection
 		//this is the reason for the endless shaking when unstable fps in v1.4.1x
 		ldiff = ldiff + (invRot * NiPoint3(0, 0, varGravityCorrection));
 	},
 		[&] { // rotation calculation
-
 		NiPoint3 InteriaMaxOffsetRot = emptyPoint;
 		NiPoint3 InteriaMinOffsetRot = emptyPoint;
-
 		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
 		if (multiplerInertiaRot >= 0.001f)
 		{
@@ -2008,83 +1953,59 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 				InteriaMaxOffsetRot.x = collisionInertiaRot.x;
 			else
 				InteriaMinOffsetRot.x = collisionInertiaRot.x;
-
 			if (collisionInertiaRot.y >= 0.0f)
 				InteriaMaxOffsetRot.y = collisionInertiaRot.y;
 			else
 				InteriaMinOffsetRot.y = collisionInertiaRot.y;
-
 			if (collisionInertiaRot.z >= 0.0f)
 				InteriaMaxOffsetRot.z = collisionInertiaRot.z;
 			else
 				InteriaMinOffsetRot.z = collisionInertiaRot.z;
-
 			multiplerInertiaRot -= (((float)originalDeltaT / timeTickRot) * 0.01f * timeStepRot);
 			if (multiplerInertiaRot < 0.001f)
 				multiplerInertiaRot = 0.0f;
 			collisionInertiaRot *= multiplerInertiaRot;
 		}
-
-
 		float timeMultiplierRot = timeTickRot / (float)deltaTRot;
 		diffRot = invRot * (diffRot * timeMultiplierRot);
-
 		// linear X = rotation Y, linear Y = rotation Z, linear Z = rotation X
 		NiPoint3 stiffnessXYZRot(stiffnessYRot, stiffnessZRot, stiffnessXRot);
 		NiPoint3 stiffness2XYZRot(stiffness2YRot, stiffness2ZRot, stiffness2XRot);
 		NiPoint3 dampingXYZRot(dampingYRot, dampingZRot, dampingXRot);
-
 		NiPoint3 diff2Rot(diffRot.x * diffRot.x * sgn(diffRot.x), diffRot.y * diffRot.y * sgn(diffRot.y), diffRot.z * diffRot.z * sgn(diffRot.z));
 		NiPoint3 forceRot = (NiPoint3((diffRot.x * stiffnessXYZRot.x) + (diff2Rot.x * stiffness2XYZRot.x)
 			, (diffRot.y * stiffnessXYZRot.y) + (diff2Rot.y * stiffness2XYZRot.y)
 			, (diffRot.z * stiffnessXYZRot.z) + (diff2Rot.z * stiffness2XYZRot.z))
 			- forceGravityBias);
-
 		velocityRot = invRot * velocityRot;
-
 		do {
 			// Assume mass is 1, so Accelleration is Force, can vary mass by changinf force
 			//velocity = (velocity + (force * timeStep)) * (1 - (damping * timeStep));
-
 			velocityRot = velocityRot * Friction; //Fixes that when becomes unstable collisions during colliding at low or unstable FPS
-
 			velocityRot.x = (velocityRot.x + (forceRot.x * timeStepRot)) - (velocityRot.x * (dampingXYZRot.x * timeStepRot));
 			velocityRot.y = (velocityRot.y + (forceRot.y * timeStepRot)) - (velocityRot.y * (dampingXYZRot.y * timeStepRot));
 			velocityRot.z = (velocityRot.z + (forceRot.z * timeStepRot)) - (velocityRot.z * (dampingXYZRot.z * timeStepRot));
-
 			posDeltaRot += velocityRot * timeStepRot;
-
 			deltaTRot -= timeTickRot;
 		} while (deltaTRot >= timeTickRot);
-
 		velocityRot = obj->m_parent->m_worldTransform.rot * velocityRot; //velocity is maintain on world transform
-
 		newPosRot = newPosRot + obj->m_parent->m_worldTransform.rot * (posDeltaRot * fpsCorrection);
-
 		NiPoint3 newdiffRot = newPosRot - target;
-		
-		varRotationalXnew = varRotationalXnew * forceAmplitude;
-		varRotationalYnew = varRotationalYnew * forceAmplitude;
-		varRotationalZnew = varRotationalZnew * forceAmplitude;
-
+		varRotationalXnew = varRotationalXnew * forceAmplitude * amplitude * amplitude;
+		varRotationalYnew = varRotationalYnew * forceAmplitude * amplitude * amplitude;
+		varRotationalZnew = varRotationalZnew * forceAmplitude * amplitude * amplitude;
 		ldiffRot = invRot * newdiffRot;
-
 		auto beforenewrdiffRot = ldiffRot;
-
 		ldiffRot.x = clamp(ldiffRot.x, YminOffsetRot + InteriaMinOffsetRot.x, YmaxOffsetRot + InteriaMaxOffsetRot.x); //rot y
 		ldiffRot.y = clamp(ldiffRot.y, ZminOffsetRot + InteriaMinOffsetRot.y, ZmaxOffsetRot + InteriaMaxOffsetRot.y); //rot z
 		ldiffRot.z = clamp(ldiffRot.z, XminOffsetRot + InteriaMinOffsetRot.z, XmaxOffsetRot + InteriaMaxOffsetRot.z); //rot x
-
 		beforenewrdiffRot = beforenewrdiffRot - ldiffRot;
-
 		ldiffRot.x = ldiffRot.x + ((beforenewrdiffRot.z * rotationXspreadforceY) + (beforenewrdiffRot.y * rotationZspreadforceY));
 		ldiffRot.y = ldiffRot.y + ((beforenewrdiffRot.z * rotationXspreadforceZ) + (beforenewrdiffRot.x * rotationYspreadforceZ));
 		ldiffRot.z = ldiffRot.z + ((beforenewrdiffRot.x * rotationYspreadforceX) + (beforenewrdiffRot.y * rotationZspreadforceX));
-
 		ldiffRot.x = clamp(ldiffRot.x, YminOffsetRot + InteriaMinOffsetRot.x, YmaxOffsetRot + InteriaMaxOffsetRot.x); //rot y
 		ldiffRot.y = clamp(ldiffRot.y, ZminOffsetRot + InteriaMinOffsetRot.y, ZmaxOffsetRot + InteriaMaxOffsetRot.y); //rot z
 		ldiffRot.z = clamp(ldiffRot.z, XminOffsetRot + InteriaMinOffsetRot.z, XmaxOffsetRot + InteriaMaxOffsetRot.z); //rot x
-
 		ldiffRot = ldiffRot + (invRot * NiPoint3(0, 0, varGravityCorrection));
 
 		auto rdiffXnew = ldiffRot * varRotationalXnew;
@@ -2117,7 +2038,6 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	{
 		std::vector<int> thingIdList;
 		std::vector<int> hashIdList;
-
 		NiPoint3 GroundCollisionVector = emptyPoint;
 
 		//The rotation of the previous frame due to collisions should not be used
@@ -2174,12 +2094,10 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		//Prevent normal movement to cause collision (This prevents shakes)			
 		collisionVector = emptyPoint;
 		NiPoint3 lastcollisionVector = emptyPoint;
-
 		CollisionConfig.maybePos = maybePos;
 		CollisionConfig.origRot = obj->m_parent->m_worldTransform.rot;
 		CollisionConfig.objRot = objRotation;
 		CollisionConfig.invRot = invRot;
-
 		for (int j = 0; j < thingIdList.size(); j++)
 		{
 			int id = thingIdList[j];
@@ -2223,6 +2141,11 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 					if (colliding)
 					{
 						maybeNot = true;
+
+						if (partitions[id].partitionCollisions[i].colliderActor == (*g_thePlayer) && std::find(PlayerCollisionEventNodes.begin(), PlayerCollisionEventNodes.end(), partitions[id].partitionCollisions[i].colliderNodeName) != PlayerCollisionEventNodes.end())
+						{
+							ActorNodePlayerCollisionEventMap[actorNodeString].collisionInThisCycle = true;
+						}
 					}
 
 					collisionCheckCount++;
@@ -2247,6 +2170,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 
 			for (int m = 0; m < thingCollisionCapsules.size(); m++)
 			{
+
 				if (thingCollisionCapsules[m].End1_worldPos.z - thingCollisionCapsules[m].End1_radius100 < thingCollisionCapsules[m].End2_worldPos.z - thingCollisionCapsules[m].End2_radius100)
 				{
 					if (thingCollisionCapsules[m].End1_worldPos.z - thingCollisionCapsules[m].End1_radius100 < bottomPos - bottomRadius)
@@ -2355,11 +2279,9 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	{
 		oldWorldPos = (obj->m_parent->m_worldTransform.rot * (ldiff + ldiffcol + ldiffGcol)) + target - NiPoint3(0, 0, varGravityCorrection);
 		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * (ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot)) + target - NiPoint3(0, 0, varGravityCorrection);
-
 		//for update oldWorldPos&Rot when frame gap
 		oldLocalPos = ldiff + ldiffcol + ldiffGcol - (invRot * NiPoint3(0, 0, varGravityCorrection));
 		oldLocalPosRot = (ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot) - (invRot * NiPoint3(0, 0, varGravityCorrection));
-
 		collisionInertia += (ldiffcol + ldiffGcol);
 		collisionInertiaRot += ((ldiffcol + ldiffGcol) * collisionMultiplerRot);
 		multiplerInertia = 1.0f;
@@ -2374,7 +2296,6 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		oldLocalPos = ldiff - (invRot * NiPoint3(0, 0, varGravityCorrection));
 		oldLocalPosRot = ldiffRot - (invRot * NiPoint3(0, 0, varGravityCorrection));
 	}
-
 	thing_SetNode_lock.lock();
 	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (((ldiff.x * varLinearX) + maybeIdiffcol.x) * nodeParentInvScale);
 	obj->m_localTransform.pos.y = thingDefaultPos.y + YdefaultOffset + (((ldiff.y * varLinearY) + maybeIdiffcol.y) * nodeParentInvScale);
@@ -2382,6 +2303,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	obj->m_localTransform.rot = thingDefaultRot * newRot;
 	RefreshNode(obj);
 	thing_SetNode_lock.unlock();
+
 
 	//logger.error("end update()\n");
 	/*QueryPerformanceCounter(&endingTime);
@@ -2423,7 +2345,6 @@ void Thing::CalculateDiffVagina(NiPoint3 &collisionDiff, float opening, bool isl
 		collisionDiff = emptyPoint;
 	}
 }
-
 void Thing::CalculateDiffAnus(NiPoint3 &collisionDiff, float opening, bool isleftandright, bool leftORback)
 {
 	if (opening > 0)

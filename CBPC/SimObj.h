@@ -41,6 +41,7 @@
 
 #define NINODE_CHILDREN(ninode) ((NiTArray <NiAVObject *> *) ((char*)(&(ninode->m_children))))
 
+
 class SimObj {
 	UInt32 id = 0;
 	bool bound = false;
@@ -57,12 +58,11 @@ public:
 	SimObj() {}
 	~SimObj();
 	bool bind(Actor *actor, bool isMale);
-	void update(Actor *actor, bool CollisionsEnabled);
+	void update(Actor *actor, bool CollisionsEnabled, bool isFemale);
 	bool updateConfig(Actor* actor);
 	bool isBound() const { return bound; }
 
 	bool GroundCollisionEnabled = false;
-
 	float groundPos = -10000.0f;
 };
 
@@ -131,3 +131,4 @@ static_assert(offsetof(AIProcessManager, activeEffectShaders) <= 0x108, "Unk141F
 typedef bool(*_IsInCombatNative)(Actor* actor);
 
 bool ActorInCombat(Actor* actor);
+
