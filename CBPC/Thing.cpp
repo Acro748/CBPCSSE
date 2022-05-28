@@ -2272,6 +2272,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		}
 		else
 		{
+			maybeIdiffcol = (emptyPoint + collisionBuffer) * 0.5;
+			collisionBuffer = emptyPoint;
 			collisionSync = emptyPoint;
 		}
 		///#### collision calculate done
