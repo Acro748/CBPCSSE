@@ -28,10 +28,8 @@ inline void RefreshNode(NiAVObject* node)
 	NiAVObject::ControllerUpdateContext ctx;
 	ctx.flags = 0;
 	ctx.delta = 0;
-
 	node->UpdateWorldData(&ctx);
 }
-
 class Thing {
 	BSFixedString boneName;
 	NiPoint3 oldWorldPos;
@@ -137,7 +135,7 @@ public:
 	float breastLightArmoredAmplitude = 1.0;
 	float breastHeavyArmoredAmplitude = 1.0;
 
-	float collisionFriction = 0.8f;
+	float collisionFriction = 0.02f;
 	float collisionPenetration = 1.0f;
 	float collisionMultipler = 1.0f;
 	float collisionMultiplerRot = 1.0f;
@@ -150,6 +148,8 @@ public:
 	float collisionYminOffset = -100.0f;
 	float collisionZmaxOffset = 100.0f;
 	float collisionZminOffset = -100.0f;
+
+	float amplitude = 1.0f;
 
 	//100 weight
 	float stiffness_100 = 0.0f;
@@ -254,6 +254,9 @@ public:
 	float collisionZmaxOffset_100 = 100.0f;
 	float collisionZminOffset_100 = -100.0f;
 
+	float amplitude_100 = 1.0f;
+
+
 	//0 weight
 	float stiffness_0 = 0.0f;
 	float stiffnessX_0 = 0.0f;
@@ -357,6 +360,11 @@ public:
 	float collisionZmaxOffset_0 = 100.0f;
 	float collisionZminOffset_0 = -100.0f;
 
+	float amplitude_0 = 1.0f;
+
+	std::string actorNodeString;
+
+
 	Thing(Actor *actor, NiAVObject *obj, BSFixedString &name);
 	~Thing();
 
@@ -416,7 +424,6 @@ public:
 
 	float scaleWeight = 1.0f;
 
-
 	std::vector<Sphere> CreateThingCollisionSpheres(Actor* actor, std::string nodeName);
 	std::vector<Capsule> CreateThingCollisionCapsules(Actor * actor, std::string nodeName);
 
@@ -433,7 +440,6 @@ public:
 	NiPoint3 rightAnusDefaultPos;
 	NiPoint3 backAnusDefaultPos;
 	NiPoint3 frontAnusDefaultPos;
-
 	bool updateBellyFirstRun = true;
 	NiPoint3 bellyDefaultPos;
 
@@ -444,20 +450,16 @@ public:
 	//for update oldWorldPos&Rot when frame gap
 	NiPoint3 oldLocalPos;
 	NiPoint3 oldLocalPosRot;
-
 	float actorBaseScale = 1.0f;
 
 	//Extra variables
 	float groundPos = -10000.0f;
-
 	NiPoint3 collisionBuffer = emptyPoint;
 	NiPoint3 collisionSync = emptyPoint;
-
 	NiPoint3 collisionInertia = emptyPoint;
 	NiPoint3 collisionInertiaRot = emptyPoint;
 	float multiplerInertia = 0.0f;
 	float multiplerInertiaRot = 0.0f;
-
 	CollisionConfigs CollisionConfig;
 
 	float lastMaxOffsetY = 0.0f;
@@ -476,4 +478,3 @@ public:
 
 	float varGravityCorrection = -1 * gravityCorrection;
 };
-

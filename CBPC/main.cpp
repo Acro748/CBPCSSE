@@ -101,6 +101,7 @@ bool Debug_Execute(const ObScriptParam* paramInfo, ScriptData* scriptData, TESOb
 		if (tuningModeCollision == 0)
 		{
 			Console_Print("Reload CBPC Master / Collision / Config files");
+
 			consoleConfigReload.store(true);
 		}
 	}
@@ -109,6 +110,18 @@ bool Debug_Execute(const ObScriptParam* paramInfo, ScriptData* scriptData, TESOb
 		Console_Print("Reload CBPC system file");
 		loadSystemConfig();
 		LOG_ERR("Loaded System config");
+		return true;
+	}
+	else if (_strnicmp(buffer, "pause", MAX_PATH) == 0)
+	{
+		Console_Print("CBPC paused. Call \"cbpc start\" to resume.");
+		modPaused.store(true);
+		return true;
+	}
+	else if (_strnicmp(buffer, "start", MAX_PATH) == 0)
+	{
+		Console_Print("CBPC started. Call \"cbpc pause\" to pause.");
+		modPaused.store(false);
 		return true;
 	}
 
@@ -191,6 +204,8 @@ extern "C"
 				LOG_ERR("Loaded Collision config");
 				loadExtraCollisionConfig();
 				LOG_ERR("Loaded Extra Collision configs");
+				LoadPlayerCollisionEventConfig();
+				LOG_ERR("Loaded Player Collision Event config");
 #ifdef RUNTIME_VR_VERSION_1_4_15
 				LoadWeaponCollisionConfig();
 				LOG_ERR("Loaded Weapon Collision config");
@@ -256,6 +271,12 @@ extern "C"
 
 		g_messaging = (SKSEMessagingInterface*)skse->QueryInterface(kInterface_Messaging);
 		g_messaging->RegisterListener(g_pluginHandle, "SKSE", OnSKSEMessage);
+
+		g_modEventDispatcher = reinterpret_cast<EventDispatcher<SKSEModCallbackEvent>*>(g_messaging->GetEventDispatcher(SKSEMessagingInterface::kDispatcher_ModEvent));
+		if (g_modEventDispatcher == NULL)
+		{
+			_MESSAGE("couldn't get mod event dispatcher");
+		}
 
 		bool bSuccess = g_papyrus->Register(RegisterFuncs);
 

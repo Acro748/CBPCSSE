@@ -104,7 +104,7 @@ extern std::atomic<bool> raceSexMenuClosed;
 extern std::atomic<bool> raceSexMenuOpen;
 extern std::atomic<bool> MainMenuOpen;
 extern std::atomic<bool> consoleConfigReload;
-
+extern std::atomic<bool> modPaused;
 extern BSFixedString breastGravityReferenceBoneString;
 
 extern BSFixedString GroundReferenceBone;
@@ -129,6 +129,22 @@ extern BSFixedString KeywordNameNoPushUpR;
 
 extern UInt32 VampireLordBeastRaceFormId;
 
+extern EventDispatcher<SKSEModCallbackEvent>* g_modEventDispatcher;
+
+extern concurrency::concurrent_vector<std::string> PlayerCollisionEventNodes;
+
+extern float MinimumCollisionDurationForEvent;
+
+struct PlayerCollisionEvent
+{
+	bool collisionInThisCycle = false;
+	float durationFilled = 0.0f;
+	float totalDurationFilled = 0.0f;
+};
+
+extern concurrency::concurrent_unordered_map<std::string, PlayerCollisionEvent> ActorNodePlayerCollisionEventMap;
+
+
 
 enum eLogLevels
 {
@@ -138,6 +154,7 @@ enum eLogLevels
 };
 
 void Log(const int msgLogLevel, const char * fmt, ...);
+
 
 #define LOG(fmt, ...) Log(LOGLEVEL_WARN, fmt, ##__VA_ARGS__)
 #define LOG_ERR(fmt, ...) Log(LOGLEVEL_ERR, fmt, ##__VA_ARGS__)
@@ -161,7 +178,6 @@ struct Sphere
 	double radius100 = 4.0;
 	double radius100pwr2 = 16.0;
 	NiPoint3 worldPos = NiPoint3(0, 0, 0);
-
 	std::string NodeName;
 	UInt32 index = -1;
 };
@@ -351,6 +367,9 @@ void loadMasterConfig();
 void loadExtraCollisionConfig();
 
 void loadSystemConfig();
+
+void LoadPlayerCollisionEventConfig();
+
 
 void ConfigLineSplitterSphere(std::string &line, Sphere &newSphere);
 void ConfigLineSplitterCapsule(std::string &line, Capsule &newCapsule);

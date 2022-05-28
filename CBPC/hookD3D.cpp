@@ -152,7 +152,6 @@ struct UnkEngine
 	char unk[0x16];
 	bool gamePaused; // 16
 };
-
 void updateActors(bool gamePaused);
 UINT64 __cdecl Render(UnkEngine *This, UINT64 arg)
 {

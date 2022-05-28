@@ -4,8 +4,8 @@
 #include <common/ICriticalSection.h>
 
 
-std::string versionStr = "1.5.x";
-UInt32 version = 0x0105ff;
+std::string versionStr = "1.5.1";
+UInt32 version = 0x010501;
 
 
 #pragma warning(disable : 4996)
@@ -77,7 +77,6 @@ float vaginaOpeningMultiplier = 4.0f;
 
 float anusOpeningLimit = 5.0f;
 float anusOpeningMultiplier = 4.0f;
-
 int logging = 0;
 
 int useCamera = 1;
@@ -102,6 +101,7 @@ std::atomic<bool> raceSexMenuOpen = false;
 std::atomic<bool> MainMenuOpen = false;
 std::atomic<bool> consoleConfigReload = false;
 
+std::atomic<bool> modPaused = false;
 concurrency::concurrent_unordered_map<std::string, std::string> configMap;
 concurrency::concurrent_unordered_map<std::string, Conditions> nodeConditionsMap;
 config_t config;
@@ -149,6 +149,18 @@ BSFixedString KeywordNameNoPushUpL = "CBPCNoPushUpL";
 BSFixedString KeywordNameNoPushUpR = "CBPCNoPushUpR";
 
 UInt32 VampireLordBeastRaceFormId = 0x0200283A;
+
+//Event stuff
+EventDispatcher<SKSEModCallbackEvent>* g_modEventDispatcher = NULL;
+
+concurrency::concurrent_vector<std::string> PlayerCollisionEventNodes;
+
+float MinimumCollisionDurationForEvent = 0.3f;
+
+
+
+concurrency::concurrent_unordered_map<std::string, PlayerCollisionEvent> ActorNodePlayerCollisionEventMap;
+
 
 bool compareConfigs(const SpecificNPCConfig& config1, const SpecificNPCConfig& config2)
 {
@@ -520,7 +532,7 @@ void loadConfig() {
 			config[it.second]["breastClothedAmplitude"] = 1.0f;
 			config[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 			config[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
-			config[it.second]["collisionFriction"] = 0.2f;
+			config[it.second]["collisionFriction"] = 0.02f;
 			config[it.second]["collisionPenetration"] = 0.0f;
 			config[it.second]["collisionMultipler"] = 1.0f;
 			config[it.second]["collisionMultiplerRot"] = 1.0f;
@@ -531,6 +543,7 @@ void loadConfig() {
 			config[it.second]["collisionYminoffset"] = -100.0f;
 			config[it.second]["collisionZmaxoffset"] = 100.0f;
 			config[it.second]["collisionZminoffset"] = -100.0f;
+			config[it.second]["amplitude"] = 1.0f;
 
 			//0 weight
 			config0weight[it.second]["stiffness"] = 0.0f;
@@ -614,7 +627,7 @@ void loadConfig() {
 			config0weight[it.second]["breastClothedAmplitude"] = 1.0f;
 			config0weight[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 			config0weight[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
-			config0weight[it.second]["collisionFriction"] = 0.2f;
+			config0weight[it.second]["collisionFriction"] = 0.02f;
 			config0weight[it.second]["collisionPenetration"] = 0.0f;
 			config0weight[it.second]["collisionMultipler"] = 1.0f;
 			config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
@@ -625,6 +638,7 @@ void loadConfig() {
 			config0weight[it.second]["collisionYminoffset"] = -100.0f;
 			config0weight[it.second]["collisionZmaxoffset"] = 100.0f;
 			config0weight[it.second]["collisionZminoffset"] = -100.0f;
+			config0weight[it.second]["amplitude"] = 1.0f;
 		}
 
 		auto configList = get_all_files_names_within_folder(configPath.c_str());
@@ -766,7 +780,7 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["breastClothedAmplitude"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
-											newNPCBounceConfig.config[it.second]["collisionFriction"] = 0.2f;
+											newNPCBounceConfig.config[it.second]["collisionFriction"] = 0.02f;
 											newNPCBounceConfig.config[it.second]["collisionPenetration"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["collisionMultipler"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["collisionMultiplerRot"] = 1.0f;
@@ -777,6 +791,7 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["collisionYminoffset"] = -100.0f;
 											newNPCBounceConfig.config[it.second]["collisionZmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config[it.second]["collisionZminoffset"] = -100.0f;
+											newNPCBounceConfig.config[it.second]["amplitude"] = 1.0f;
 
 											//0 weight
 											newNPCBounceConfig.config0weight[it.second]["stiffness"] = 0.0f;
@@ -860,7 +875,7 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["breastClothedAmplitude"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionFriction"] = 0.2f;
+											newNPCBounceConfig.config0weight[it.second]["collisionFriction"] = 0.02f;
 											newNPCBounceConfig.config0weight[it.second]["collisionPenetration"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionMultipler"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
@@ -871,6 +886,7 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["collisionYminoffset"] = -100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionZmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionZminoffset"] = -100.0f;
+											newNPCBounceConfig.config0weight[it.second]["amplitude"] = 1.0f;
 										}
 									}
 								}
@@ -1206,14 +1222,12 @@ void loadMasterConfig()
 									continue;
 								if (variableName.compare("Anal") == 0 && isThereAnusNode)
 									continue;
-
 								for (int i = 0; i < affectedBones.size(); i++)
 								{
 									if (std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), variableName) != affectedBones.at(i).end())
 									{
 										isFound = true;
 									}
-
 									auto FindPelvisNode = std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), "NPC Pelvis [Pelv]");
 									if (FindPelvisNode != affectedBones.at(i).end() && isThereVaginaNode) //if enabled vagina physics then auto disabling pelvis collision
 									{
@@ -1221,7 +1235,6 @@ void loadMasterConfig()
 										if (affectedBones.at(i).size() < 1)
 											affectedBones.erase(affectedBones.begin() + i);
 									}
-
 									auto FindAnalNode = std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), "Anal");
 									if (FindAnalNode != affectedBones.at(i).end() && isThereAnusNode) //if enabled vagina physics then auto disabling pelvis collision
 									{
@@ -1336,19 +1349,16 @@ void loadMasterConfig()
 											isThereVaginaNode = true;
 										if (variableName.compare("NPC LT Anus2") == 0 || variableName.compare("NPC RT Anus2") == 0 || variableName.compare("NPC LB Anus2") == 0 || variableName.compare("NPC RB Anus2") == 0)
 											isThereAnusNode = true;
-
 										if (variableName.compare("NPC Pelvis [Pelv]") == 0 && isThereVaginaNode)
 											continue;
 										if (variableName.compare("Anal") == 0 && isThereAnusNode)
 											continue;
-
 										for (int i = 0; i < affectedBones.size(); i++)
 										{
 											if (std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), variableName) != affectedBones.at(i).end())
 											{
 												isFound = true;
 											}
-
 											auto FindPelvisNode = std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), "NPC Pelvis [Pelv]");
 											if (FindPelvisNode != affectedBones.at(i).end() && isThereVaginaNode)//if enabled vagina physics then auto disabling pelvis collision
 											{
@@ -1356,7 +1366,6 @@ void loadMasterConfig()
 												if (affectedBones.at(i).size() < 1)
 													affectedBones.erase(affectedBones.begin() + i);
 											}
-
 											auto FindAnalNode = std::find(affectedBones.at(i).begin(), affectedBones.at(i).end(), "Anal");
 											if (FindAnalNode != affectedBones.at(i).end() && isThereAnusNode) //if enabled vagina physics then auto disabling pelvis collision
 											{
@@ -1438,12 +1447,10 @@ void loadCollisionConfig()
 					if (line.substr(0, 1) == "[")
 					{
 						std::vector<std::string> maincurrentSetting = split(line, ":");
-
 						if (maincurrentSetting.size() > 1)
 						{
 							currentSetting = maincurrentSetting[0];
 							scaleWeight = strtof(maincurrentSetting[1].c_str(), 0);
-
 							if (scaleWeight > 1.0f)
 								scaleWeight = 1.0f;
 							else if (scaleWeight < 0.0f)
@@ -1550,7 +1557,6 @@ void loadCollisionConfig()
 							Capsule newCapsule; //type 1
 
 							int type = 0;
-
 							std::vector<std::string> LowHighWeight = split(line, '|');
 
 							std::vector<std::string> PointSplitted;
@@ -1722,12 +1728,10 @@ void loadExtraCollisionConfig()
 							if (line.substr(0, 1) == "[")
 							{
 								std::vector<std::string> maincurrentSetting = split(line, ":");
-
 								if (maincurrentSetting.size() > 1)
 								{
 									currentSetting = maincurrentSetting[0];
 									scaleWeight = strtof(maincurrentSetting[1].c_str(), 0);
-
 									if (scaleWeight > 1.0f)
 										scaleWeight = 1.0f;
 									else if (scaleWeight < 0.0f)
@@ -2814,7 +2818,8 @@ bool IsConfigActuallyAllocated(SpecificNPCBounceConfig snbc, std::string section
 		|| (snbc.config[section]["collisionZmaxoffset"] >= 100.001f) || (snbc.config[section]["collisionZmaxoffset"] <= 99.999f)
 		|| (snbc.config0weight[section]["collisionZmaxoffset"] >= 100.001f) || (snbc.config0weight[section]["collisionZmaxoffset"] <= 99.999f)
 		|| (snbc.config[section]["collisionZminoffset"] <= -100.001f) || (snbc.config[section]["collisionZminoffset"] >= -99.999f)
-		|| (snbc.config0weight[section]["collisionZminoffset"] <= -100.001f) || (snbc.config0weight[section]["collisionZminoffset"] >= -99.999f);
+		|| (snbc.config0weight[section]["collisionZminoffset"] <= -100.001f) || (snbc.config0weight[section]["collisionZminoffset"] >= -99.999f)		
+		|| (snbc.config[section]["amplitude"] >= 0.001f) || (snbc.config0weight[section]["amplitude"] >= 0.001f);
 }
 
 bool CheckActorForConditions(Actor* actor, Conditions &conditions)
@@ -3008,14 +3013,13 @@ BSFixedString GetVersionMinor(StaticFunctionTag* base)
 
 BSFixedString GetVersionBeta(StaticFunctionTag* base)
 {
-	return BSFixedString("0");
+	return BSFixedString("1");
 }
 
 void ReloadConfig(StaticFunctionTag* base)
 {
 	consoleConfigReload.store(true);
 }
-
 std::string GetActorNodeString(Actor* actor, BSFixedString nodeName)
 {
 	return num2hex(actor->formID, 8) + ":" + nodeName.c_str();
@@ -3042,7 +3046,58 @@ void StopPhysics(StaticFunctionTag* base, Actor* actor, BSFixedString nodeName)
 	}
 }
 
-//Initializes openvr system. Required for haptic triggers.
+void LoadPlayerCollisionEventConfig()
+{
+	PlayerCollisionEventNodes.clear();
+	std::string	runtimeDirectory = GetRuntimeDirectory();
+
+	if (!runtimeDirectory.empty())
+	{
+		std::string configPath = runtimeDirectory + "Data\\SKSE\\Plugins\\CBPCPlayerCollisionEventConfig.txt";
+
+		std::ifstream file(configPath);
+		std::string line;
+		std::string currentSetting;
+		while (std::getline(file, line))
+		{
+			trim(line);
+			skipComments(line);
+			trim(line);
+			if (line.length() > 0)
+			{
+				if (line.substr(0, 1) == "[")
+				{
+					//newsetting
+					currentSetting = line;
+				}
+				else
+				{
+					if (currentSetting == "[PlayerCollisionEventNodes]")
+					{
+						PlayerCollisionEventNodes.push_back(line);
+					}
+					else if (currentSetting == "[Settings]")
+					{
+						std::string variableName;
+						float variableValue = GetConfigSettingsFloatValue(line, variableName);
+						if (variableName == "MinimumCollisionDuration")
+						{
+							MinimumCollisionDurationForEvent = variableValue;
+						}
+					}
+				}
+			}
+		}
+
+		LOG_ERR("Player Collision Event Config file is loaded successfully.");
+		return;
+	}
+
+	LOG_ERR("Player Collision Event Config file is not loaded.");
+	return;
+}
+
+
 bool RegisterFuncs(VMClassRegistry* registry)
 {
 #ifdef RUNTIME_VR_VERSION_1_4_15
@@ -3060,7 +3115,6 @@ bool RegisterFuncs(VMClassRegistry* registry)
 
 	registry->RegisterFunction(
 		new NativeFunction0 <StaticFunctionTag, void>("ReloadConfig", "CBPCPluginScript", ReloadConfig, registry));
-
 	registry->RegisterFunction(
 		new NativeFunction2 <StaticFunctionTag, void, Actor*, BSFixedString> ("StartPhysics", "CBPCPluginScript", StartPhysics, registry));
 
@@ -3072,7 +3126,6 @@ bool RegisterFuncs(VMClassRegistry* registry)
 
 	registry->RegisterFunction(
 		new NativeFunction9 <StaticFunctionTag, bool, Actor*, BSFixedString, VMArray<float>, float, VMArray<float>, float, float, UInt32, bool> ("AttachColliderCapsule", "CBPCPluginScript", AttachColliderCapsule, registry));
-
 	registry->RegisterFunction(
 		new NativeFunction5 <StaticFunctionTag, bool, Actor*, BSFixedString, UInt32, UInt32, bool> ("DetachCollider", "CBPCPluginScript", DetachCollider, registry));
 		

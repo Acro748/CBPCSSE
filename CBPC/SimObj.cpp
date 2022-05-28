@@ -93,7 +93,6 @@ bool SimObj::bind(Actor *actor, bool isMale)
 				things.insert(std::make_pair(firstcs.data, thingmsg));
 		});
 		GroundCollisionEnabled = CreateActorColliders(actor, actorColliders);
-
 		updateConfig(actor);
 
 		#ifdef RUNTIME_VR_VERSION_1_4_15
@@ -117,16 +116,15 @@ bool IsActorValid(Actor *actor) {
 }
 
 
-void SimObj::update(Actor *actor, bool CollisionsEnabled) {
+void SimObj::update(Actor *actor, bool CollisionsEnabled, bool isFemale) 
+{
 	if (!bound)
 		return;
 	//logger.error("update\n");
-
 	if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState || !(*g_thePlayer)->loadedState->node)
 	{
 		return;
 	}
-
 	if (GroundCollisionEnabled && CollisionsEnabled)
 	{
 		if (actor->loadedState && actor->loadedState->node)
@@ -135,7 +133,6 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 			if (groundobj)
 			{
 				groundPos = groundobj->m_worldTransform.pos.z; //Get ground by NPC Root [Root] node
-
 				NiAVObject* highheelobj = actor->loadedState->node->GetObjectByName(&HighheelReferenceBone.data);
 				if (highheelobj)
 				{
@@ -144,46 +141,68 @@ void SimObj::update(Actor *actor, bool CollisionsEnabled) {
 			}
 		}
 	}
-
 	//## thing_ReadNode_lock
 	// It seems that a read error occurs when the GetObjectByName() function is called simultaneously
-
 	//## thing_SetNode_lock
 	// There's nothing problem with editing, but if editing once then all node world positions are updated.
 	// so it seems that a high probability of overloading if it is processed by parallel processing.
-
 	std::shared_mutex thing_ReadNode_lock, thing_SetNode_lock;
-
 	concurrency::parallel_for_each(things.begin(), things.end(), [&](auto& t)
 	{
-		for (auto& tt : t.second) //The basic unit is parallel processing, but some physics chain nodes need sequential loading
-		{
-			bool isStopPhysics = false;
-			if (ActorNodeStoppedPhysicsMap.find(GetActorNodeString(actor, tt.first)) != ActorNodeStoppedPhysicsMap.end())
-				isStopPhysics = ActorNodeStoppedPhysicsMap[GetActorNodeString(actor, tt.first)];
-
-			if (!isStopPhysics)
+			for (auto& tt : t.second) //The basic unit is parallel processing, but some physics chain nodes need sequential loading
 			{
-				tt.second.ActorCollisionsEnabled = CollisionsEnabled;
-				if (strcmp(tt.first, pelvis) == 0)
+				bool isStopPhysics = false;
+				std::string actorNodeString = GetActorNodeString(actor, tt.first);
+				if (ActorNodeStoppedPhysicsMap.find(actorNodeString) != ActorNodeStoppedPhysicsMap.end())
+					isStopPhysics = ActorNodeStoppedPhysicsMap[actorNodeString];
+
+				if (!isStopPhysics)
 				{
-					tt.second.updatePelvis(actor, thing_ReadNode_lock, thing_SetNode_lock);
-				}
-				else if (strcmp(tt.first, anal) == 0)
-				{
-					tt.second.updateAnal(actor, thing_ReadNode_lock, thing_SetNode_lock);
-				}
-				else
-				{
-					tt.second.groundPos = groundPos;
-					tt.second.update(actor, thing_ReadNode_lock, thing_SetNode_lock);
-					if (tt.second.VirtualCollisionEnabled)
+					ActorNodePlayerCollisionEventMap[actorNodeString].collisionInThisCycle = false;
+
+					tt.second.ActorCollisionsEnabled = CollisionsEnabled;
+					if (strcmp(tt.first, pelvis) == 0)
 					{
-						NodeCollisionSync[tt.first] = tt.second.collisionSync;
+						tt.second.updatePelvis(actor, thing_ReadNode_lock, thing_SetNode_lock);
+					}
+					else if (strcmp(tt.first, anal) == 0)
+					{
+						tt.second.updateAnal(actor, thing_ReadNode_lock, thing_SetNode_lock);
+					}
+					else
+					{
+						tt.second.groundPos = groundPos;
+						tt.second.update(actor, thing_ReadNode_lock, thing_SetNode_lock);
+						if (tt.second.VirtualCollisionEnabled)
+						{
+							NodeCollisionSync[tt.first] = tt.second.collisionSync;
+						}
+					}
+
+					if (ActorNodePlayerCollisionEventMap[actorNodeString].collisionInThisCycle == true) //Node got player collision in this cycle
+					{
+						ActorNodePlayerCollisionEventMap[actorNodeString].durationFilled += IntervalTimeTick;
+						ActorNodePlayerCollisionEventMap[actorNodeString].totalDurationFilled += IntervalTimeTick;
+						//LOG_ERR("Node got collision:%s actor:%x - seconds:%g", t.first, actor->formID, ActorNodePlayerCollisionDurationMap[actorNodeString]);
+						if (ActorNodePlayerCollisionEventMap[actorNodeString].durationFilled >= MinimumCollisionDurationForEvent)
+						{
+							if (g_modEventDispatcher != NULL)
+							{
+								BSFixedString modEventName(isFemale ? "CBPCPlayerCollisionWithFemaleEvent" : "CBPCPlayerCollisionWithMaleEvent");
+								SKSEModCallbackEvent modEvent(modEventName, t.first, ActorNodePlayerCollisionEventMap[actorNodeString].totalDurationFilled, actor);
+								g_modEventDispatcher->SendEvent(&modEvent);
+								LOG("Sending cbpc event for node:%s actor:%x", t.first, actor->formID);
+							}
+							ActorNodePlayerCollisionEventMap[actorNodeString].durationFilled = 0;
+						}
+					}
+					else
+					{
+						ActorNodePlayerCollisionEventMap[actorNodeString].durationFilled = 0;
+						ActorNodePlayerCollisionEventMap[actorNodeString].totalDurationFilled = 0;
 					}
 				}
 			}
-		}
 	});
 	//logger.error("end SimObj update\n");
 }
@@ -213,7 +232,6 @@ bool SimObj::updateConfig(Actor* actor) {
 
 		for (auto& tt : t.second) {
 			tt.second.actorWeight = actorWeight;
-
 			std::string& section = configMap[tt.first];
 			//LOG("config section:[%s]", section.c_str());
 
@@ -227,7 +245,6 @@ bool SimObj::updateConfig(Actor* actor) {
 			{
 				tt.second.updateConfig(actor, config[section], config0weight[section]);
 			}
-
 			tt.second.GroundCollisionEnabled = GroundCollisionEnabled;
 		}
 	});

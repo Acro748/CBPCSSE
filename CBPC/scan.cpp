@@ -185,11 +185,8 @@ float GetFrameIntervalTimeTick() //Frame interval time on the engine
 	FrameIntervalTimeTick = (float)(clock() - BeforeFrameTime) * 0.001f;
 	BeforeFrameTime = clock();
 #endif
-
 	return FrameIntervalTimeTick;
 }
-
-
 bool compareActorEntries(const ActorEntry& entry1, const ActorEntry& entry2)
 {
 	return entry1.actorDistSqr < entry2.actorDistSqr;
@@ -312,6 +309,7 @@ void updateActors(bool gamePaused)
 		QueryPerformanceFrequency(&frequency);
 		QueryPerformanceCounter(&startingTime);
 	}
+
 	// We scan the cell and build the list every time - only look up things by ID once
 	// we retain all state by actor ID, in a map - it's cleared on cell change
 
@@ -332,6 +330,7 @@ void updateActors(bool gamePaused)
 			loadConfig();
 			loadCollisionConfig();
 			loadExtraCollisionConfig();
+			LoadPlayerCollisionEventConfig();
 
 #ifdef RUNTIME_VR_VERSION_1_4_15
 			LoadWeaponCollisionConfig();
@@ -346,6 +345,7 @@ void updateActors(bool gamePaused)
 				loadMasterConfig();
 				loadCollisionConfig();
 				loadExtraCollisionConfig();
+				LoadPlayerCollisionEventConfig();
 
 #ifdef RUNTIME_VR_VERSION_1_4_15
 				LoadWeaponCollisionConfig();
@@ -357,6 +357,8 @@ void updateActors(bool gamePaused)
 		}
 	}
 
+	if (modPaused.load())
+		return;
 
 	//logger.error("scan Cell\n");
 	if (!(*g_thePlayer) || !(*g_thePlayer)->loadedState)
@@ -471,11 +473,8 @@ void updateActors(bool gamePaused)
 			{
 				//TESNPC * actorNPC;
 				Actor* actor;
-
 				NiPointer<TESObjectREFR> ToRefr = nullptr;
-
 				bool isValid = true;
-
 				if (i < processMan->actorsHigh.count)
 				{
 #ifdef RUNTIME_VR_VERSION_1_4_15
@@ -484,7 +483,7 @@ void updateActors(bool gamePaused)
 					LookupREFRByHandle(processMan->actorsHigh[i], ToRefr);
 #else
 					LookupREFRByHandle2(processMan->actorsHigh[i], ToRefr);
-#endif			
+#endif
 				}
 				if (ToRefr != nullptr || i == processMan->actorsHigh.count)
 				{
@@ -594,6 +593,7 @@ void updateActors(bool gamePaused)
 
 	LOG("Starting collider hashing");
 
+
 	NiPoint3 playerPos = (*g_thePlayer)->loadedState->node->m_worldTransform.pos;
 	long colliderSphereCount = 0;
 	long colliderCapsuleCount = 0;
@@ -604,6 +604,7 @@ void updateActors(bool gamePaused)
 		{
 			auto objIt = actors.find(actorEntries[u].id);
 			if (objIt != actors.end())
+
 			{
 				UpdateColliderPositions(objIt->second.actorColliders, objIt->second.NodeCollisionSync);
 
@@ -624,10 +625,10 @@ void updateActors(bool gamePaused)
 								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
 							}
 						}
-
 						if (logging)
 							InterlockedIncrement(&colliderSphereCount);
 					}
+
 					for (int j = 0; j < collider.second.collisionCapsules.size(); j++)
 					{
 						hashIdList = GetHashIdsFromPos((collider.second.collisionCapsules[j].End1_worldPos + collider.second.collisionCapsules[j].End2_worldPos) * 0.5f - playerPos
@@ -641,10 +642,10 @@ void updateActors(bool gamePaused)
 								partitions[hashIdList[m]].partitionCollisions.push_back(collider.second);
 							}
 						}
-
 						if (logging)
 							InterlockedIncrement(&colliderCapsuleCount);
 					}
+
 #ifdef RUNTIME_VR_VERSION_1_4_15
 					for (int j = 0; j < collider.second.collisionTriangles.size(); j++)
 					{
@@ -663,6 +664,7 @@ void updateActors(bool gamePaused)
 							}
 						}
 						for (int k = 0; k < 101; k = k + 20)
+
 						{
 							NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].a, collider.second.collisionTriangles[j].c, k);
 
@@ -677,6 +679,7 @@ void updateActors(bool gamePaused)
 							}
 						}
 						for (int k = 0; k < 101; k = k + 20)
+
 						{
 							NiPoint3 pos = GetPointFromPercentage(collider.second.collisionTriangles[j].b, collider.second.collisionTriangles[j].c, k);
 
@@ -772,7 +775,6 @@ void updateActors(bool gamePaused)
 	//Get DeltaT by engine
 	IntervalTimeTick = GetFrameIntervalTimeTick();
 	IntervalTimeTickScale = IntervalTimeTick / IntervalTime60Tick;
-
 	concurrency::parallel_for_each(actorEntries.begin(), actorEntries.end(), [&](const auto& a)
 	{
 		auto objIt = actors.find(a.id);
@@ -787,7 +789,7 @@ void updateActors(bool gamePaused)
 				SimObj& obj = objIt->second;
 				if (obj.isBound())
 				{
-					obj.update(a.actor, a.collisionsEnabled);
+					obj.update(a.actor, a.collisionsEnabled, a.sex == 0);
 				}
 				else
 				{
@@ -1227,8 +1229,6 @@ bool DetachCollider(StaticFunctionTag* base, Actor* actor, BSFixedString nodeNam
 	}
 	return false;
 }
-
-
 /*
 class ScanDelegate : public TaskDelegate {
 public:
