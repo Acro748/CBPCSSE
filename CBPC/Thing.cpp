@@ -2238,20 +2238,22 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 			//However, simply applying the multipler then changes the actual obj position,so that's making the collisions out of sync
 			//Therefore to make perfect collision
 			//it seems to be pushed out as much as colliding to the naked eye, but the actual position of the colliding obj must be maintained original position
-			maybeIdiffcol = (ldiffcol + ldiffGcol) * collisionMultipler / obj->m_parent->m_worldTransform.scale;
+			maybeIdiffcol = ldiffcol + ldiffGcol;
+			auto mayberdiffcol = maybeIdiffcol;
 
 			//add collision vector buffer of one frame to some reduce jitter and add softness by collision
 			//be particularly useful for both nodes colliding that defined in both affected and collider nodes
 			auto maybeldiffcoltmp = maybeIdiffcol;
-			maybeIdiffcol = (maybeIdiffcol + collisionBuffer) * 0.5;
+			maybeIdiffcol = (maybeIdiffcol + collisionBuffer) * 0.5f * collisionMultipler;
+			mayberdiffcol = (mayberdiffcol + collisionBuffer) * 0.5f * collisionMultiplerRot;
 			collisionBuffer = maybeldiffcoltmp;
 
 			//set to collision sync for the obj that has both affected obj and collider obj
-			collisionSync = obj->m_parent->m_worldTransform.rot * (ldiffcol + ldiffGcol - maybeIdiffcol);
+			collisionSync = obj->m_parent->m_worldTransform.rot * (ldiffcol + ldiffGcol - maybeIdiffcol) * nodeParentInvScale;
 
-			auto rcoldiffXnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalXnew;
-			auto rcoldiffYnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalYnew;
-			auto rcoldiffZnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalZnew;
+			auto rcoldiffXnew = mayberdiffcol * varRotationalXnew;
+			auto rcoldiffYnew = mayberdiffcol * varRotationalYnew;
+			auto rcoldiffZnew = mayberdiffcol * varRotationalZnew;
 
 			rcoldiffXnew.x *= linearXrotationX;
 			rcoldiffXnew.y *= linearYrotationX;
@@ -2272,9 +2274,31 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		}
 		else
 		{
-			maybeIdiffcol = (emptyPoint + collisionBuffer) * 0.5;
+			maybeIdiffcol = collisionBuffer * 0.5f * collisionMultipler;
+			auto mayberdiffcol = collisionBuffer * 0.5f * collisionMultiplerRot;
 			collisionBuffer = emptyPoint;
-			collisionSync = emptyPoint;
+			collisionSync = emptyPoint - maybeIdiffcol;
+
+			auto rcoldiffXnew = mayberdiffcol * varRotationalXnew;
+			auto rcoldiffYnew = mayberdiffcol * varRotationalYnew;
+			auto rcoldiffZnew = mayberdiffcol * varRotationalZnew;
+
+			rcoldiffXnew.x *= linearXrotationX;
+			rcoldiffXnew.y *= linearYrotationX;
+			rcoldiffXnew.z *= linearZrotationX; //1
+
+			rcoldiffYnew.x *= linearXrotationY; //1
+			rcoldiffYnew.y *= linearYrotationY;
+			rcoldiffYnew.z *= linearZrotationY;
+
+			rcoldiffZnew.x *= linearXrotationZ;
+			rcoldiffZnew.y *= linearYrotationZ; //1
+			rcoldiffZnew.z *= linearZrotationZ;
+
+			NiMatrix33 newcolRot;
+			newcolRot.SetEulerAngles(rcoldiffYnew.x + rcoldiffYnew.y + rcoldiffYnew.z, rcoldiffZnew.x + rcoldiffZnew.y + rcoldiffZnew.z, rcoldiffXnew.x + rcoldiffXnew.y + rcoldiffXnew.z);
+
+			newRot = newRot * newcolRot;
 		}
 		///#### collision calculate done
 
