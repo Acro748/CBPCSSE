@@ -426,6 +426,13 @@ void Thing::updateConfigValues(Actor* actor)
 	else
 		collisionElastic = false;
 
+	float collisionElasticConstraintsValue = GetPercentageValue(collisionElasticConstraints_0, collisionElasticConstraints_100, actorWeight);
+	if (collisionElasticConstraintsValue > 0.5f)
+		collisionElasticConstraints = true;
+	else
+		collisionElasticConstraints = false;
+
+
 	collisionXmaxOffset = GetPercentageValue(collisionXmaxOffset_0, collisionXmaxOffset_100, actorWeight);
 	collisionXminOffset = GetPercentageValue(collisionXminOffset_0, collisionXminOffset_100, actorWeight);
 	collisionYmaxOffset = GetPercentageValue(collisionYmaxOffset_0, collisionYmaxOffset_100, actorWeight);
@@ -626,6 +633,7 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 
 	collisionMultiplerRot_100 = centry["collisionMultiplerRot"];
 	collisionElastic_100 = centry["collisionElastic"];
+	collisionElasticConstraints_100 = centry["collisionElasticConstraints"];
 
 	collisionXmaxOffset_100 = centry["collisionXmaxoffset"];
 	collisionXminOffset_100 = centry["collisionXminoffset"];
@@ -819,6 +827,7 @@ void Thing::updateConfig(Actor* actor, configEntry_t & centry, configEntry_t& ce
 	collisionMultiplerRot_0 = centry0weight["collisionMultiplerRot"];
 
 	collisionElastic_0 = centry0weight["collisionElastic"];
+	collisionElasticConstraints_0 = centry0weight["collisionElasticConstraints"];
 
 	collisionXmaxOffset_0 = centry0weight["collisionXmaxoffset"];
 	collisionXminOffset_0 = centry0weight["collisionXminoffset"];
@@ -2333,10 +2342,14 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		//for update oldWorldPos&Rot when frame gap
 		oldLocalPos = ldiff + ldiffcol + ldiffGcol - (invRot * NiPoint3(0, 0, varGravityCorrection));
 		oldLocalPosRot = (ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot) - (invRot * NiPoint3(0, 0, varGravityCorrection));
-		collisionInertia = ldiff + (ldiffcol + ldiffGcol);
-		collisionInertiaRot = ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot;
-		multiplerInertia = 1.0f;
-		multiplerInertiaRot = 1.0f;
+		
+		if (collisionElasticConstraints)
+		{
+			collisionInertia = ldiff + (ldiffcol + ldiffGcol);
+			collisionInertiaRot = ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot;
+			multiplerInertia = 1.0f;
+			multiplerInertiaRot = 1.0f;
+		}
 	}
 	else
 	{
