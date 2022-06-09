@@ -1865,22 +1865,23 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
 		if (multiplerInertia >= 0.001f)
 		{
-			if (collisionInertia.x >= 0.0f)
-				InteriaMaxOffset.x = collisionInertia.x;
-			else
-				InteriaMinOffset.x = collisionInertia.x;
-			if (collisionInertia.y >= 0.0f)
-				InteriaMaxOffset.y = collisionInertia.y;
-			else
-				InteriaMinOffset.y = collisionInertia.y;
-			if (collisionInertia.z >= 0.0f)
-				InteriaMaxOffset.z = collisionInertia.z;
-			else
-				InteriaMinOffset.z = collisionInertia.z;
+			if (collisionInertia.x >= 0.001f && collisionInertia.x > XmaxOffset)
+				InteriaMaxOffset.x = collisionInertia.x - XmaxOffset;
+			else if (collisionInertia.x <= -0.001f && collisionInertia.x < XminOffset)
+				InteriaMinOffset.x = collisionInertia.x - XminOffset;
+			if (collisionInertia.y >= 0.001f && collisionInertia.y > YmaxOffset)
+				InteriaMaxOffset.y = collisionInertia.y - YmaxOffset;
+			else if (collisionInertia.y <= -0.001f && collisionInertia.y < YminOffset)
+				InteriaMinOffset.y = collisionInertia.y - YminOffset;
+			if (collisionInertia.z >= 0.001f && collisionInertia.z > ZmaxOffset)
+				InteriaMaxOffset.z = collisionInertia.z - ZmaxOffset;
+			else if (collisionInertia.z <= -0.001f && collisionInertia.z < ZminOffset)
+				InteriaMinOffset.z = collisionInertia.z - ZminOffset;
 			multiplerInertia -= (((float)originalDeltaT / timeTick) * 0.01f * timeStep);
 			if (multiplerInertia < 0.001f)
 				multiplerInertia = 0.0f;
-			collisionInertia *= multiplerInertia;
+			InteriaMaxOffset *= multiplerInertia;
+			InteriaMinOffset *= multiplerInertia;
 		}
 
 		// Compute the "Spring" Force
@@ -1950,22 +1951,23 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
 		if (multiplerInertiaRot >= 0.001f)
 		{
-			if (collisionInertiaRot.x >= 0.0f)
-				InteriaMaxOffsetRot.x = collisionInertiaRot.x;
-			else
-				InteriaMinOffsetRot.x = collisionInertiaRot.x;
-			if (collisionInertiaRot.y >= 0.0f)
-				InteriaMaxOffsetRot.y = collisionInertiaRot.y;
-			else
-				InteriaMinOffsetRot.y = collisionInertiaRot.y;
-			if (collisionInertiaRot.z >= 0.0f)
-				InteriaMaxOffsetRot.z = collisionInertiaRot.z;
-			else
-				InteriaMinOffsetRot.z = collisionInertiaRot.z;
+			if (collisionInertiaRot.x >= 0.001f && collisionInertiaRot.x > XmaxOffsetRot)
+				InteriaMaxOffsetRot.x = collisionInertiaRot.x - XmaxOffsetRot;
+			else if (collisionInertiaRot.x <= -0.001f && collisionInertiaRot.x < XminOffsetRot)
+				InteriaMinOffsetRot.x = collisionInertiaRot.x - XminOffsetRot;
+			if (collisionInertiaRot.y >= 0.001f && collisionInertiaRot.y > YmaxOffsetRot)
+				InteriaMaxOffsetRot.y = collisionInertiaRot.y - YmaxOffsetRot;
+			else if (collisionInertiaRot.y <= -0.001f && collisionInertiaRot.y < YminOffsetRot)
+				InteriaMinOffsetRot.y = collisionInertiaRot.y - YminOffsetRot;
+			if (collisionInertiaRot.z >= 0.001f && collisionInertiaRot.z > ZmaxOffsetRot)
+				InteriaMaxOffsetRot.z = collisionInertiaRot.z - ZmaxOffsetRot;
+			else if (collisionInertiaRot.z <= -0.001f && collisionInertiaRot.z < ZminOffsetRot)
+				InteriaMinOffsetRot.z = collisionInertiaRot.z - ZminOffsetRot;
 			multiplerInertiaRot -= (((float)originalDeltaT / timeTickRot) * 0.01f * timeStepRot);
 			if (multiplerInertiaRot < 0.001f)
 				multiplerInertiaRot = 0.0f;
-			collisionInertiaRot *= multiplerInertiaRot;
+			InteriaMaxOffsetRot *= multiplerInertiaRot;
+			InteriaMinOffsetRot *= multiplerInertiaRot;
 		}
 		float timeMultiplierRot = timeTickRot / (float)deltaTRot;
 		diffRot = invRot * (diffRot * timeMultiplierRot);
@@ -2249,7 +2251,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 			collisionBuffer = maybeldiffcoltmp;
 
 			//set to collision sync for the obj that has both affected obj and collider obj
-			collisionSync = obj->m_parent->m_worldTransform.rot * (ldiffcol + ldiffGcol - maybeIdiffcol) * nodeParentInvScale;
+			collisionSync = obj->m_parent->m_worldTransform.rot * (ldiffcol + ldiffGcol - maybeIdiffcol);
 
 			auto rcoldiffXnew = mayberdiffcol * varRotationalXnew;
 			auto rcoldiffYnew = mayberdiffcol * varRotationalYnew;
@@ -2331,8 +2333,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		//for update oldWorldPos&Rot when frame gap
 		oldLocalPos = ldiff + ldiffcol + ldiffGcol - (invRot * NiPoint3(0, 0, varGravityCorrection));
 		oldLocalPosRot = (ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot) - (invRot * NiPoint3(0, 0, varGravityCorrection));
-		collisionInertia += (ldiffcol + ldiffGcol);
-		collisionInertiaRot += ((ldiffcol + ldiffGcol) * collisionMultiplerRot);
+		collisionInertia = ldiff + (ldiffcol + ldiffGcol);
+		collisionInertiaRot = ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot;
 		multiplerInertia = 1.0f;
 		multiplerInertiaRot = 1.0f;
 	}
