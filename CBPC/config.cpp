@@ -4,8 +4,8 @@
 #include <common/ICriticalSection.h>
 
 
-std::string versionStr = "1.5.1";
-UInt32 version = 0x010501;
+std::string versionStr = "1.5.2";
+UInt32 version = 0x010502;
 
 
 #pragma warning(disable : 4996)
@@ -532,11 +532,12 @@ void loadConfig() {
 			config[it.second]["breastClothedAmplitude"] = 1.0f;
 			config[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 			config[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
-			config[it.second]["collisionFriction"] = 0.02f;
+			config[it.second]["collisionFriction"] = 0.8f;
 			config[it.second]["collisionPenetration"] = 0.0f;
 			config[it.second]["collisionMultipler"] = 1.0f;
 			config[it.second]["collisionMultiplerRot"] = 1.0f;
-			config[it.second]["collisionElastic"] = 0.0f;
+			config[it.second]["collisionElastic"] = 1.0f;
+			config[it.second]["collisionElasticConstraints"] = 1.0f;
 			config[it.second]["collisionXmaxoffset"] = 100.0f;
 			config[it.second]["collisionXminoffset"] = -100.0f;
 			config[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -627,11 +628,12 @@ void loadConfig() {
 			config0weight[it.second]["breastClothedAmplitude"] = 1.0f;
 			config0weight[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 			config0weight[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
-			config0weight[it.second]["collisionFriction"] = 0.02f;
+			config0weight[it.second]["collisionFriction"] = 0.8f;
 			config0weight[it.second]["collisionPenetration"] = 0.0f;
 			config0weight[it.second]["collisionMultipler"] = 1.0f;
 			config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
-			config0weight[it.second]["collisionElastic"] = 0.0f;
+			config0weight[it.second]["collisionElastic"] = 1.0f;
+			config0weight[it.second]["collisionElasticConstraints"] = 1.0f;
 			config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
 			config0weight[it.second]["collisionXminoffset"] = -100.0f;
 			config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -780,11 +782,12 @@ void loadConfig() {
 											newNPCBounceConfig.config[it.second]["breastClothedAmplitude"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
-											newNPCBounceConfig.config[it.second]["collisionFriction"] = 0.02f;
+											newNPCBounceConfig.config[it.second]["collisionFriction"] = 0.8f;
 											newNPCBounceConfig.config[it.second]["collisionPenetration"] = 0.0f;
 											newNPCBounceConfig.config[it.second]["collisionMultipler"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["collisionMultiplerRot"] = 1.0f;
-											newNPCBounceConfig.config[it.second]["collisionElastic"] = 0.0f;
+											newNPCBounceConfig.config[it.second]["collisionElastic"] = 1.0f;
+											newNPCBounceConfig.config[it.second]["collisionElasticConstraints"] = 1.0f;
 											newNPCBounceConfig.config[it.second]["collisionXmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config[it.second]["collisionXminoffset"] = -100.0f;
 											newNPCBounceConfig.config[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -875,11 +878,12 @@ void loadConfig() {
 											newNPCBounceConfig.config0weight[it.second]["breastClothedAmplitude"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["breastLightArmoredAmplitude"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["breastHeavyArmoredAmplitude"] = 1.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionFriction"] = 0.02f;
+											newNPCBounceConfig.config0weight[it.second]["collisionFriction"] = 0.8f;
 											newNPCBounceConfig.config0weight[it.second]["collisionPenetration"] = 0.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionMultipler"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionMultiplerRot"] = 1.0f;
-											newNPCBounceConfig.config0weight[it.second]["collisionElastic"] = 0.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionElastic"] = 1.0f;
+											newNPCBounceConfig.config0weight[it.second]["collisionElasticConstraints"] = 1.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionXmaxoffset"] = 100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionXminoffset"] = -100.0f;
 											newNPCBounceConfig.config0weight[it.second]["collisionYmaxoffset"] = 100.0f;
@@ -3013,7 +3017,7 @@ BSFixedString GetVersionMinor(StaticFunctionTag* base)
 
 BSFixedString GetVersionBeta(StaticFunctionTag* base)
 {
-	return BSFixedString("1");
+	return BSFixedString("2");
 }
 
 void ReloadConfig(StaticFunctionTag* base)

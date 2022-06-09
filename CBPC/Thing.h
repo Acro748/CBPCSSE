@@ -141,6 +141,7 @@ public:
 	float collisionMultiplerRot = 1.0f;
 
 	bool collisionElastic = false;
+	bool collisionElasticConstraints = false;
 
 	float collisionXmaxOffset = 100.0f;
 	float collisionXminOffset = -100.0f;
@@ -246,6 +247,7 @@ public:
 	float collisionMultiplerRot_100 = 1.0f;
 
 	float collisionElastic_100 = 0.0f;
+	float collisionElasticConstraints_100 = 0.0f;
 
 	float collisionXmaxOffset_100 = 100.0f;
 	float collisionXminOffset_100 = -100.0f;
@@ -352,7 +354,8 @@ public:
 	float collisionMultiplerRot_0 = 1.0f;
 
 	float collisionElastic_0 = 0.0f;
-
+	float collisionElasticConstraints_0 = 0.0f;
+	
 	float collisionXmaxOffset_0 = 100.0f;
 	float collisionXminOffset_0 = -100.0f;
 	float collisionYmaxOffset_0 = 100.0f;
