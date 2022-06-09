@@ -2111,13 +2111,14 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		CollisionConfig.objRot = objRotation;
 		CollisionConfig.invRot = invRot;
 
-		NiPoint3 AveragelDiff = ((ldiff + ldiffRot) * 0.5f) - lvarGravityCorrection;
-		CollisionConfig.CollisionMaxOffset.x = collisionXmaxOffset - AveragelDiff.x;
-		CollisionConfig.CollisionMinOffset.x = collisionXminOffset - AveragelDiff.x;
-		CollisionConfig.CollisionMaxOffset.y = collisionYmaxOffset - AveragelDiff.y;
-		CollisionConfig.CollisionMinOffset.y = collisionYminOffset - AveragelDiff.y;
-		CollisionConfig.CollisionMaxOffset.z = collisionZmaxOffset - AveragelDiff.z;
-		CollisionConfig.CollisionMinOffset.z = collisionZminOffset - AveragelDiff.z;
+		//set by linear move base (If implement accurate collisions for rotation only later on then need to add a rotation version)
+		NiPoint3 Currentldiff = ldiff - lvarGravityCorrection;
+		CollisionConfig.CollisionMaxOffset.x = collisionXmaxOffset - Currentldiff.x;
+		CollisionConfig.CollisionMinOffset.x = collisionXminOffset - Currentldiff.x;
+		CollisionConfig.CollisionMaxOffset.y = collisionYmaxOffset - Currentldiff.y;
+		CollisionConfig.CollisionMinOffset.y = collisionYminOffset - Currentldiff.y;
+		CollisionConfig.CollisionMaxOffset.z = collisionZmaxOffset - Currentldiff.z;
+		CollisionConfig.CollisionMinOffset.z = collisionZminOffset - Currentldiff.z;
 
 		if (CollisionConfig.CollisionMaxOffset.x < 0.0f)
 			CollisionConfig.CollisionMaxOffset.x = 0.0f;
