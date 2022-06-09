@@ -1874,17 +1874,17 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
 		if (multiplerInertia >= 0.001f)
 		{
-			if (collisionInertia.x >= 0.001f && collisionInertia.x > XmaxOffset)
+			if (collisionInertia.x > XmaxOffset)
 				InteriaMaxOffset.x = collisionInertia.x - XmaxOffset;
-			else if (collisionInertia.x <= -0.001f && collisionInertia.x < XminOffset)
+			else if (collisionInertia.x < XminOffset)
 				InteriaMinOffset.x = collisionInertia.x - XminOffset;
-			if (collisionInertia.y >= 0.001f && collisionInertia.y > YmaxOffset)
+			if (collisionInertia.y > YmaxOffset)
 				InteriaMaxOffset.y = collisionInertia.y - YmaxOffset;
-			else if (collisionInertia.y <= -0.001f && collisionInertia.y < YminOffset)
+			else if (collisionInertia.y < YminOffset)
 				InteriaMinOffset.y = collisionInertia.y - YminOffset;
-			if (collisionInertia.z >= 0.001f && collisionInertia.z > ZmaxOffset)
+			if (collisionInertia.z > ZmaxOffset)
 				InteriaMaxOffset.z = collisionInertia.z - ZmaxOffset;
-			else if (collisionInertia.z <= -0.001f && collisionInertia.z < ZminOffset)
+			else if (collisionInertia.z < ZminOffset)
 				InteriaMinOffset.z = collisionInertia.z - ZminOffset;
 			multiplerInertia -= (((float)originalDeltaT / timeTick) * 0.01f * timeStep);
 			if (multiplerInertia < 0.001f)
@@ -1960,17 +1960,17 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
 		if (multiplerInertiaRot >= 0.001f)
 		{
-			if (collisionInertiaRot.x >= 0.001f && collisionInertiaRot.x > XmaxOffsetRot)
+			if (collisionInertiaRot.x > XmaxOffsetRot)
 				InteriaMaxOffsetRot.x = collisionInertiaRot.x - XmaxOffsetRot;
-			else if (collisionInertiaRot.x <= -0.001f && collisionInertiaRot.x < XminOffsetRot)
+			else if (collisionInertiaRot.x < XminOffsetRot)
 				InteriaMinOffsetRot.x = collisionInertiaRot.x - XminOffsetRot;
-			if (collisionInertiaRot.y >= 0.001f && collisionInertiaRot.y > YmaxOffsetRot)
+			if (collisionInertiaRot.y > YmaxOffsetRot)
 				InteriaMaxOffsetRot.y = collisionInertiaRot.y - YmaxOffsetRot;
-			else if (collisionInertiaRot.y <= -0.001f && collisionInertiaRot.y < YminOffsetRot)
+			else if (collisionInertiaRot.y < YminOffsetRot)
 				InteriaMinOffsetRot.y = collisionInertiaRot.y - YminOffsetRot;
-			if (collisionInertiaRot.z >= 0.001f && collisionInertiaRot.z > ZmaxOffsetRot)
+			if (collisionInertiaRot.z > ZmaxOffsetRot)
 				InteriaMaxOffsetRot.z = collisionInertiaRot.z - ZmaxOffsetRot;
-			else if (collisionInertiaRot.z <= -0.001f && collisionInertiaRot.z < ZminOffsetRot)
+			else if (collisionInertiaRot.z < ZminOffsetRot)
 				InteriaMinOffsetRot.z = collisionInertiaRot.z - ZminOffsetRot;
 			multiplerInertiaRot -= (((float)originalDeltaT / timeTickRot) * 0.01f * timeStepRot);
 			if (multiplerInertiaRot < 0.001f)
