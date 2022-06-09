@@ -1862,6 +1862,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 	// Convert the world translations into local coordinates
 	auto invRot = obj->m_parent->m_worldTransform.rot.Transpose();
 	NiPoint3 forceGravityBias = invRot * (NiPoint3(0, 0, varGravityBias) / fpsCorrection);
+	NiPoint3 lvarGravityCorrection = (invRot * NiPoint3(0, 0, varGravityCorrection));
 	
 	NiPoint3 ldiff = emptyPoint;
 	NiPoint3 ldiffRot = emptyPoint;
@@ -1873,22 +1874,23 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
 		if (multiplerInertia >= 0.001f)
 		{
-			if (collisionInertia.x >= 0.0f)
-				InteriaMaxOffset.x = collisionInertia.x;
-			else
-				InteriaMinOffset.x = collisionInertia.x;
-			if (collisionInertia.y >= 0.0f)
-				InteriaMaxOffset.y = collisionInertia.y;
-			else
-				InteriaMinOffset.y = collisionInertia.y;
-			if (collisionInertia.z >= 0.0f)
-				InteriaMaxOffset.z = collisionInertia.z;
-			else
-				InteriaMinOffset.z = collisionInertia.z;
+			if (collisionInertia.x >= 0.001f && collisionInertia.x > XmaxOffset)
+				InteriaMaxOffset.x = collisionInertia.x - XmaxOffset;
+			else if (collisionInertia.x <= -0.001f && collisionInertia.x < XminOffset)
+				InteriaMinOffset.x = collisionInertia.x - XminOffset;
+			if (collisionInertia.y >= 0.001f && collisionInertia.y > YmaxOffset)
+				InteriaMaxOffset.y = collisionInertia.y - YmaxOffset;
+			else if (collisionInertia.y <= -0.001f && collisionInertia.y < YminOffset)
+				InteriaMinOffset.y = collisionInertia.y - YminOffset;
+			if (collisionInertia.z >= 0.001f && collisionInertia.z > ZmaxOffset)
+				InteriaMaxOffset.z = collisionInertia.z - ZmaxOffset;
+			else if (collisionInertia.z <= -0.001f && collisionInertia.z < ZminOffset)
+				InteriaMinOffset.z = collisionInertia.z - ZminOffset;
 			multiplerInertia -= (((float)originalDeltaT / timeTick) * 0.01f * timeStep);
 			if (multiplerInertia < 0.001f)
 				multiplerInertia = 0.0f;
-			collisionInertia *= multiplerInertia;
+			InteriaMaxOffset *= multiplerInertia;
+			InteriaMinOffset *= multiplerInertia;
 		}
 
 		// Compute the "Spring" Force
@@ -1950,7 +1952,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		ldiff.z = clamp(ldiff.z, ZminOffset + InteriaMinOffset.z, ZmaxOffset + InteriaMaxOffset.z);
 		//same the clamp(diff.z - varGravityCorrection, -maxOffset, maxOffset) + varGravityCorrection
 		//this is the reason for the endless shaking when unstable fps in v1.4.1x
-		ldiff = ldiff + (invRot * NiPoint3(0, 0, varGravityCorrection));
+		ldiff = ldiff + lvarGravityCorrection;
 	},
 		[&] { // rotation calculation
 		NiPoint3 InteriaMaxOffsetRot = emptyPoint;
@@ -1958,22 +1960,23 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		// when collisionElastic is 1 and collided, remove jitter caused by Max/Minoffsets
 		if (multiplerInertiaRot >= 0.001f)
 		{
-			if (collisionInertiaRot.x >= 0.0f)
-				InteriaMaxOffsetRot.x = collisionInertiaRot.x;
-			else
-				InteriaMinOffsetRot.x = collisionInertiaRot.x;
-			if (collisionInertiaRot.y >= 0.0f)
-				InteriaMaxOffsetRot.y = collisionInertiaRot.y;
-			else
-				InteriaMinOffsetRot.y = collisionInertiaRot.y;
-			if (collisionInertiaRot.z >= 0.0f)
-				InteriaMaxOffsetRot.z = collisionInertiaRot.z;
-			else
-				InteriaMinOffsetRot.z = collisionInertiaRot.z;
+			if (collisionInertiaRot.x >= 0.001f && collisionInertiaRot.x > XmaxOffsetRot)
+				InteriaMaxOffsetRot.x = collisionInertiaRot.x - XmaxOffsetRot;
+			else if (collisionInertiaRot.x <= -0.001f && collisionInertiaRot.x < XminOffsetRot)
+				InteriaMinOffsetRot.x = collisionInertiaRot.x - XminOffsetRot;
+			if (collisionInertiaRot.y >= 0.001f && collisionInertiaRot.y > YmaxOffsetRot)
+				InteriaMaxOffsetRot.y = collisionInertiaRot.y - YmaxOffsetRot;
+			else if (collisionInertiaRot.y <= -0.001f && collisionInertiaRot.y < YminOffsetRot)
+				InteriaMinOffsetRot.y = collisionInertiaRot.y - YminOffsetRot;
+			if (collisionInertiaRot.z >= 0.001f && collisionInertiaRot.z > ZmaxOffsetRot)
+				InteriaMaxOffsetRot.z = collisionInertiaRot.z - ZmaxOffsetRot;
+			else if (collisionInertiaRot.z <= -0.001f && collisionInertiaRot.z < ZminOffsetRot)
+				InteriaMinOffsetRot.z = collisionInertiaRot.z - ZminOffsetRot;
 			multiplerInertiaRot -= (((float)originalDeltaT / timeTickRot) * 0.01f * timeStepRot);
 			if (multiplerInertiaRot < 0.001f)
 				multiplerInertiaRot = 0.0f;
-			collisionInertiaRot *= multiplerInertiaRot;
+			InteriaMaxOffsetRot *= multiplerInertiaRot;
+			InteriaMinOffsetRot *= multiplerInertiaRot;
 		}
 		float timeMultiplierRot = timeTickRot / (float)deltaTRot;
 		diffRot = invRot * (diffRot * timeMultiplierRot);
@@ -2015,7 +2018,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		ldiffRot.x = clamp(ldiffRot.x, YminOffsetRot + InteriaMinOffsetRot.x, YmaxOffsetRot + InteriaMaxOffsetRot.x); //rot y
 		ldiffRot.y = clamp(ldiffRot.y, ZminOffsetRot + InteriaMinOffsetRot.y, ZmaxOffsetRot + InteriaMaxOffsetRot.y); //rot z
 		ldiffRot.z = clamp(ldiffRot.z, XminOffsetRot + InteriaMinOffsetRot.z, XmaxOffsetRot + InteriaMaxOffsetRot.z); //rot x
-		ldiffRot = ldiffRot + (invRot * NiPoint3(0, 0, varGravityCorrection));
+		ldiffRot = ldiffRot + lvarGravityCorrection;
 
 		auto rdiffXnew = ldiffRot * varRotationalXnew;
 		auto rdiffYnew = ldiffRot * varRotationalYnew;
@@ -2062,7 +2065,7 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		NiPoint3 maybePos = target + (obj->m_parent->m_worldTransform.rot * (maybeldiff + (thingDefaultPos * nodeScale))); //add missing local pos
 
 		float colliderNodescale = 1.0f - ((1.0f - (nodeScale / actorBaseScale)) * scaleWeight); //Calibrate the scale gap between collider and actual mesh caused by bone weight
-		
+
 		//After cbp movement collision detection
 		for (int i = 0; i < thingCollisionSpheres.size(); i++)
 		{
@@ -2107,6 +2110,29 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		CollisionConfig.origRot = obj->m_parent->m_worldTransform.rot;
 		CollisionConfig.objRot = objRotation;
 		CollisionConfig.invRot = invRot;
+
+		//set by linear move base (If implement accurate collisions for rotation only later on then need to add a rotation version)
+		NiPoint3 Currentldiff = ldiff - lvarGravityCorrection;
+		CollisionConfig.CollisionMaxOffset.x = collisionXmaxOffset - Currentldiff.x;
+		CollisionConfig.CollisionMinOffset.x = collisionXminOffset - Currentldiff.x;
+		CollisionConfig.CollisionMaxOffset.y = collisionYmaxOffset - Currentldiff.y;
+		CollisionConfig.CollisionMinOffset.y = collisionYminOffset - Currentldiff.y;
+		CollisionConfig.CollisionMaxOffset.z = collisionZmaxOffset - Currentldiff.z;
+		CollisionConfig.CollisionMinOffset.z = collisionZminOffset - Currentldiff.z;
+
+		if (CollisionConfig.CollisionMaxOffset.x < 0.0f)
+			CollisionConfig.CollisionMaxOffset.x = 0.0f;
+		if (CollisionConfig.CollisionMinOffset.x > 0.0f)
+			CollisionConfig.CollisionMinOffset.x = 0.0f;
+		if (CollisionConfig.CollisionMaxOffset.y < 0.0f)
+			CollisionConfig.CollisionMaxOffset.y = 0.0f;
+		if (CollisionConfig.CollisionMinOffset.y > 0.0f)
+			CollisionConfig.CollisionMinOffset.y = 0.0f;
+		if (CollisionConfig.CollisionMaxOffset.z < 0.0f)
+			CollisionConfig.CollisionMaxOffset.z = 0.0f;
+		if (CollisionConfig.CollisionMinOffset.z > 0.0f)
+			CollisionConfig.CollisionMinOffset.z = 0.0f;
+
 		for (int j = 0; j < thingIdList.size(); j++)
 		{
 			int id = thingIdList[j];
@@ -2224,20 +2250,22 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 			//However, simply applying the multipler then changes the actual obj position,so that's making the collisions out of sync
 			//Therefore to make perfect collision
 			//it seems to be pushed out as much as colliding to the naked eye, but the actual position of the colliding obj must be maintained original position
-			maybeIdiffcol = (ldiffcol + ldiffGcol) * collisionMultipler / obj->m_parent->m_worldTransform.scale;
+			maybeIdiffcol = ldiffcol + ldiffGcol;
+			auto mayberdiffcol = maybeIdiffcol;
 
 			//add collision vector buffer of one frame to some reduce jitter and add softness by collision
 			//be particularly useful for both nodes colliding that defined in both affected and collider nodes
 			auto maybeldiffcoltmp = maybeIdiffcol;
-			maybeIdiffcol = (maybeIdiffcol + collisionBuffer) * 0.5;
+			maybeIdiffcol = (maybeIdiffcol + collisionBuffer) * 0.5f * collisionMultipler;
+			mayberdiffcol = (mayberdiffcol + collisionBuffer) * 0.5f * collisionMultiplerRot;
 			collisionBuffer = maybeldiffcoltmp;
 
 			//set to collision sync for the obj that has both affected obj and collider obj
 			collisionSync = obj->m_parent->m_worldTransform.rot * (ldiffcol + ldiffGcol - maybeIdiffcol);
 
-			auto rcoldiffXnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalXnew;
-			auto rcoldiffYnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalYnew;
-			auto rcoldiffZnew = (ldiffcol + ldiffGcol) * collisionMultiplerRot * varRotationalZnew;
+			auto rcoldiffXnew = mayberdiffcol * varRotationalXnew;
+			auto rcoldiffYnew = mayberdiffcol * varRotationalYnew;
+			auto rcoldiffZnew = mayberdiffcol * varRotationalZnew;
 
 			rcoldiffXnew.x *= linearXrotationX;
 			rcoldiffXnew.y *= linearYrotationX;
@@ -2258,7 +2286,31 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		}
 		else
 		{
-			collisionSync = emptyPoint;
+			maybeIdiffcol = collisionBuffer * 0.5f * collisionMultipler;
+			auto mayberdiffcol = collisionBuffer * 0.5f * collisionMultiplerRot;
+			collisionBuffer = emptyPoint;
+			collisionSync = emptyPoint - maybeIdiffcol;
+
+			auto rcoldiffXnew = mayberdiffcol * varRotationalXnew;
+			auto rcoldiffYnew = mayberdiffcol * varRotationalYnew;
+			auto rcoldiffZnew = mayberdiffcol * varRotationalZnew;
+
+			rcoldiffXnew.x *= linearXrotationX;
+			rcoldiffXnew.y *= linearYrotationX;
+			rcoldiffXnew.z *= linearZrotationX; //1
+
+			rcoldiffYnew.x *= linearXrotationY; //1
+			rcoldiffYnew.y *= linearYrotationY;
+			rcoldiffYnew.z *= linearZrotationY;
+
+			rcoldiffZnew.x *= linearXrotationZ;
+			rcoldiffZnew.y *= linearYrotationZ; //1
+			rcoldiffZnew.z *= linearZrotationZ;
+
+			NiMatrix33 newcolRot;
+			newcolRot.SetEulerAngles(rcoldiffYnew.x + rcoldiffYnew.y + rcoldiffYnew.z, rcoldiffZnew.x + rcoldiffZnew.y + rcoldiffZnew.z, rcoldiffXnew.x + rcoldiffXnew.y + rcoldiffXnew.z);
+
+			newRot = newRot * newcolRot;
 		}
 		///#### collision calculate done
 
@@ -2294,9 +2346,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		
 		if (collisionElasticConstraints)
 		{
-			collisionInertia += (ldiffcol + ldiffGcol);
-			collisionInertiaRot += ((ldiffcol + ldiffGcol) * collisionMultiplerRot);
-
+			collisionInertia = ldiff + (ldiffcol + ldiffGcol);
+			collisionInertiaRot = ldiffRot + (ldiffcol + ldiffGcol) * collisionMultiplerRot;
 			multiplerInertia = 1.0f;
 			multiplerInertiaRot = 1.0f;
 		}
@@ -2307,8 +2358,8 @@ void Thing::update(Actor* actor, std::shared_mutex& thing_ReadNode_lock, std::sh
 		oldWorldPosRot = (obj->m_parent->m_worldTransform.rot * ldiffRot) + target - NiPoint3(0, 0, varGravityCorrection);
 
 		//for update oldWorldPos&Rot when frame gap
-		oldLocalPos = ldiff - (invRot * NiPoint3(0, 0, varGravityCorrection));
-		oldLocalPosRot = ldiffRot - (invRot * NiPoint3(0, 0, varGravityCorrection));
+		oldLocalPos = ldiff - lvarGravityCorrection;
+		oldLocalPosRot = ldiffRot - lvarGravityCorrection;
 	}
 	thing_SetNode_lock.lock();
 	obj->m_localTransform.pos.x = thingDefaultPos.x + XdefaultOffset + (((ldiff.x * varLinearX) + maybeIdiffcol.x) * nodeParentInvScale);
